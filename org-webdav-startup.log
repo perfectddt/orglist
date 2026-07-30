@@ -1,4 +1,4 @@
-[周四 2026/07/30  9:58:21.49] Starting local WebDAV bridge.
+[周四 2026/07/30 19:39:09.83] Starting local WebDAV bridge.
 Script: C:\Users\Administrator\Documents\Codex\2026-07-29\d-gtd\outputs\org-webdav-bridge.py
 Trying: py -3
 Org 清单 WebDAV 本地桥接已启动。
@@ -9,10 +9,3 @@ Org 清单 WebDAV 本地桥接已启动。
 [本地桥接] PROPFIND /webdav-proxy
 [本地桥接] PROPFIND /webdav-proxy
 [本地桥接] PROPFIND /webdav-proxy
-[本地桥接] PROPFIND /webdav-proxy
-[本地桥接] PROPFIND /webdav-proxy
-[本地桥接] GET /webdav-proxy
-[本地桥接] GET /webdav-proxy
-[本地桥接] GET /webdav-proxy
-[本地桥接] GET /webdav-proxy
-[本地桥接] GET /webdav-proxy

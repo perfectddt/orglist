@@ -218,10 +218,10 @@
     .batchMode .batchSelect{display:grid}.taskSwipe.batchSelected .batchSelect{color:#fff;
       background:var(--accent);border-color:var(--accent)}.taskSwipe.batchSelected .task{background:var(--accentSoft)}
     .batchMode .task,.batchMode .hierCard{padding-left:44px}
-    .swipeActions{position:absolute;z-index:0;top:0;right:0;bottom:0;display:flex;width:186px}
+    .swipeActions{position:absolute;z-index:0;top:0;right:0;bottom:0;display:flex;width:248px}
     .swipeActions button{flex:1;border:0;color:#fff;font-size:11px;font-weight:850}
-    .swipeEdit{background:var(--blue)}.swipeDate{background:var(--yellow)}.swipeDelete{background:var(--red)}
-    .taskSwipe.swipedLeft .task,.taskSwipe.swipedLeft .hierCard{transform:translateX(-186px)}
+    .swipeEdit{background:var(--blue)}.swipeMove{background:#8a6bb4}.swipeDate{background:var(--yellow)}.swipeDelete{background:var(--red)}
+    .taskSwipe.swipedLeft .task,.taskSwipe.swipedLeft .hierCard{transform:translateX(-248px)}
     .priority{flex:0 0 auto;font-family:ui-monospace,monospace;font-size:10px;font-weight:800}
     .pA{color:var(--red)}.pB{color:var(--yellow)}.pC{color:var(--blue)}
     .meta{display:flex;align-items:center;gap:7px;margin-top:7px;overflow:hidden;color:var(--muted);
@@ -491,6 +491,8 @@
     .editorWrap.highlight .editArea{inset:0!important;width:100%!important;height:100%!important;
       min-height:100%!important;max-height:100%!important;resize:none!important;
       color:transparent;caret-color:var(--text);-webkit-text-fill-color:transparent}
+    .editArea::selection{color:var(--text);background:color-mix(in srgb,var(--blue) 34%,transparent);
+      -webkit-text-fill-color:var(--text)}
     .editorWrap .editArea,.editorWrap .highlightLayer{font-size:var(--editor-font-size,11px)}
     .vimCommandBar{display:flex;align-items:center;gap:10px;min-height:34px;margin-top:6px;padding:6px 10px;
       color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:8px;
@@ -606,7 +608,7 @@
       .search{grid-row:2;grid-column:1/-1;width:100%;min-width:0}
       .syntaxButton{grid-row:3;grid-column:1/-1;justify-self:start;padding:5px 8px;font-size:9px}
       .offline{display:none}
-      select,select option{font-size:11px!important}
+      select,select option{font-size:9px!important;line-height:1.2!important}
       .main{min-width:0;padding:25px 14px 40px}.filters{grid-template-columns:repeat(2,minmax(0,1fr))}
       .heading{align-items:flex-start;flex-direction:column}.headingActions{align-self:stretch;justify-content:flex-start}
       .modeSwitch{flex:1}
@@ -615,7 +617,11 @@
       .batchMode .task,.batchMode .hierCard{padding-left:38px}.batchBar.show{position:fixed;right:12px;bottom:12px;left:12px;
         max-height:42vh;overflow:auto}.batchMode .main{padding-bottom:120px}
       .taskDetailHint{display:inline-flex;order:99}
-      .quadrantGrid,.list.columns2,.hierList.columns2,.quadrantControls{grid-template-columns:1fr}
+      .list.columns2,.hierList.columns2,.quadrantControls{grid-template-columns:1fr}
+      .quadrantGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+      .quadrantBody .task{min-height:74px;padding:10px 8px;grid-template-columns:17px minmax(0,1fr);gap:6px}
+      .quadrantBody .taskTitle{font-size:11px}.quadrantBody .meta{gap:3px;font-size:7px}
+      .quadrantBody .tail{gap:4px}.quadrantHead{padding:10px 8px}.quadrantHead h2{font-size:10px}
       .yearGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.calendarControlField{margin-left:0}
       .calendarMonthScroll{overflow:visible}.monthGrid,.monthWeekdays{min-width:0}
       .monthWeekdays{font-size:7px}.monthWeekdays span{padding:6px 0}.calendarDay{min-height:70px;padding:5px}
@@ -843,6 +849,7 @@
           <div class="editorWrap" id="editorWrap"><pre class="highlightLayer" id="editHighlight" aria-hidden="true"></pre>
             <textarea class="editArea" id="editText" spellcheck="false" aria-label="Org 原文"></textarea></div></div>
         <div class="vimCommandBar" id="vimCommandBar"><span class="vimCommandMode" id="vimCommandMode">普通编辑</span>
+          <button class="vimToggle" id="vimEscButton" type="button" hidden>Esc／普通模式</button>
           <span class="vimCommandMessage" id="vimCommandMessage">开启 Vim 后按 : 调出命令行</span>
           <div class="vimCommandEntry" id="vimCommandEntry"><span>:</span><input id="vimCommand" autocomplete="off" spellcheck="false" aria-label="Vim 命令"></div>
           <span class="vimCursorPosition" id="vimCursorPosition">1:1</span></div>
@@ -938,6 +945,30 @@
       </div>
     </div>
   </div>
+  <div class="modalBackdrop" id="moveModal" role="dialog" aria-modal="true" aria-labelledby="moveTitle">
+    <div class="modal" style="width:min(680px,96vw)">
+      <div class="modalHead"><h2 id="moveTitle">移动 Org 条目</h2><button class="iconBtn" id="closeMove" aria-label="关闭">×</button></div>
+      <div class="modalBody">
+        <div class="deleteSummary" id="moveSummary"></div>
+        <div class="visualForm">
+          <label class="visualField"><span>目标文件</span><select id="moveFile"></select></label>
+          <label class="visualField"><span>移动位置</span><select id="movePosition">
+            <option value="parent-end">父级子项末尾</option><option value="parent-start">父级子项开头</option>
+            <option value="before">指定条目之前</option><option value="after">指定条目及其子项之后</option>
+          </select></label>
+          <label class="visualField" id="moveParentField"><span>目标父级</span><select id="moveParent"></select>
+            <small>移动后会自动调整本条目及全部子标题的星号层级。</small></label>
+          <label class="visualField formHidden" id="moveAnchorField"><span>参照条目</span><select id="moveAnchor"></select></label>
+          <div class="visualSource" id="moveDestination"></div>
+        </div>
+        <p class="editWarning">移动包含当前标题的完整子树。操作先应用到当前页面，并把涉及的文件标记为未写回；确认位置无误后再点击“写回已修改文件”。</p>
+        <div class="modalActions">
+          <button class="btn secondary" id="cancelMove">取消</button>
+          <button class="btn primary" id="applyMove">移动到当前页面</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="modalBackdrop" id="deleteModal" role="dialog" aria-modal="true" aria-labelledby="deleteTitle">
     <div class="modal" style="width:min(600px,96vw)">
       <div class="modalHead"><h2 id="deleteTitle">删除 Org 条目</h2><button class="iconBtn" id="closeDelete" aria-label="关闭">×</button></div>
@@ -994,6 +1025,8 @@ print("hello")
         <p class="modalIntro">这是为 Org 编辑器准备的轻量 Vim 模式，不是完整 Vim。开启后默认进入普通模式，按 <code>i</code> 进入插入模式，按 <code>Esc</code> 返回普通模式。</p>
         <div class="vimHelpGrid">
           <div>h / j / k / l</div><div>左、下、上、右移动；连续按 j/k 时编辑器滚动条会跟随光标。</div>
+          <div>v</div><div>进入字符选择模式；继续用 h/j/k/l、w/b、0/$、gg/G 扩展选择，按 d 或 x 删除，按 c 删除后进入插入模式，再按 v 或 Esc 退出。</div>
+          <div>手机软键盘</div><div>普通模式下英文按键会执行命令，不会写入正文；点击“Esc／普通模式”可从插入模式返回。</div>
           <div>i / a</div><div>在光标位置／光标后一位进入插入模式。</div>
           <div>0 / $</div><div>移动到当前行开头／结尾。</div>
           <div>w / b</div><div>移动到下一个词／上一个词。</div>
@@ -1060,6 +1093,22 @@ print("hello")
           </div>
         </section>
         <section class="settingsSection">
+          <h3>四象限默认定义</h3>
+          <p class="settingsHint">这里保存的规则会作为四象限的默认判断方式；进入四象限后仍可临时调整。</p>
+          <div class="settingsGrid">
+            <label class="visualField"><span>“重要”的默认定义</span><select id="defaultImportantRule">
+              <option value="A">仅优先级 A</option><option value="AB">优先级 A 或 B</option>
+              <option value="ANY">设置了任意优先级</option><option value="TAG">含“重要”标签</option>
+              <option value="PROP">属性 IMPORTANT 为真</option>
+            </select></label>
+            <label class="visualField"><span>“紧急”的默认定义</span><select id="defaultUrgentRule">
+              <option value="0">已到期或今天</option><option value="3">已到期或未来 3 天</option>
+              <option value="7">已到期或未来 7 天</option><option value="14">已到期或未来 14 天</option>
+              <option value="OVERDUE">仅已逾期</option><option value="TAG">含“紧急”标签</option>
+            </select></label>
+          </div>
+        </section>
+        <section class="settingsSection">
           <h3>启动页</h3>
           <p class="settingsHint">可把当前所在的全局清单、层级位置或日历视图连同筛选条件设为下次打开文件后的首页。</p>
           <div class="configActions"><button class="btn primary" id="setStartupCurrent">将当前页设为启动页</button>
@@ -1110,11 +1159,10 @@ print("hello")
   (() => {
     "use strict";
     const BASE_STATUS=["TODO","NEXT","DONE","CNCL"];
-    const LEGACY_STATUS=["WAITING","WAIT","HOLD","CANCELLED","CANCELED","STARTED","PROJECT"];
-    const STATUS = new Set([...BASE_STATUS,...LEGACY_STATUS]);
-    const DONE = new Set(["DONE","CNCL","CANCELLED","CANCELED"]);
-    const STATUS_LABEL = {NONE:"未设状态",TODO:"待办",NEXT:"下一步",DONE:"已完成",CNCL:"已取消",WAITING:"等待中",
-      WAIT:"等待中",HOLD:"已搁置",STARTED:"进行中",PROJECT:"项目",CANCELLED:"已取消",CANCELED:"已取消"};
+    const LEGACY_STATUS=[];
+    const STATUS = new Set(BASE_STATUS);
+    const DONE = new Set(["DONE","CNCL"]);
+    const STATUS_LABEL = {NONE:"未设状态",TODO:"待办",NEXT:"下一步",DONE:"已完成",CNCL:"已取消"};
     const VIEWS = [
       ["open","○","待办"],["today","日","今天"],["upcoming","→","未来"],["overdue","!","已逾期"],
       ["no-date","—","无日期"],["completed","✓","已完成"],["quadrant","田","四象限"],
@@ -1122,16 +1170,17 @@ print("hello")
     ];
     const state = {tasks:[],files:[],sources:[],mode:"global",view:"open",file:"all",status:"ALL",priority:"ALL",tag:"ALL",
       sort:"date",dateField:"date",dateFrom:"",dateTo:"",query:"",selected:null,hierParent:null,
-      columns:"2",quadrantImportant:"A",quadrantUrgent:"3",localDone:{},visible:100,recent:[],
+      columns:"2",quadrantImportant:"A",quadrantUrgent:"3",quadrantDefaults:{important:"A",urgent:"3"},visible:100,recent:[],
       searchHistory:[],custom:[],customActive:null,smartVisible:[],calendarMode:"month",
       calendarCursor:"",calendarDateRule:"ACTION",dayStart:7,dayEnd:22,
       sideOrder:["smart","custom","files"],smartOrder:[],fileOrder:["all"],editMode:"plain",editorScale:100,
       filterPreference:"auto",filtersCollapsed:false,filterTouched:false,detailBehavior:"desktop",detailOpen:false,
       webdavProfiles:[],webdavBusy:false,editing:null,visualMode:"edit",visualAddMode:"single",
-      visualEditing:null,deleting:null,searchError:"",navHistory:[],editingScope:"task",editingFileId:null,
+      visualEditing:null,deleting:null,moving:null,searchError:"",navHistory:[],editingScope:"task",editingFileId:null,
       customOpenStatuses:[],customDoneStatuses:[],defaultFilters:{view:"open",status:"ALL",priority:"ALL",
         sort:"date",dateField:"date",columns:"2"},batchMode:false,batchSelected:[],batchSources:[],
-      suppressTaskClickUntil:0,startupPage:null,vimMode:false,vimState:"insert",vimPending:""};
+      suppressTaskClickUntil:0,startupPage:null,vimMode:false,vimState:"insert",vimPending:"",
+      vimLastKey:"",vimLastKeyAt:0,vimInputRestore:null,vimVisualAnchor:null,vimVisualCursor:null};
     const HISTORY_KEY="org-task-recent-sources-v2",HISTORY_DB="org-task-local-history",HISTORY_STORE="handles";
     const CUSTOM_KEY="org-task-custom-lists-v1",LAYOUT_KEY="org-task-list-columns-v1",
       SEARCH_HISTORY_KEY="org-task-search-history-v1",QUADRANT_KEY="org-task-quadrant-rules-v1",
@@ -1156,7 +1205,7 @@ print("hello")
     function refreshStatusWords(){
       STATUS.clear();[...BASE_STATUS,...LEGACY_STATUS,...state.customOpenStatuses,...state.customDoneStatuses]
         .forEach(status=>STATUS.add(status));
-      DONE.clear();["DONE","CNCL","CANCELLED","CANCELED",...state.customDoneStatuses].forEach(status=>DONE.add(status))
+      DONE.clear();["DONE","CNCL",...state.customDoneStatuses].forEach(status=>DONE.add(status))
     }
     function configuredStatuses(){
       return [...BASE_STATUS,...state.customOpenStatuses,...state.customDoneStatuses]
@@ -1341,8 +1390,18 @@ print("hello")
     }
     function formatOrgTimestamp(date,time,closed=false){
       if(!/^\d{4}-\d{2}-\d{2}$/.test(date||""))return "";
-      const inside=`${date}${/^\d{2}:\d{2}$/.test(time||"")?` ${time}`:""}`;
-      return closed?`[${inside}]`:`<${inside}>`
+      return orgTimestamp(date,/^\d{2}:\d{2}$/.test(time||"")?time:"",closed)
+    }
+    function currentCompletionParts(){
+      const now=new Date();
+      return {date:todayFrom(now),time:`${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`}
+    }
+    function withAutomaticClosed(values){
+      const result={...values};
+      if(DONE.has(result.status)&&!result.closedDate){
+        const now=currentCompletionParts();result.closedDate=now.date;result.closedTime=now.time
+      }
+      return result
     }
     function extractPropertyDrawer(rawBlock){
       const lines=String(rawBlock||"").replace(/\r\n?/g,"\n").split("\n");
@@ -1361,6 +1420,7 @@ print("hello")
       return value.trim()
     }
     function buildOrgBlock(values,level,propertyDrawer=""){
+      values=withAutomaticClosed(values);
       const safeLevel=Math.max(1,Math.min(30,Number(level)||1));
       const title=String(values.title||"").replace(/\r?\n/g," ").trim();
       if(!title)throw new Error("标题不能为空");
@@ -1369,12 +1429,10 @@ print("hello")
       const tags=normalizeOrgTags(values.tags);
       const heading=[`${"*".repeat(safeLevel)}${status?` ${status}`:""}`,priority?`[#${priority}]`:"",title,
         tags.length?`:${tags.join(":")}:`:""].filter(Boolean).join(" ");
-      const planningParts=[
-        values.closedDate?`CLOSED: ${formatOrgTimestamp(values.closedDate,values.closedTime,true)}`:"",
-        values.scheduledDate?`SCHEDULED: ${formatOrgTimestamp(values.scheduledDate,values.scheduledTime)}`:"",
-        values.deadlineDate?`DEADLINE: ${formatOrgTimestamp(values.deadlineDate,values.deadlineTime)}`:""
-      ].filter(Boolean);
-      return [heading,planningParts.join(" "),String(propertyDrawer||"").trim(),
+      const closedLine=values.closedDate?`CLOSED: ${formatOrgTimestamp(values.closedDate,values.closedTime,true)}`:"",
+        planningLine=[values.scheduledDate?`SCHEDULED: ${formatOrgTimestamp(values.scheduledDate,values.scheduledTime)}`:"",
+          values.deadlineDate?`DEADLINE: ${formatOrgTimestamp(values.deadlineDate,values.deadlineTime)}`:""].filter(Boolean).join(" ");
+      return [heading,closedLine,planningLine,String(propertyDrawer||"").trim(),
         String(values.body||"").replace(/\r\n?/g,"\n").trim()].filter(Boolean).join("\n")
     }
     function insertOrgBlock(text,block,requestedIndex,eol="\n"){
@@ -1432,12 +1490,12 @@ print("hello")
       if(!title)return null;
       let status=defaults.status||"TODO",priority=defaults.priority||"",tags=normalizeOrgTags(defaults.tags||[]);
       const checkbox=title.match(/^\[([ xX-])\]\s*/);
-      if(checkbox){status=/[xX]/.test(checkbox[1])?"DONE":checkbox[1]==="-"?"STARTED":"TODO";title=title.slice(checkbox[0].length)}
-      const statusMatch=title.match(/^(TODO|NEXT|DONE|WAITING|WAIT|HOLD|STARTED|PROJECT|CANCELLED|CANCELED)\b\s*/i);
-      if(statusMatch){status=statusMatch[1].toUpperCase();title=title.slice(statusMatch[0].length)}
-      const chineseStatus=title.match(/^(待办|下一步|进行中|等待中|已完成|已取消)[：:\s]+/);
+      if(checkbox){status=/[xX]/.test(checkbox[1])?"DONE":checkbox[1]==="-"?"NEXT":"TODO";title=title.slice(checkbox[0].length)}
+      const statusMatch=title.match(/^([A-Z][A-Z0-9_-]*)\b\s*/i);
+      if(statusMatch&&STATUS.has(statusMatch[1].toUpperCase())){status=statusMatch[1].toUpperCase();title=title.slice(statusMatch[0].length)}
+      const chineseStatus=title.match(/^(待办|下一步|已完成|已取消)[：:\s]+/);
       if(chineseStatus){
-        status={待办:"TODO",下一步:"NEXT",进行中:"STARTED",等待中:"WAITING",已完成:"DONE",已取消:"CANCELLED"}[chineseStatus[1]];
+        status={待办:"TODO",下一步:"NEXT",已完成:"DONE",已取消:"CNCL"}[chineseStatus[1]];
         title=title.slice(chineseStatus[0].length)
       }
       title=title.replace(/\[#([A-Z0-9])\]/i,(match,value)=>{priority=value.toUpperCase();return " "});
@@ -1574,8 +1632,9 @@ print("hello")
         state.searchHistory=Array.isArray(saved)?saved.filter(value=>typeof value==="string"&&value.trim()).slice(0,12):[]}
       catch(_){state.searchHistory=[]}
       try{const rules=JSON.parse(localStorage.getItem(QUADRANT_KEY)||"{}");
-        if(["A","AB","ANY","TAG","PROP"].includes(rules.important))state.quadrantImportant=rules.important;
-        if(["0","3","7","14","OVERDUE","TAG"].includes(rules.urgent))state.quadrantUrgent=rules.urgent
+        if(["A","AB","ANY","TAG","PROP"].includes(rules.important))state.quadrantDefaults.important=rules.important;
+        if(["0","3","7","14","OVERDUE","TAG"].includes(rules.urgent))state.quadrantDefaults.urgent=rules.urgent;
+        state.quadrantImportant=state.quadrantDefaults.important;state.quadrantUrgent=state.quadrantDefaults.urgent
       }catch(_){}
       try{const visible=JSON.parse(localStorage.getItem(SMART_KEY)||"[]"),valid=VIEWS.map(view=>view[0]);
         state.smartVisible=Array.isArray(visible)?visible.filter(key=>valid.includes(key)):valid;
@@ -1773,6 +1832,8 @@ print("hello")
       $("defaultView").value=state.defaultFilters.view;$("defaultStatus").value=state.defaultFilters.status;
       $("defaultPriority").value=state.defaultFilters.priority;$("defaultSort").value=state.defaultFilters.sort;
       $("defaultDateField").value=state.defaultFilters.dateField;$("defaultColumns").value=state.defaultFilters.columns;
+      $("defaultImportantRule").value=state.quadrantDefaults.important;
+      $("defaultUrgentRule").value=state.quadrantDefaults.urgent;
       $("customOpenStatuses").value=state.customOpenStatuses.join(" ");
       $("customDoneStatuses").value=state.customDoneStatuses.join(" ");
       renderStartupSummary();
@@ -1791,6 +1852,9 @@ print("hello")
       state.defaultFilters={view:$("defaultView").value,status:$("defaultStatus").value,
         priority:$("defaultPriority").value,sort:$("defaultSort").value,dateField:$("defaultDateField").value,
         columns:$("defaultColumns").value};
+      state.quadrantDefaults={important:$("defaultImportantRule").value,urgent:$("defaultUrgentRule").value};
+      state.quadrantImportant=state.quadrantDefaults.important;state.quadrantUrgent=state.quadrantDefaults.urgent;
+      try{localStorage.setItem(QUADRANT_KEY,JSON.stringify(state.quadrantDefaults))}catch(_){}
       if(!["ALL","OPEN","NONE",...configuredStatuses()].includes(state.defaultFilters.status))state.defaultFilters.status="ALL";
       if(!["ALL","OPEN","DONE","NONE",...configuredStatuses()].includes(state.status))state.status="ALL";
       state.filterTouched=false;saveDisplaySettings();syncFilterCollapse(true);
@@ -2276,7 +2340,7 @@ print("hello")
         item.kind==="folder"?chooseFolder():chooseFiles()
       }catch(_){setNotice("历史位置暂时无法读取，请重新选择文件。")}
     }
-    const isDone = t => Object.prototype.hasOwnProperty.call(state.localDone,t.uid)?state.localDone[t.uid]:(DONE.has(t.status)||!!t.closed);
+    const isDone = t => DONE.has(t.status)||!!t.closed;
     function setNotice(text){$("noticeText").textContent=text;$("notice").classList.toggle("show",!!text)}
     function rebuildFromSources(preserve) {
       let offset=0;state.tasks=[];state.files=state.sources.map(source=>{
@@ -2302,9 +2366,10 @@ print("hello")
           webdavUrl,webdavEtag,webdavConfig,text:await decode(file),id:"f"+i,eol:"\r\n"})));
         state.sources=decoded.map(item=>({id:item.id,name:item.file.name,path:item.path||item.file.name,
           text:item.text,eol:item.text.includes("\r\n")?"\r\n":"\n",fileHandle:item.handle||null,
-          webdavUrl:item.webdavUrl||"",webdavEtag:item.webdavEtag||"",webdavConfig:item.webdavConfig||null,dirty:false}));
+          webdavUrl:item.webdavUrl||"",webdavEtag:item.webdavEtag||"",webdavConfig:item.webdavConfig||null,
+          webdavBaseText:item.webdavUrl?item.text:null,dirty:false}));
         rebuildFromSources();
-        state.file="all";state.selected=null;state.hierParent=null;state.localDone={};
+        state.file="all";state.selected=null;state.hierParent=null;
         state.navHistory=[];state.batchMode=false;state.batchSelected=[];state.batchSources=[];
         setSearchQuery("");state.visible=100;applyStartupPage();
         setNotice(`已读取 ${state.files.length} 个文件，共识别 ${state.tasks.length} 个标题条目。`);
@@ -2326,8 +2391,7 @@ print("hello")
       if(state.file!=="all"&&task.fileId!==state.file)return false;
       const done=isDone(task);
       if(state.status==="OPEN"&&done)return false;
-      if(state.status==="DONE"&&!done)return false;
-      if(!["ALL","OPEN","DONE"].includes(state.status)&&task.status!==state.status)return false;
+      if(!["ALL","OPEN"].includes(state.status)&&task.status!==state.status)return false;
       if(state.priority!=="ALL"&&(state.priority==="NONE"?!!task.priority:task.priority!==state.priority))return false;
       if(state.tag!=="ALL"&&!task.tags.includes(state.tag))return false;
       return taskDateFilterMatches(task)&&search.predicate(task)
@@ -2412,10 +2476,11 @@ print("hello")
       return `<div class="taskSwipe ${batchSelected?"batchSelected":""}" data-swipe-row="${task.uid}">
         <button class="batchSelect" data-batch-select="${task.uid}" aria-label="${batchSelected?"取消选择":"选择"} ${esc(task.title)}">✓</button>
         <div class="swipeActions"><button class="swipeEdit" data-swipe-edit="${task.uid}">编辑</button>
+          <button class="swipeMove" data-swipe-move="${task.uid}">移动</button>
           <button class="swipeDate" data-swipe-date="${task.uid}">日期</button>
           <button class="swipeDelete" data-swipe-delete="${task.uid}">删除</button></div>
         <button class="task ${statusToneClass(task.status)} ${done?"isDone":""} ${state.selected===task.uid?"selected":""}" data-task="${task.uid}">
-        <span class="check ${done?"done":task.status.toLowerCase()}" data-toggle="${task.uid}"></span>
+        <span class="check ${done?"done":task.status.toLowerCase()}" data-toggle="${task.uid}" title="${done?"取消完成并改为 TODO":"标记为 DONE 并写入 CLOSED 完成时间"}"></span>
         <span class="taskBody"><span class="titleLine">${task.priority?`<span class="priority p${esc(task.priority)}">${esc(task.priority)}</span>`:""}<span class="taskTitle">${esc(task.title)}</span></span>
         <span class="meta"><span class="chip statusColor ${statusToneClass(task.status)}">${esc(STATUS_LABEL[task.status]||task.status)}</span>${task.tags.slice(0,3).map(tag=>`<span class="tag">#${esc(tag)}</span>`).join("")}${task.parentPath.length?`<span class="path">${esc(task.parentPath.slice(-2).join(" / "))}</span>`:""}</span></span>
         <span class="tail">${renderDateBadges(task)}<span class="source">${esc(task.fileName)}</span><span class="taskDetailHint" data-task-detail="${task.uid}">详情</span></span>
@@ -2480,14 +2545,16 @@ print("hello")
         event.stopPropagation();selectTask(element.dataset.taskDetail,true);(rerender||renderContent)()
       });
       host.querySelectorAll("[data-toggle]").forEach(element=>element.onclick=event=>{
-        event.stopPropagation();const task=state.tasks.find(item=>item.uid===element.dataset.toggle);
-        if(task){state.localDone[task.uid]=!isDone(task);render()}
+        event.stopPropagation();toggleTaskCompletion(element.dataset.toggle)
       });
       host.querySelectorAll("[data-batch-select]").forEach(button=>button.onclick=event=>{
         event.stopPropagation();toggleBatchSelection(button.dataset.batchSelect)
       });
       host.querySelectorAll("[data-swipe-edit]").forEach(button=>button.onclick=event=>{
         event.stopPropagation();openVisualEditor("edit",button.dataset.swipeEdit)
+      });
+      host.querySelectorAll("[data-swipe-move]").forEach(button=>button.onclick=event=>{
+        event.stopPropagation();openMoveModal(button.dataset.swipeMove)
       });
       host.querySelectorAll("[data-swipe-date]").forEach(button=>button.onclick=event=>{
         event.stopPropagation();openTaskDateEditor(button.dataset.swipeDate)
@@ -2538,11 +2605,38 @@ print("hello")
       });
       if(field&&field!=="KEEP"&&field!=="CLEAR_ALL"&&date){
         const token=`${field}: ${orgTimestamp(date,time,field==="CLOSED")}`;
-        const planningIndex=lines.findIndex((line,index)=>index>0&&/\b(?:SCHEDULED|DEADLINE|CLOSED):/.test(line));
-        if(planningIndex>0)lines[planningIndex]=`${lines[planningIndex].trim()} ${token}`.trim();
+        const planningIndex=lines.findIndex((line,index)=>index>0&&/\b(?:SCHEDULED|DEADLINE):/.test(line));
+        if(field==="CLOSED")lines.splice(1,0,token);
+        else if(planningIndex>0)lines[planningIndex]=`${lines[planningIndex].trim()} ${token}`.trim();
         else lines.splice(1,0,token)
       }
       return lines.join("\n")
+    }
+    function ensureClosedForStatus(block,status){
+      if(!DONE.has(status)||planning(block,"CLOSED"))return block;
+      const now=currentCompletionParts();return updateBatchPlanning(block,"CLOSED",now.date,now.time)
+    }
+    function setBlockCompletion(block,task,complete){
+      let lines=String(block||"").replace(/\r\n?/g,"\n").split("\n");
+      lines[0]=replaceHeadingStatus(lines[0],task,complete?"DONE":"TODO");
+      if(complete){
+        const now=currentCompletionParts();return updateBatchPlanning(lines.join("\n"),"CLOSED",now.date,now.time)
+      }
+      return updateBatchPlanning(lines.join("\n"),"CLOSED","","")
+    }
+    function toggleTaskCompletion(uid){
+      const task=state.tasks.find(item=>item.uid===uid),source=task&&state.sources.find(item=>item.id===task.fileId);
+      if(!task||!source){setNotice("无法找到要修改的条目。");return false}
+      const complete=!isDone(task),lines=source.text.replace(/\r\n?/g,"\n").split("\n");
+      const block=setBlockCompletion(lines.slice(task.startIndex,task.endIndex).join("\n"),task,complete).split("\n");
+      lines.splice(task.startIndex,task.endIndex-task.startIndex,...block);
+      source.text=lines.join(source.eol||"\n");source.dirty=true;
+      if(!state.batchSources.includes(source.id))state.batchSources.push(source.id);
+      state.batchMode=true;state.batchSelected=[];
+      rebuildFromSources({fileId:source.id,startIndex:task.startIndex,line:task.line});render();
+      setNotice(complete?`已把“${task.title}”改为 DONE 并添加 CLOSED 完成时间，尚未写回原文件。`:
+        `已把“${task.title}”重新改为 TODO 并移除 CLOSED，尚未写回原文件。`);
+      return true
     }
     function applyBatchStatus(){
       if(!state.batchSelected.length){setNotice("请先选择至少一个条目。");return}
@@ -2567,7 +2661,11 @@ print("hello")
           const original=lines.slice(task.startIndex,task.endIndex).join("\n");
           let block=original.split("\n");
           block[0]=replaceHeadingStatus(block[0],task,nextStatus,{priority,tagMode,tags});
-          const changed=updateBatchPlanning(block.join("\n"),dateField,date,time).split("\n");
+          let changed=updateBatchPlanning(block.join("\n"),dateField,date,time);
+          const effectiveStatus=nextStatus==="KEEP"?task.status:nextStatus;
+          if(nextStatus!=="KEEP"&&!DONE.has(effectiveStatus)&&dateField!=="CLOSED")
+            changed=updateBatchPlanning(changed,"CLOSED","","");
+          changed=ensureClosedForStatus(changed,effectiveStatus).split("\n");
           lines.splice(task.startIndex,task.endIndex-task.startIndex,...changed)
         });
         source.text=lines.join(source.eol||"\n");source.dirty=true;
@@ -2623,8 +2721,7 @@ print("hello")
       if(state.file!=="all"&&task.fileId!==state.file)return false;
       const done=isDone(task);
       if(state.status==="OPEN"&&done)return false;
-      if(state.status==="DONE"&&!done)return false;
-      if(!["ALL","OPEN","DONE"].includes(state.status)&&task.status!==state.status)return false;
+      if(!["ALL","OPEN"].includes(state.status)&&task.status!==state.status)return false;
       if(state.priority!=="ALL"&&(state.priority==="NONE"?!!task.priority:task.priority!==state.priority))return false;
       if(state.tag!=="ALL"&&!task.tags.includes(state.tag))return false;
       return taskDateFilterMatches(task)&&searchPredicate(task);
@@ -2660,6 +2757,7 @@ print("hello")
       return `<div class="taskSwipe hierarchySwipe ${batchSelected?"batchSelected":""}" data-swipe-row="${task.uid}">
         <button class="batchSelect" data-batch-select="${task.uid}" aria-label="${batchSelected?"取消选择":"选择"} ${esc(task.title)}">✓</button>
         <div class="swipeActions"><button class="swipeEdit" data-swipe-edit="${task.uid}">编辑</button>
+          <button class="swipeMove" data-swipe-move="${task.uid}">移动</button>
           <button class="swipeDate" data-swipe-date="${task.uid}">日期</button>
           <button class="swipeDelete" data-swipe-delete="${task.uid}">删除</button></div>
         <article class="hierCard ${statusToneClass(task.status)} ${done?"isDone":""}" data-hier="${task.uid}">
@@ -2726,6 +2824,9 @@ print("hello")
       });
       $("listHost").querySelectorAll("[data-swipe-edit]").forEach(button=>button.onclick=event=>{
         event.stopPropagation();openVisualEditor("edit",button.dataset.swipeEdit)
+      });
+      $("listHost").querySelectorAll("[data-swipe-move]").forEach(button=>button.onclick=event=>{
+        event.stopPropagation();openMoveModal(button.dataset.swipeMove)
       });
       $("listHost").querySelectorAll("[data-swipe-date]").forEach(button=>button.onclick=event=>{
         event.stopPropagation();openTaskDateEditor(button.dataset.swipeDate)
@@ -2932,8 +3033,8 @@ print("hello")
       const t=state.tasks.find(x=>x.uid===state.selected);
       if(!t){state.detailOpen=false;$("detail").classList.remove("open");$("detail").innerHTML='<div class="detailEmpty"><div class="circle"></div><h2>选择一个条目</h2><p>查看正文、Org 属性、标签和来源位置。</p></div>';return}
       const done=isDone(t),props=Object.entries(t.properties);
-      $("detail").innerHTML=`<div class="detailHead"><div><strong>条目详情</strong></div><div class="detailActions"><button class="deleteButton" id="deleteTask">删除条目</button><button class="editButton" id="visualEditTask">可视化编辑</button><button class="editButton" id="editTask">编辑原文</button><button class="iconBtn" id="closeDetail">×</button></div></div>
-        <div class="detailScroll"><div class="detailTitle"><button class="check ${done?"done":t.status.toLowerCase()}" id="detailCheck"></button><h2>${esc(t.title)}</h2></div>
+      $("detail").innerHTML=`<div class="detailHead"><div><strong>条目详情</strong></div><div class="detailActions"><button class="editButton" id="moveTask">移动条目</button><button class="deleteButton" id="deleteTask">删除条目</button><button class="editButton" id="visualEditTask">可视化编辑</button><button class="editButton" id="editTask">编辑原文</button><button class="iconBtn" id="closeDetail">×</button></div></div>
+        <div class="detailScroll"><div class="detailTitle"><button class="check ${done?"done":t.status.toLowerCase()}" id="detailCheck" title="${done?"取消完成并改为 TODO":"标记为 DONE 并写入 CLOSED 完成时间"}"></button><h2>${esc(t.title)}</h2></div>
         <div class="fields"><div><span>状态</span><b>${esc(STATUS_LABEL[t.status]||t.status)}</b></div>
         <div><span>优先级</span><b>${esc(t.priority||"无")}</b></div>
         <div><span>SCHEDULED</span><b>${esc(t.scheduled||"未设置")}</b></div>
@@ -2943,17 +3044,18 @@ print("hello")
         ${t.body?`<section class="section"><h3>正文与备注</h3><pre>${esc(t.body)}</pre></section>`:""}
         ${props.length?`<section class="section"><h3>Org 属性</h3><dl>${props.map(([k,v])=>`<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl></section>`:""}
         <section class="section sourceInfo"><h3>来源</h3><p>${esc(t.filePath)}</p><small>第 ${t.line} 行 · ${t.level} 级标题</small></section></div>
-        <div class="detailNote">勾选仅影响当前浏览；编辑后由你选择写回原文件或下载副本。</div>`;
+        <div class="detailNote">DONE、CNCL、自定义完成状态或 CLOSED 完成时间都会让条目显示为已完成。点击圆圈会把 Org 状态改为 DONE，并写入当前 CLOSED 时间。</div>`;
       $("detail").classList.toggle("open",state.detailOpen);$("closeDetail").onclick=()=>{state.detailOpen=false;$("detail").classList.remove("open")};
       $("deleteTask").onclick=()=>openDeleteModal(t.uid);
+      $("moveTask").onclick=()=>openMoveModal(t.uid);
       $("visualEditTask").onclick=()=>openVisualEditor("edit",t.uid);
       $("editTask").onclick=()=>openEditor(t.uid);
-      $("detailCheck").onclick=()=>{state.localDone[t.uid]=!isDone(t);render()};
+      $("detailCheck").onclick=()=>toggleTaskCompletion(t.uid);
       $("detail").querySelectorAll("[data-tag]").forEach(b=>b.onclick=()=>{state.mode="global";state.tag=b.dataset.tag;$("tagFilter").value=state.tag;state.visible=100;render()});
     }
     function tokenSpan(className,value){return `<span class="${className}">${esc(value)}</span>`}
     function highlightOrgTokens(text){
-      const pattern=/(\[\[[^\]\n]+\](?:\[[^\]\n]+\])?\])|([<[]\d{4}-\d{2}-\d{2}[^\]>\n]*[>\]])|(\[#[A-Z0-9]\])|\b(TODO|NEXT|DONE|CNCL|WAITING|WAIT|HOLD|CANCELLED|CANCELED|STARTED|PROJECT)\b|((?:DEADLINE|SCHEDULED|CLOSED):)|(\[[ Xx-]\])|(\*[^*\n]+\*)|(\/[^\/\n]+\/)|(_[^_\n]+_)|(=[^=\n]+=)|(~[^~\n]+~)|(:[^\s:]+(?::[^\s:]+)*:)/g;
+      const pattern=/(\[\[[^\]\n]+\](?:\[[^\]\n]+\])?\])|([<[]\d{4}-\d{2}-\d{2}[^\]>\n]*[>\]])|(\[#[A-Z0-9]\])|\b(TODO|NEXT|DONE|CNCL)\b|((?:DEADLINE|SCHEDULED|CLOSED):)|(\[[ Xx-]\])|(\*[^*\n]+\*)|(\/[^\/\n]+\/)|(_[^_\n]+_)|(=[^=\n]+=)|(~[^~\n]+~)|(:[^\s:]+(?::[^\s:]+)*:)/g;
       return text.replace(pattern,(match,link,date,priority,status,planning,checkbox,bold,italic,underline,code,verbatim,tag)=>{
         const className=link?"tokLink":date?"tokDate":priority?"tokPriority":status?"tokStatus":
           planning?"tokPlanning":checkbox?"tokCheckbox":bold?"tokOrgBold":italic?"tokOrgItalic":
@@ -2979,16 +3081,17 @@ print("hello")
     function highlightOrg(text){return text.split("\n").map(highlightOrgLine).join("\n")}
     function updateVimCursorStatus(input=$("editText")){
       if(!input||!$("vimCursorPosition"))return;
-      const before=input.value.slice(0,input.selectionStart),parts=before.split("\n");
-      $("vimCursorPosition").textContent=`${parts.length}:${parts[parts.length-1].length+1}`
+      const position=activeVimPosition(input),before=input.value.slice(0,position),parts=before.split("\n");
+      $("vimCursorPosition").textContent=`${parts.length}:${parts[parts.length-1].length+1}${
+        state.vimState==="visual"?` · 已选 ${Math.abs((state.vimVisualCursor??position)-(state.vimVisualAnchor??position))} 字符`:""}`
     }
     function syncEditorScroll(){
       const input=$("editText");$("editHighlight").scrollTop=input.scrollTop;$("editHighlight").scrollLeft=input.scrollLeft;
       $("editLineNumbers").scrollTop=input.scrollTop
     }
-    function ensureEditorCaretVisible(input=$("editText")){
+    function ensureEditorCaretVisible(input=$("editText"),position=activeVimPosition(input)){
       if(!input)return;
-      const before=input.value.slice(0,input.selectionStart),parts=before.split("\n"),line=parts.length-1,
+      const before=input.value.slice(0,position),parts=before.split("\n"),line=parts.length-1,
         column=parts[parts.length-1].length;
       const style=window.getComputedStyle?.(input),lineHeight=parseFloat(style?.lineHeight)||18;
       const paddingTop=parseFloat(style?.paddingTop)||15,paddingLeft=parseFloat(style?.paddingLeft)||15,
@@ -3073,12 +3176,15 @@ print("hello")
     }
     function setVimState(mode){
       state.vimState=mode;state.vimPending="";
-      const label=state.vimMode?(mode==="normal"?"普通模式":"插入模式"):"普通编辑";
+      if(mode!=="visual"){state.vimVisualAnchor=null;state.vimVisualCursor=null}
+      const label=state.vimMode?(mode==="normal"?"普通模式":mode==="visual"?"选择模式":"插入模式"):"普通编辑";
       $("vimStatus").textContent=label;$("vimCommandMode").textContent=label;
       $("vimToggle").textContent=state.vimMode?"Vim 开":"Vim 关";$("vimToggle").classList.toggle("active",state.vimMode);
       $("vimCommandBar").classList.toggle("vimEnabled",state.vimMode);
+      $("vimEscButton").hidden=!state.vimMode;
       if(!$("vimCommandEntry").classList.contains("show"))
-        $("vimCommandMessage").textContent=state.vimMode?"普通模式按 : 调出命令行":"开启 Vim 后按 : 调出命令行"
+        $("vimCommandMessage").textContent=state.vimMode?(mode==="visual"?"v 退出选择，d/x 删除，c 删除后插入":"普通模式按 : 调出命令行"):
+          "开启 Vim 后按 : 调出命令行"
     }
     function toggleVimMode(){
       state.vimMode=!state.vimMode;try{localStorage.setItem(VIM_KEY,state.vimMode?"1":"0")}catch(_){}
@@ -3142,47 +3248,102 @@ print("hello")
       const start=text.lastIndexOf("\n",Math.max(0,position-1))+1,end=text.indexOf("\n",position);
       return {start,end:end<0?text.length:end}
     }
+    function activeVimPosition(input){
+      return state.vimState==="visual"&&Number.isInteger(state.vimVisualCursor)?
+        state.vimVisualCursor:input.selectionStart
+    }
+    function placeVimPosition(input,position){
+      const target=Math.max(0,Math.min(input.value.length,position));
+      if(state.vimState==="visual"&&Number.isInteger(state.vimVisualAnchor)){
+        state.vimVisualCursor=target;
+        input.setSelectionRange(Math.min(state.vimVisualAnchor,target),Math.max(state.vimVisualAnchor,target))
+      }else input.setSelectionRange(target,target);
+      updateVimCursorStatus(input);return target
+    }
+    function exitVimVisual(input,position=activeVimPosition(input),mode="normal"){
+      const target=Math.max(0,Math.min(input.value.length,position));
+      setVimState(mode);input.setSelectionRange(target,target);updateVimCursorStatus(input)
+    }
     function moveVimVertical(input,direction){
-      const text=input.value,pos=input.selectionStart,current=vimLineBounds(text,pos),column=pos-current.start;
+      const text=input.value,pos=activeVimPosition(input),current=vimLineBounds(text,pos),column=pos-current.start;
       const nextPos=direction<0?Math.max(0,current.start-1):Math.min(text.length,current.end+1);
-      const next=vimLineBounds(text,nextPos),target=Math.min(next.end,next.start+column);input.setSelectionRange(target,target);
-      ensureEditorCaretVisible(input)
+      const next=vimLineBounds(text,nextPos),target=Math.min(next.end,next.start+column);placeVimPosition(input,target);
+      ensureEditorCaretVisible(input,target)
+    }
+    function runVimNormalKey(input,key){
+      if(key===":"){openVimCommandLine();return}
+      if(key==="/"){$("editFind").focus();return}
+      if(key==="v"){
+        if(state.vimState==="visual"){exitVimVisual(input);return}
+        const anchor=input.selectionStart;state.vimVisualAnchor=anchor;
+        state.vimVisualCursor=Math.min(input.value.length,anchor+1);setVimState("visual");
+        input.setSelectionRange(Math.min(anchor,state.vimVisualCursor),Math.max(anchor,state.vimVisualCursor));
+        updateVimCursorStatus(input);return
+      }
+      if(state.vimState==="visual"&&["d","x","c"].includes(key)){
+        const start=input.selectionStart,end=input.selectionEnd;input.setRangeText("",start,end,"start");
+        exitVimVisual(input,start,key==="c"?"insert":"normal");renderEditHighlight();return
+      }
+      if(key==="i"){if(state.vimState==="visual")exitVimVisual(input);setVimState("insert");return}
+      if(key==="a"){
+        const pos=Math.min(input.value.length,activeVimPosition(input)+1);
+        if(state.vimState==="visual")exitVimVisual(input,pos,"insert");else{input.setSelectionRange(pos,pos);setVimState("insert")}
+        ensureEditorCaretVisible(input,pos);return
+      }
+      if(key==="o"||key==="O"){
+        const bounds=vimLineBounds(input.value,activeVimPosition(input)),pos=key==="o"?bounds.end:bounds.start;
+        if(state.vimState==="visual")exitVimVisual(input,pos);
+        input.setRangeText("\n",pos,pos,"end");setVimState("insert");renderEditHighlight();ensureEditorCaretVisible(input);return
+      }
+      if(key==="G"){placeVimPosition(input,input.value.length);ensureEditorCaretVisible(input,input.value.length);return}
+      if(state.vimPending==="g"&&key==="g"){placeVimPosition(input,0);state.vimPending="";ensureEditorCaretVisible(input,0);return}
+      if(state.vimPending==="d"&&key==="d"){
+        const bounds=vimLineBounds(input.value,activeVimPosition(input)),end=bounds.end<input.value.length?bounds.end+1:bounds.end;
+        input.setRangeText("",bounds.start,end,"start");state.vimPending="";renderEditHighlight();ensureEditorCaretVisible(input);return
+      }
+      if(key==="g"||key==="d"){state.vimPending=key;return}
+      state.vimPending="";
+      const pos=activeVimPosition(input),bounds=vimLineBounds(input.value,pos);
+      if(key==="h"||key==="ArrowLeft")placeVimPosition(input,Math.max(0,pos-1));
+      else if(key==="l"||key==="ArrowRight")placeVimPosition(input,Math.min(input.value.length,pos+1));
+      else if(key==="j"||key==="ArrowDown")moveVimVertical(input,1);
+      else if(key==="k"||key==="ArrowUp")moveVimVertical(input,-1);
+      else if(key==="0")placeVimPosition(input,bounds.start);
+      else if(key==="$")placeVimPosition(input,bounds.end);
+      else if(key==="w"){const match=input.value.slice(pos+1).match(/\b\w/),next=match?pos+1+match.index:input.value.length;placeVimPosition(input,next)}
+      else if(key==="b"){const before=input.value.slice(0,pos),matches=[...before.matchAll(/\b\w/g)],next=matches.length?matches[matches.length-1].index:0;placeVimPosition(input,next)}
+      else if(key==="x"){input.setRangeText("",pos,Math.min(input.value.length,pos+1),"start");renderEditHighlight()}
+      ensureEditorCaretVisible(input,activeVimPosition(input))
     }
     function handleVimKeydown(event){
       if(!state.vimMode||event.ctrlKey||event.metaKey||event.altKey)return;
-      const input=event.currentTarget;if(state.vimState==="insert"){
+      const input=event.currentTarget;
+      if(state.vimState==="insert"){
         if(event.key==="Escape"){event.preventDefault();event.stopPropagation();setVimState("normal")}return
       }
-      if(event.key===":"){event.preventDefault();openVimCommandLine();return}
-      if(event.key==="/"){event.preventDefault();$("editFind").focus();return}
-      if(event.key==="i"){event.preventDefault();setVimState("insert");return}
-      if(event.key==="a"){event.preventDefault();const pos=Math.min(input.value.length,input.selectionStart+1);input.setSelectionRange(pos,pos);ensureEditorCaretVisible(input);setVimState("insert");return}
-      if(event.key==="o"||event.key==="O"){
-        event.preventDefault();const bounds=vimLineBounds(input.value,input.selectionStart);
-        const pos=event.key==="o"?bounds.end:bounds.start;input.setRangeText("\n",pos,pos,"end");setVimState("insert");renderEditHighlight();ensureEditorCaretVisible(input);return
+      event.preventDefault();if(event.key==="Escape"){
+        event.stopPropagation();if(state.vimState==="visual")exitVimVisual(input);return
       }
-      if(event.key==="G"){event.preventDefault();input.setSelectionRange(input.value.length,input.value.length);ensureEditorCaretVisible(input);return}
-      if(state.vimPending==="g"&&event.key==="g"){event.preventDefault();input.setSelectionRange(0,0);state.vimPending="";ensureEditorCaretVisible(input);return}
-      if(state.vimPending==="d"&&event.key==="d"){
-        event.preventDefault();const bounds=vimLineBounds(input.value,input.selectionStart);
-        const end=bounds.end<input.value.length?bounds.end+1:bounds.end;input.setRangeText("",bounds.start,end,"start");
-        state.vimPending="";renderEditHighlight();ensureEditorCaretVisible(input);return
+      state.vimLastKey=event.key;state.vimLastKeyAt=Date.now();runVimNormalKey(input,event.key)
+    }
+    function handleVimBeforeInput(event){
+      if(!state.vimMode||state.vimState==="insert"||!String(event.inputType||"").startsWith("insert"))return;
+      const key=String(event.data||"");if(key.length!==1){event.preventDefault();return}
+      const input=event.currentTarget;
+      if(state.vimLastKey===key&&Date.now()-state.vimLastKeyAt<100){event.preventDefault();return}
+      const restore={value:"",start:input.selectionStart,end:input.selectionEnd};
+      if(event.cancelable)event.preventDefault();
+      runVimNormalKey(input,key);
+      restore.value=input.value;restore.start=input.selectionStart;restore.end=input.selectionEnd;state.vimInputRestore=restore;
+      setTimeout(()=>{if(state.vimInputRestore===restore)state.vimInputRestore=null},0)
+    }
+    function handleEditorInput(event){
+      const restore=state.vimInputRestore;
+      if(restore){
+        state.vimInputRestore=null;event.currentTarget.value=restore.value;
+        event.currentTarget.setSelectionRange(restore.start,restore.end)
       }
-      if(event.key==="g"||event.key==="d"){event.preventDefault();state.vimPending=event.key;return}
-      state.vimPending="";
-      const pos=input.selectionStart,bounds=vimLineBounds(input.value,pos);
-      if(event.key==="h"||event.key==="ArrowLeft"){event.preventDefault();input.setSelectionRange(Math.max(0,pos-1),Math.max(0,pos-1))}
-      else if(event.key==="l"||event.key==="ArrowRight"){event.preventDefault();const next=Math.min(input.value.length,pos+1);input.setSelectionRange(next,next)}
-      else if(event.key==="j"||event.key==="ArrowDown"){event.preventDefault();moveVimVertical(input,1)}
-      else if(event.key==="k"||event.key==="ArrowUp"){event.preventDefault();moveVimVertical(input,-1)}
-      else if(event.key==="0"){event.preventDefault();input.setSelectionRange(bounds.start,bounds.start)}
-      else if(event.key==="$"){event.preventDefault();input.setSelectionRange(bounds.end,bounds.end)}
-      else if(event.key==="w"){event.preventDefault();const match=input.value.slice(pos+1).match(/\b\w/);const next=match?pos+1+match.index:input.value.length;input.setSelectionRange(next,next)}
-      else if(event.key==="b"){event.preventDefault();const before=input.value.slice(0,pos),matches=[...before.matchAll(/\b\w/g)];const next=matches.length?matches[matches.length-1].index:0;input.setSelectionRange(next,next)}
-      else if(event.key==="x"){event.preventDefault();input.setRangeText("",pos,Math.min(input.value.length,pos+1),"start");renderEditHighlight()}
-      else if(event.key==="Escape"){event.preventDefault();event.stopPropagation()}
-      else event.preventDefault();
-      ensureEditorCaretVisible(input)
+      renderEditHighlight()
     }
     function closeEditor(){
       state.editing=null;state.editingFileId=null;state.editingScope="task";closeVimCommandLine(false);
@@ -3263,7 +3424,8 @@ print("hello")
       if(source.webdavUrl){
         const headers={"Content-Type":"text/plain; charset=utf-8"};if(etag)headers["If-Match"]=etag;
         const response=await webdavRequest(source.webdavUrl,{method:"PUT",headers,body:text},source.webdavConfig);
-        source.webdavEtag=response.headers.get("etag")||source.webdavEtag
+        source.webdavEtag=response.headers.get("etag")||"";
+        source.webdavBaseText=text
       }else{
         const handle=source.fileHandle;
         let permission=typeof handle.queryPermission==="function"?await handle.queryPermission({mode:"readwrite"}):"granted";
@@ -3274,7 +3436,8 @@ print("hello")
     }
     function writeFailureNotice(error){
       const message=error?.message||"浏览器未允许写入";
-      setNotice(message.includes("412")?"写回已取消：远程文件刚刚发生变化，请重新读取后再试。":
+      setNotice(message.includes("412")||message.includes("远程文件刚刚发生变化")?
+        "写回已取消：远程文件刚刚发生变化，请重新读取后再试。":
         ["NotAllowedError","NoModificationAllowedError","SecurityError"].includes(error?.name)?
           "写回失败：没有文件写入权限。请重新打开 Org 文件夹并允许读写。":`写回失败：${message}`)
     }
@@ -3307,10 +3470,10 @@ print("hello")
       try{
         const selected=state.tasks.find(task=>task.uid===state.selected);
         if(source.webdavUrl){
-          const headers={"Content-Type":"text/plain; charset=utf-8"};
-          if(source.webdavEtag)headers["If-Match"]=source.webdavEtag;
-          const response=await webdavRequest(source.webdavUrl,{method:"PUT",headers,body:source.text},source.webdavConfig);
-          source.webdavEtag=response.headers.get("etag")||source.webdavEtag
+          const latest=await readLatestSourceText(source);
+          if(typeof source.webdavBaseText==="string"&&latest.text!==source.webdavBaseText)
+            throw new Error("远程文件刚刚发生变化");
+          await writeTextToOriginal(source,source.text,latest.etag||source.webdavEtag)
         }else{
           const handle=source.fileHandle;
           let permission=typeof handle.queryPermission==="function"?await handle.queryPermission({mode:"readwrite"}):"granted";
@@ -3319,7 +3482,7 @@ print("hello")
           const writable=await handle.createWritable();await writable.write(source.text);await writable.close()
         }
         source.dirty=false;
-        if(selected)rebuildFromSources({fileId:source.id,startIndex:selected.startIndex,line:selected.line});
+        if(selected)rebuildFromSources({fileId:selected.fileId,startIndex:selected.startIndex,line:selected.line});
         else{rebuildFromSources();state.selected=null}
         render();
         setNotice(source.webdavUrl?`已写回 WebDAV：${source.name}`:`已写回原文件：${source.name}`);return true
@@ -3361,11 +3524,20 @@ print("hello")
       downloadSourceFile(source);closeEditor()
     }
     function visualFormValues(){
-      return {title:$("visualTitle").value,status:$("visualStatus").value,priority:$("visualPriority").value,
+      return withAutomaticClosed({title:$("visualTitle").value,status:$("visualStatus").value,priority:$("visualPriority").value,
         tags:$("visualTags").value,scheduledDate:$("visualScheduledDate").value,
         scheduledTime:$("visualScheduledTime").value,deadlineDate:$("visualDeadlineDate").value,
         deadlineTime:$("visualDeadlineTime").value,closedDate:$("visualClosedDate").value,
-        closedTime:$("visualClosedTime").value,body:$("visualBody").value}
+        closedTime:$("visualClosedTime").value,body:$("visualBody").value})
+    }
+    function syncVisualClosedForStatus(clearWhenOpen=false){
+      if(DONE.has($("visualStatus").value)){
+        if(!$("visualClosedDate").value){
+          const now=currentCompletionParts();$("visualClosedDate").value=now.date;$("visualClosedTime").value=now.time
+        }
+      }else if(clearWhenOpen){
+        $("visualClosedDate").value="";$("visualClosedTime").value=""
+      }
     }
     function fillVisualForm(task){
       $("visualTitle").value=task?editableHeadingTitle(task.rawBlock):"";$("visualStatus").value=task?.status||"NONE";
@@ -3499,7 +3671,7 @@ print("hello")
       $("visualFile").value=preferredFile;
       const selectedUid=!editTask&&current?.fileId===preferredFile?current.uid:"";
       updateVisualParents(selectedUid);updateVisualAnchors(selectedUid);
-      $("visualPosition").value="parent-end";fillVisualForm(editTask);
+      $("visualPosition").value="parent-end";fillVisualForm(editTask);syncVisualClosedForStatus(false);
       if(!editTask){
         $("bulkItems").value="";$("bulkDefaultStatus").value="TODO";$("bulkDefaultPriority").value="";
         $("bulkDefaultTags").value="";state.visualAddMode="single"
@@ -3563,6 +3735,85 @@ print("hello")
       const lineCount=source.text.replace(/\r\n?/g,"\n").split("\n").length,endIndex=next?.startIndex??lineCount;
       const descendants=fileTasks.filter(item=>item.sourceIndex>task.sourceIndex&&item.startIndex<endIndex);
       return {source,startIndex:task.startIndex,endIndex,descendants}
+    }
+    function moveCandidates(fileId,movingTask){
+      const range=taskSubtreeRange(movingTask);
+      return state.tasks.filter(task=>task.fileId===fileId&&(!range||fileId!==movingTask.fileId||
+        task.startIndex<range.startIndex||task.startIndex>=range.endIndex))
+    }
+    function updateMoveOptions(){
+      const task=state.tasks.find(item=>item.uid===state.moving),fileId=$("moveFile").value;
+      const source=state.sources.find(item=>item.id===fileId),tasks=moveCandidates(fileId,task);
+      const previousParent=$("moveParent").value,previousAnchor=$("moveAnchor").value;
+      $("moveParent").innerHTML='<option value="">顶层（H1）</option>'+tasks.map(item=>
+        `<option value="${esc(item.uid)}">${esc(`${"　".repeat(Math.max(0,item.level-1))}H${item.level} · ${item.title}`)}</option>`).join("");
+      $("moveAnchor").innerHTML=tasks.length?tasks.map(item=>
+        `<option value="${esc(item.uid)}">${esc(`${"　".repeat(Math.max(0,item.level-1))}H${item.level} · ${item.title}`)}</option>`).join(""):
+        '<option value="">目标文件没有其他条目</option>';
+      const sameFile=task?.fileId===fileId;
+      const defaultParent=sameFile&&task?.parentUid&&tasks.some(item=>item.uid===task.parentUid)?task.parentUid:"";
+      $("moveParent").value=tasks.some(item=>item.uid===previousParent)?previousParent:defaultParent;
+      $("moveAnchor").value=tasks.some(item=>item.uid===previousAnchor)?previousAnchor:(tasks[0]?.uid||"");
+      const anchored=["before","after"].includes($("movePosition").value);
+      $("moveParentField").classList.toggle("formHidden",anchored);
+      $("moveAnchorField").classList.toggle("formHidden",!anchored);
+      try{
+        const context=planVisualInsertion(source,tasks,$("movePosition").value,$("moveParent").value,$("moveAnchor").value);
+        $("moveDestination").textContent=`${context.source.path} · H${context.level} · ${context.label}`;
+        $("applyMove").disabled=false
+      }catch(error){
+        $("moveDestination").textContent=error?.message||"请选择目标位置";$("applyMove").disabled=true
+      }
+    }
+    function openMoveModal(uid){
+      const task=state.tasks.find(item=>item.uid===uid),range=taskSubtreeRange(task);
+      if(!task||!range){setNotice("无法找到要移动的条目。");return}
+      state.moving=uid;
+      $("moveSummary").innerHTML=`<strong>${esc(task.title)}</strong><br>${esc(task.filePath)} · H${task.level} · ${
+        range.descendants.length?`包含 ${range.descendants.length} 个子标题`:"不包含子标题"}`;
+      $("moveFile").innerHTML=state.sources.map(source=>`<option value="${esc(source.id)}">${esc(source.path)}</option>`).join("");
+      $("moveFile").value=task.fileId;$("movePosition").value="parent-end";
+      $("moveParent").innerHTML="";$("moveAnchor").innerHTML="";updateMoveOptions();
+      $("moveModal").classList.add("show")
+    }
+    function closeMoveModal(){
+      state.moving=null;$("moveModal").classList.remove("show")
+    }
+    function adjustedSubtreeLines(lines,delta){
+      return lines.map(line=>line.replace(/^(\*+)(\s+)/,(match,stars,space)=>
+        `${"*".repeat(Math.max(1,stars.length+delta))}${space}`))
+    }
+    function moveTaskFromPage(){
+      const task=state.tasks.find(item=>item.uid===state.moving),range=taskSubtreeRange(task);
+      if(!task||!range){setNotice("要移动的条目已经不存在。");return false}
+      const target=state.sources.find(item=>item.id===$("moveFile").value),candidates=moveCandidates(target?.id,task);
+      let context;
+      try{context=planVisualInsertion(target,candidates,$("movePosition").value,$("moveParent").value,$("moveAnchor").value)}
+      catch(error){setNotice(error?.message||"请选择有效的移动位置。");return false}
+      if(target.id===range.source.id&&context.insertAt>=range.startIndex&&context.insertAt<=range.endIndex){
+        setNotice("不能把条目移动到它自身或自己的子标题中。");return false
+      }
+      const sourceLines=range.source.text.replace(/\r\n?/g,"\n").split("\n");
+      const moved=adjustedSubtreeLines(sourceLines.slice(range.startIndex,range.endIndex),context.level-task.level);
+      sourceLines.splice(range.startIndex,range.endIndex-range.startIndex);
+      let targetLines=target.id===range.source.id?sourceLines:target.text.replace(/\r\n?/g,"\n").split("\n");
+      let insertAt=context.insertAt;
+      if(target.id===range.source.id&&insertAt>range.endIndex)insertAt-=range.endIndex-range.startIndex;
+      insertAt=Math.max(0,Math.min(targetLines.length,insertAt));
+      const payload=[...moved],prefix=insertAt>0&&targetLines[insertAt-1]?.trim()!==""?1:0;
+      if(prefix)payload.unshift("");
+      if(insertAt<targetLines.length&&targetLines[insertAt]?.trim()!=="")payload.push("");
+      targetLines.splice(insertAt,0,...payload);
+      target.text=targetLines.join(target.eol||"\n");target.dirty=true;
+      if(target.id!==range.source.id){
+        range.source.text=sourceLines.join(range.source.eol||"\n");range.source.dirty=true
+      }
+      state.batchSources=[...new Set([...state.batchSources,range.source.id,target.id])];
+      state.batchMode=true;state.batchSelected=[];state.file=target.id;
+      rebuildFromSources({fileId:target.id,startIndex:insertAt+prefix,line:insertAt+prefix+1});
+      closeMoveModal();render();
+      setNotice(`已把“${task.title}”移动到 ${target.name} 的${context.label}；涉及文件尚未写回。`);
+      return true
     }
     function closeDeleteModal(){
       state.deleting=null;$("deleteModal").classList.remove("show")
@@ -3681,10 +3932,8 @@ print("hello")
     $("columnFilter").onchange=e=>{state.columns=e.target.value==="1"?"1":"2";state.customActive=null;
       try{localStorage.setItem(LAYOUT_KEY,state.columns)}catch(_){}renderCustomLists();renderContent()};
     $("importantRule").onchange=e=>{state.quadrantImportant=e.target.value;state.customActive=null;
-      try{localStorage.setItem(QUADRANT_KEY,JSON.stringify({important:state.quadrantImportant,urgent:state.quadrantUrgent}))}catch(_){}
       renderCustomLists();renderContent()};
     $("urgentRule").onchange=e=>{state.quadrantUrgent=e.target.value;state.customActive=null;
-      try{localStorage.setItem(QUADRANT_KEY,JSON.stringify({important:state.quadrantImportant,urgent:state.quadrantUrgent}))}catch(_){}
       renderCustomLists();renderContent()};
     $("calendarControls").querySelectorAll("[data-calendar-mode]").forEach(button=>button.onclick=()=>{
       state.calendarMode=button.dataset.calendarMode;persistCalendarSettings();render()
@@ -3716,6 +3965,8 @@ print("hello")
     $("editorZoomOut").onclick=()=>applyEditorScale(-10);
     $("editorZoomIn").onclick=()=>applyEditorScale(10);
     $("vimToggle").onclick=toggleVimMode;
+    $("vimEscButton").onclick=()=>{const input=$("editText");
+      if(state.vimState==="visual")exitVimVisual(input);else setVimState("normal");input.focus()};
     $("vimHelp").onclick=()=>{$("vimHelpModal").classList.add("show")};
     $("closeVimHelp").onclick=()=>{$("vimHelpModal").classList.remove("show")};
     $("vimHelpModal").onclick=event=>{if(event.target===$("vimHelpModal"))$("vimHelpModal").classList.remove("show")};
@@ -3726,7 +3977,8 @@ print("hello")
     $("findPrev").onclick=()=>findEditorText(-1);$("findNext").onclick=()=>findEditorText(1);
     $("replaceOne").onclick=replaceEditorSelection;$("replaceAll").onclick=replaceAllEditorText;
     $("editFind").onkeydown=event=>{if(event.key==="Enter"){event.preventDefault();findEditorText(event.shiftKey?-1:1)}};
-    $("editText").oninput=renderEditHighlight;
+    $("editText").onbeforeinput=handleVimBeforeInput;
+    $("editText").oninput=handleEditorInput;
     $("editText").onkeydown=handleVimKeydown;
     $("editText").onclick=$("editText").onselect=()=>updateVimCursorStatus();
     $("editText").onscroll=syncEditorScroll;
@@ -3741,10 +3993,16 @@ print("hello")
     $("visualParent").onchange=updateVisualSource;$("visualAnchor").onchange=updateVisualSource;
     $("bulkItems").oninput=renderBulkPreview;$("bulkDefaultTags").oninput=renderBulkPreview;
     $("bulkDefaultStatus").onchange=renderBulkPreview;$("bulkDefaultPriority").onchange=renderBulkPreview;
+    $("visualStatus").onchange=()=>syncVisualClosedForStatus(true);
     $("applyVisual").onclick=()=>{if(commitVisualChanges())closeVisualEditor()};
     $("writeVisual").onclick=()=>writeVisualSource();
     $("downloadVisual").onclick=downloadVisualSource;
     $("visualModal").onclick=event=>{if(event.target===$("visualModal"))closeVisualEditor()};
+    $("closeMove").onclick=$("cancelMove").onclick=closeMoveModal;
+    $("moveFile").onchange=updateMoveOptions;$("movePosition").onchange=updateMoveOptions;
+    $("moveParent").onchange=updateMoveOptions;$("moveAnchor").onchange=updateMoveOptions;
+    $("applyMove").onclick=moveTaskFromPage;
+    $("moveModal").onclick=event=>{if(event.target===$("moveModal"))closeMoveModal()};
     $("closeDelete").onclick=$("cancelDelete").onclick=closeDeleteModal;
     $("applyDelete").onclick=()=>{if(deleteTaskFromPage())closeDeleteModal()};
     $("writeDelete").onclick=()=>writeDeletedTask();$("downloadDelete").onclick=downloadDeletedTask;
@@ -3771,7 +4029,7 @@ print("hello")
       if(event.key==="Escape"){
       if($("vimHelpModal").classList.contains("show")){$("vimHelpModal").classList.remove("show");return}
       if($("orgHelpModal").classList.contains("show")){$("orgHelpModal").classList.remove("show");return}
-      $("syntaxModal").classList.remove("show");closeEditor();closeVisualEditor();closeDeleteModal();closeCustomModal();closeSmartModal();closeSettings();hideSearchHistory()
+      $("syntaxModal").classList.remove("show");closeEditor();closeVisualEditor();closeMoveModal();closeDeleteModal();closeCustomModal();closeSmartModal();closeSettings();hideSearchHistory()
     }});
     $("theme").onclick=()=>{const dark=document.documentElement.dataset.theme==="dark";document.documentElement.dataset.theme=dark?"light":"dark"};
     $("menu").onclick=()=>{$("sidebar").classList.add("open");$("scrim").classList.add("show")};
