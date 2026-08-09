@@ -1,6 +1,6 @@
 # Org 清单 Android 版
 
-安装包：[`Org清单-Android.apk`](Org清单-Android.apk)
+安装包：[`OrglistAndroid.apk`](OrglistAndroid.apk)
 
 版本：`1.1.0`（versionCode 2）  
 最低系统：Android 8.0（API 26）  
@@ -32,7 +32,7 @@ Android 版把完整 Org 清单网页和 WebDAV 原生网络桥接放进同一�
 
 ## 安装
 
-1. 把 `Org清单-Android.apk` 发送或复制到手机。
+1. 把 `OrglistAndroid.apk` 发送或复制到手机。
 2. 在手机文件管理器中点击 APK。
 3. 如果系统阻止安装，按照提示允许当前文件管理器“安装未知应用”。
 4. 完成安装后，在桌面打开“Org 清单”。

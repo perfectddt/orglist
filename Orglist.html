@@ -1194,7 +1194,7 @@ print("hello")
         </section>
         <section class="settingsSection" id="settings-webdav">
           <h3>WebDAV</h3>
-          <p class="settingsHint">从 WebDAV 文件夹读取全部 .org 文件并写回。电脑使用“启动Org清单-WebDAV.cmd”；手机和电脑连接同一 Wi‑Fi 后，使用“启动Org清单-手机WebDAV.cmd”，再在手机打开窗口显示的地址。</p>
+          <p class="settingsHint">从 WebDAV 文件夹读取全部 .org 文件并写回。电脑使用“OrglistWebDAV.cmd”；手机和电脑连接同一 Wi‑Fi 后，使用“启动Org清单-手机WebDAV.cmd”，再在手机打开窗口显示的地址。</p>
           <div class="bridgeMode" id="webdavMode"><span class="bridgeDot"></span><div><strong id="webdavModeTitle">直连模式</strong>
             <div id="webdavModeText">WebDAV 服务器必须主动允许跨域访问。</div></div></div>
           <div class="settingsGrid">
@@ -1244,7 +1244,7 @@ print("hello")
         sort:"date",dateField:"date",columns:"2"},batchMode:false,batchSelected:[],batchSources:[],
       suppressTaskClickUntil:0,startupPage:null,vimMode:false,vimState:"insert",vimPending:"",
       vimLastKey:"",vimLastKeyAt:0,vimInputRestore:null,vimInputGuard:null,vimVisualAnchor:null,vimVisualCursor:null,
-      apkSelectTarget:null};
+      apkSelectTarget:null,apkSelectPending:null,apkSelectScheduled:false};
     const HISTORY_KEY="org-task-recent-sources-v2",HISTORY_DEFAULT_KEY="org-task-default-recent-v1",
       HISTORY_DB="org-task-local-history",HISTORY_STORE="handles";
     const CUSTOM_KEY="org-task-custom-lists-v1",LAYOUT_KEY="org-task-list-columns-v1",
@@ -1819,10 +1819,26 @@ print("hello")
       $("apkSelectBackdrop").classList.add("show");
       requestAnimationFrame(()=>$("apkSelectOptions").querySelector(".selected")?.scrollIntoView({block:"center"}))
     }
+    function consumeApkSelectEvent(event){
+      event.preventDefault();event.stopPropagation();event.stopImmediatePropagation()
+    }
+    function queueApkSelect(select){
+      if(state.apkSelectTarget||state.apkSelectScheduled||!select)return;
+      state.apkSelectScheduled=true;setTimeout(()=>{
+        state.apkSelectScheduled=false;if(!state.apkSelectTarget)openApkSelect(select)
+      },0)
+    }
+    function beginApkSelect(event){
+      const select=event.target?.closest?.("select");if(!select||!androidWebdavActive())return;
+      consumeApkSelectEvent(event);state.apkSelectPending=select
+    }
+    function finishApkSelect(event){
+      const select=state.apkSelectPending||event.target?.closest?.("select");if(!select||!androidWebdavActive())return;
+      consumeApkSelectEvent(event);state.apkSelectPending=null;queueApkSelect(select)
+    }
     function interceptApkSelect(event){
       const select=event.target?.closest?.("select");if(!select||!androidWebdavActive())return;
-      event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
-      if(!state.apkSelectTarget)openApkSelect(select)
+      consumeApkSelectEvent(event);queueApkSelect(select)
     }
     const androidWebdavPending=new Map();
     function androidWebdavFetch(url,options,headers){
@@ -1863,7 +1879,7 @@ print("hello")
       $("webdavModeText").textContent=android?"WebDAV 请求由 Android App 直接发送，不需要电脑或 CMD，也不受浏览器 CORS 限制。":
         mobile?"WebDAV 请求经同一 Wi-Fi 中的电脑转发；电脑桥接窗口必须保持打开。":
         active?"WebDAV 请求经本机 127.0.0.1 转发，不再受远程服务器 CORS 限制。":
-        "如果测试连接提示 CORS，请关闭本页并双击“启动Org清单-WebDAV.cmd”。"
+        "如果测试连接提示 CORS，请关闭本页并双击“OrglistWebDAV.cmd”。"
     }
     function setWebdavStatus(text,error=false){
       $("webdavStatus").textContent=text;$("webdavStatus").className=`webdavStatus ${error?"error":"info"}${text?" show":""}`
@@ -1982,10 +1998,14 @@ print("hello")
       return {format:"org-checklist-config-v1",exportedAt:new Date().toISOString(),values}
     }
     function exportConfiguration(){
-      const text=JSON.stringify(buildConfigurationExport(),null,2),url=URL.createObjectURL(
-        new Blob([text],{type:"application/json;charset=utf-8"}));
-      const anchor=document.createElement("a");anchor.href=url;
-      anchor.download=`org-checklist-config-${today()}.json`;document.body.appendChild(anchor);
+      const text=JSON.stringify(buildConfigurationExport(),null,2),name=`org-checklist-config-${today()}.json`;
+      if(androidWebdavActive()&&typeof window.AndroidWebDav?.saveTextFile==="function"){
+        try{window.AndroidWebDav.saveTextFile(name,"application/json",text);
+          setNotice("已打开系统保存窗口；WebDAV 密码和文件内容不会写入备份。");return
+        }catch(error){setNotice(`无法打开系统保存窗口：${error?.message||error}`);return}
+      }
+      const url=URL.createObjectURL(new Blob([text],{type:"application/json;charset=utf-8"}));
+      const anchor=document.createElement("a");anchor.href=url;anchor.download=name;document.body.appendChild(anchor);
       anchor.click();anchor.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
       setNotice("配置已导出；WebDAV 密码和文件内容未包含在备份中。")
     }
@@ -2020,7 +2040,7 @@ print("hello")
         await fetch(requestUrl,{...options,headers,credentials:"omit"})}
       catch(error){throw new Error(android?`Android WebDAV 连接失败：${error?.message||"请检查网络、地址和账号。"}`:
         bridge?"本地桥接无法访问 WebDAV，请检查服务器地址、网络和账号。":
-        "浏览器阻止了 WebDAV 直连（通常是 CORS）。请双击同目录的“启动Org清单-WebDAV.cmd”，在自动打开的新页面中重试。")}
+        "浏览器阻止了 WebDAV 直连（通常是 CORS）。请双击同目录的“OrglistWebDAV.cmd”，在自动打开的新页面中重试。")}
       if(!response.ok){
         const detail=(await response.text()).trim().slice(0,240);
         throw new Error(`WebDAV 返回 ${response.status} ${response.statusText||""}${detail?`：${detail}`:""}`.trim())
@@ -4181,7 +4201,9 @@ print("hello")
       const option=select.options[Number(button.dataset.apkOption)];if(!option||option.disabled)return;
       select.selectedIndex=Number(button.dataset.apkOption);select.dispatchEvent(new Event("change",{bubbles:true}));closeApkSelect()
     };
-    document.addEventListener("pointerdown",interceptApkSelect,true);
+    document.addEventListener("pointerdown",beginApkSelect,true);
+    document.addEventListener("pointerup",finishApkSelect,true);
+    document.addEventListener("pointercancel",()=>{state.apkSelectPending=null},true);
     document.addEventListener("click",interceptApkSelect,true);
     const navigationClickSelector="[data-view],[data-file],[data-custom],[data-hier],[data-crumb],[data-task]," +
       "[data-task-detail],[data-detail],[data-tag],[data-calendar-mode],#globalMode,#hierMode,#calendarPrev,#calendarNext,#calendarToday";

@@ -1,17 +1,17 @@
 # Org 清单本地工作台使用说明
 
-主程序：[`Org清单-本地版.html`](Org清单-本地版.html)
+主程序：[`Orglist.html`](Orglist.html)
 
 这是一个读取和管理 Org Mode 计划清单的单文件网页。默认完全在本地运行，不需要登录账号，也不会主动上传 Org 文件。
 
-Android 手机可直接安装 [`Org清单-Android.apk`](Org清单-Android.apk)，详细步骤见
+Android 手机可直接安装 [`OrglistAndroid.apk`](OrglistAndroid.apk)，详细步骤见
 [`README-Android.md`](README-Android.md)。
 
 Android APK 当前为 `1.1.0`。本次完成状态、连续写回、移动、手机四象限和手机 Vim 修正先更新在本地 HTML；重新打包 APK 后才会进入 Android App。
 
 ## 1. 快速开始
 
-1. 双击打开 `Org清单-本地版.html`。
+1. 双击打开 `Orglist.html`。
 2. 点击左侧“打开 Org 文件夹”。
 3. 选择存放 `.org` 文件的文件夹，并允许浏览器读取文件。
 4. 如果浏览器不支持选择文件夹，可使用“选择一个或多个文件”。
@@ -210,7 +210,7 @@ NEXT 联系面试单位 下周一 #面试
 
 网页直接连接远程 WebDAV 时，常因浏览器 CORS 安全限制失败。项目提供本地桥接：
 
-1. 双击 `启动Org清单-WebDAV.cmd`。
+1. 双击 `OrglistWebDAV.cmd`。
 2. 保持弹出的命令窗口打开。
 3. 浏览器会自动打开桥接页面。
 4. 进入“设置 → WebDAV”。
@@ -229,7 +229,7 @@ WebDAV 会递归扫描子文件夹，默认最多 4 层、80 个目录、500 个
 
 ### 手机独立使用、电脑关机
 
-Android 用户可以安装同目录的 `Org清单-Android.apk`。Android App 内置原生 WebDAV 网络桥接，打开 App 后直接连接 HTTPS WebDAV，不需要电脑、CMD、同一 Wi-Fi 或云端网页代理。App 只在使用时联网，不需要常驻后台。
+Android 用户可以安装同目录的 `OrglistAndroid.apk`。Android App 内置原生 WebDAV 网络桥接，打开 App 后直接连接 HTTPS WebDAV，不需要电脑、CMD、同一 Wi-Fi 或云端网页代理。App 只在使用时联网，不需要常驻后台。
 
 安装和配置请阅读 [`README-Android.md`](README-Android.md)。
 
@@ -276,7 +276,7 @@ Nextcloud 原生支持 WebDAV，也建议为第三方客户端创建可撤销的
 
 ### WebDAV 提示 CORS
 
-电脑端使用 `启动Org清单-WebDAV.cmd`。手机独立使用则需要云端代理、NAS 代理，或由 WebDAV 服务器显式允许网页来源。
+电脑端使用 `OrglistWebDAV.cmd`。手机独立使用则需要云端代理、NAS 代理，或由 WebDAV 服务器显式允许网页来源。
 
 ### 修改后刷新页面内容恢复
 

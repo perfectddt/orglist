@@ -15,7 +15,7 @@ from typing import Dict, Optional, Tuple
 
 
 FIRST_PORT = 8765
-HTML_NAME = "Org清单-本地版.html"
+HTML_NAME = "Orglist.html"
 BASE_DIR = Path(__file__).resolve().parent
 HTML_PATH = BASE_DIR / HTML_NAME
 MAX_BODY = 25 * 1024 * 1024
