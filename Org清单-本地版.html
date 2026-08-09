@@ -53,9 +53,6 @@
     .sideHeading{color:var(--muted);font-size:13px;letter-spacing:.055em;text-transform:none}
     .sideSections{flex:1 1 auto;min-height:0;overflow:auto;scrollbar-width:thin}.sideSection{position:relative;
       border:1px solid transparent;border-radius:9px;transition:opacity .15s,border-color .15s,transform .15s}
-    .sectionDragHandle{cursor:grab;user-select:none}.sectionDragHandle:active{cursor:grabbing}
-    .sideSection.dragging{opacity:.38}.sideSection.dragBefore{border-top-color:var(--accent)}
-    .sideSection.dragAfter{border-bottom-color:var(--accent)}
     .navItem,.fileItem{display:flex;align-items:center;width:100%;min-width:0;border:0;
       background:transparent;color:var(--muted);border-radius:8px;text-align:left}
     .navItem{gap:10px;min-height:36px;padding:8px 9px;font-size:13px}
@@ -67,14 +64,9 @@
       color:var(--muted);font-size:12px}.navItem.active .navIcon{color:var(--accent)}
     .navName,.fileName{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .count{color:var(--muted2);font-size:10px;font-style:normal;font-variant-numeric:tabular-nums}
-    .itemDragHandle{display:grid;place-items:center;flex:0 0 11px;width:11px;color:var(--muted2);
-      cursor:grab;font-size:9px;opacity:.35;user-select:none}.itemDragHandle:active{cursor:grabbing}
-    .navItem:hover .itemDragHandle,.fileItem:hover .itemDragHandle,.customItem:hover .itemDragHandle{opacity:1}
-    .sortableItem.dragging{opacity:.35}.sortableItem.dragBefore{box-shadow:inset 0 2px 0 var(--accent)}
-    .sortableItem.dragAfter{box-shadow:inset 0 -2px 0 var(--accent)}
     .files{min-height:0;overflow:auto;scrollbar-width:thin}
     .history{max-height:142px;overflow:auto;scrollbar-width:thin}
-    .historyItem{display:grid;grid-template-columns:18px minmax(0,1fr) 22px;gap:7px;align-items:center;
+    .historyItem{display:grid;grid-template-columns:18px minmax(0,1fr) 22px 22px;gap:7px;align-items:center;
       width:100%;min-height:37px;padding:6px 7px;color:var(--muted);background:transparent;
       border:0;border-radius:8px;text-align:left}
     .historyItem:hover{color:var(--text);background:var(--panel)}
@@ -83,12 +75,14 @@
     .historyText{min-width:0}.historyText strong,.historyText small{display:block;overflow:hidden;
       text-overflow:ellipsis;white-space:nowrap}.historyText strong{color:inherit;font-size:10px}
     .historyText small{margin-top:2px;color:var(--muted2);font-size:8px}
-    .historyRemove{display:grid;place-items:center;width:22px;height:22px;padding:0;color:var(--muted2);
+    .historyDefault,.historyRemove{display:grid;place-items:center;width:22px;height:22px;padding:0;color:var(--muted2);
       background:transparent;border:0;border-radius:5px}.historyRemove:hover{color:var(--red);background:var(--redSoft)}
+    .historyDefault{font-size:13px}.historyDefault:hover,.historyDefault.active{color:var(--accent);
+      background:var(--accentSoft)}.historyItem.isDefault{background:color-mix(in srgb,var(--accentSoft) 52%,transparent)}
     .clearHistory{padding:0;color:var(--muted2);background:transparent;border:0;font-size:9px;
       font-weight:700;text-transform:none}.clearHistory:hover{color:var(--red)}
     .customLists{max-height:126px;overflow:auto;scrollbar-width:thin}
-    .customItem{display:grid;grid-template-columns:11px 18px minmax(0,1fr) 22px;gap:7px;align-items:center;
+    .customItem{display:grid;grid-template-columns:18px minmax(0,1fr) 22px;gap:7px;align-items:center;
       width:100%;min-height:34px;padding:6px 7px;color:var(--muted);background:transparent;
       border:0;border-radius:8px;text-align:left}
     .customItem:hover,.customItem.active{color:var(--text);background:var(--panel)}
@@ -314,8 +308,11 @@
       border:0;text-align:left}.calendarDay:hover{background:var(--soft)}.calendarDay.outside{color:var(--muted2);background:var(--soft)}
     .calendarDay.todayCell{box-shadow:inset 0 0 0 2px var(--accent)}.dayTop{display:flex;align-items:center;
       justify-content:space-between;gap:5px}.dayNumber{font-size:15px;font-weight:850;line-height:1}
-    .dayCount{display:grid;place-items:center;min-width:20px;height:20px;padding:0 5px;color:#fff;
-      background:var(--accent);border-radius:99px;font-size:8px;font-weight:850}
+    .dayCount{display:inline-flex;align-items:center;justify-content:center;min-width:0;height:auto;padding:0;
+      font-size:10px;line-height:1;letter-spacing:.1px}.dayCountOpen{color:var(--muted2);font-weight:650}
+    .dayCountSlash{padding:0 2px 0 1px;color:var(--muted2);opacity:.72}.dayCountTotal{display:inline-flex;
+      align-items:center;justify-content:center;min-width:24px;height:22px;padding:0 6px;color:#fff;background:var(--accent);
+      border-radius:99px;font-size:13px;font-weight:950;line-height:1;font-variant-numeric:tabular-nums}
     .dayTasks{display:grid;gap:4px;margin-top:7px}.dayTask{overflow:hidden;padding:3px 5px;color:var(--blue);
       background:var(--blueSoft);border-radius:4px;font-size:8px;text-overflow:ellipsis;white-space:nowrap}
     .yearGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}.yearMonth{
@@ -386,7 +383,8 @@
       color:var(--muted);font-size:9px;white-space:nowrap}
     .hierPreview{overflow:hidden;max-width:330px;text-overflow:ellipsis}
     .hierTail{display:flex;align-items:center;gap:10px}.childCount{padding:5px 8px;color:var(--blue);
-      background:var(--blueSoft);border-radius:6px;font-size:9px;font-weight:700}
+      background:var(--blueSoft);border-radius:6px;font-size:9px;font-weight:700}.childOpenCount{margin-left:3px;
+      color:var(--accent);font-size:10px;font-weight:900;font-variant-numeric:tabular-nums}
     .hierArrow{color:var(--accent);font-size:18px}.hierDetail{padding:5px 7px;color:var(--muted);
       background:transparent;border:1px solid var(--line);border-radius:6px;font-size:9px}
     .hierDetail:hover{color:var(--accent);border-color:var(--accent)}
@@ -436,6 +434,18 @@
       background:rgba(20,19,17,.42)}.modalBackdrop.show{display:grid}
     .modal{width:min(720px,96vw);max-height:min(760px,90vh);overflow:auto;background:var(--panel);
       border:1px solid var(--line);border-radius:16px;box-shadow:0 28px 80px rgba(0,0,0,.24)}
+    .apkSelectBackdrop{position:fixed;z-index:240;inset:0;display:none;align-items:flex-end;
+      justify-content:center;background:rgba(20,19,17,.38)}.apkSelectBackdrop.show{display:flex}
+    .apkSelectSheet{width:min(520px,100%);max-height:min(62vh,520px);display:flex;flex-direction:column;
+      overflow:hidden;background:var(--panel);border:1px solid var(--line);border-radius:16px 16px 0 0;
+      box-shadow:0 -18px 60px rgba(0,0,0,.2)}
+    .apkSelectHead{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;
+      border-bottom:1px solid var(--line)}.apkSelectHead strong{font-size:12px}.apkSelectHead button{
+      width:28px;height:28px;color:var(--muted);background:var(--soft);border:0;border-radius:7px;font-size:15px}
+    .apkSelectOptions{padding:6px;overflow:auto}.apkSelectOption{display:block;width:100%;padding:9px 11px;
+      color:var(--text);background:transparent;border:0;border-radius:8px;font-size:12px;line-height:1.3;
+      text-align:left}.apkSelectOption+ .apkSelectOption{margin-top:2px}.apkSelectOption.selected{
+      color:var(--accent);background:var(--accentSoft);font-weight:800}.apkSelectOption:disabled{opacity:.42}
     .modalHead{position:sticky;z-index:1;top:0;display:flex;align-items:center;justify-content:space-between;
       padding:18px 20px;background:var(--panel);border-bottom:1px solid var(--line)}
     .modalHead h2{margin:0;font:520 21px Georgia,"Songti SC",serif}.modalBody{padding:20px}
@@ -562,12 +572,30 @@
     .smartChoiceGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
     .smartChoice{display:flex;align-items:center;gap:9px;padding:10px 11px;background:var(--soft);
       border:1px solid var(--line);border-radius:9px;font-size:10px}.smartChoice input{accent-color:var(--accent)}
-    .settingsSection{padding:0 0 20px}.settingsSection+.settingsSection{padding-top:20px;border-top:1px solid var(--line)}
+    .settingsDialog{width:min(980px,96vw);height:min(800px,90vh);max-height:min(800px,90vh);overflow:hidden;
+      display:flex;flex-direction:column}.settingsLayout{display:grid;grid-template-columns:170px minmax(0,1fr);
+      flex:1;min-height:0}.settingsNav{min-height:0;padding:14px 10px;overflow:auto;background:var(--soft);
+      border-right:1px solid var(--line)}.settingsNav button{display:flex;align-items:center;width:100%;margin:0 0 4px;
+      padding:9px 10px;color:var(--muted);background:transparent;border:0;border-radius:8px;font-size:10px;
+      font-weight:750;text-align:left}.settingsNav button:hover{color:var(--accent);background:var(--accentSoft)}
+    .settingsNav button.active{color:#fff;background:var(--accent)}.settingsContent{min-height:0;overflow:auto;
+      scroll-behavior:smooth}.settingsSection{scroll-margin-top:18px;padding:0 0 20px}
+    .settingsSection+.settingsSection{padding-top:20px;border-top:1px solid var(--line)}
     .settingsSection h3{margin:0 0 6px;font-size:12px}.settingsHint{margin:0 0 13px;color:var(--muted);
       font-size:9px;line-height:1.65}.settingsGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
     .settingsGrid .full{grid-column:1/-1}.settingsCheck{display:flex;align-items:flex-start;gap:9px;
       padding:10px 11px;background:var(--soft);border:1px solid var(--line);border-radius:8px;
       color:var(--muted);font-size:9px;line-height:1.55}.settingsCheck input{margin-top:2px;accent-color:var(--accent)}
+    .settingsOrderGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.settingsOrderGroup{
+      min-width:0;padding:11px;background:var(--soft);border:1px solid var(--line);border-radius:10px}
+    .settingsOrderGroup h4{margin:0 0 9px;font-size:10px}.settingsOrderList{display:grid;gap:5px}.settingsOrderRow{
+      display:grid;grid-template-columns:minmax(0,1fr) 26px 26px;align-items:center;gap:4px;min-height:32px;
+      padding:5px 6px 5px 9px;background:var(--panel);border:1px solid var(--line);border-radius:7px}
+    .settingsOrderName{min-width:0;overflow:hidden;font-size:9px;text-overflow:ellipsis;white-space:nowrap}
+    .settingsOrderName small{margin-left:4px;color:var(--muted2);font-size:7px}.settingsOrderMove{display:grid;
+      place-items:center;width:26px;height:24px;padding:0;color:var(--muted);background:var(--soft);
+      border:1px solid var(--line);border-radius:6px;font-size:11px;font-weight:900}.settingsOrderMove:hover:not(:disabled){
+      color:var(--accent);border-color:var(--accent)}.settingsOrderMove:disabled{opacity:.25}
     .webdavActions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.webdavStatus{
       display:none;margin-top:10px;padding:9px 11px;border-radius:8px;font-size:9px;line-height:1.6}
     .bridgeMode{display:flex;align-items:flex-start;gap:9px;margin:0 0 12px;padding:10px 11px;
@@ -626,9 +654,13 @@
       .calendarMonthScroll{overflow:visible}.monthGrid,.monthWeekdays{min-width:0}
       .monthWeekdays{font-size:7px}.monthWeekdays span{padding:6px 0}.calendarDay{min-height:70px;padding:5px}
       .dayTop{align-items:flex-start;flex-direction:column;gap:3px}.dayNumber{font-size:13px}.dayCount{
-        min-width:16px;height:16px;padding:0 3px;font-size:7px}.dayTasks{display:none}
+        min-width:0;height:auto;padding:0;font-size:9px}.dayCountTotal{min-width:22px;height:20px;padding:0 5px;font-size:11px}.dayTasks{display:none}
       .calendarTitleRow{align-items:flex-start}.calendarTitleRow h2{font-size:18px}.calendarTitleRow span{
-        max-width:150px;font-size:8px;text-align:right}}
+        max-width:150px;font-size:8px;text-align:right}.settingsDialog{width:min(720px,96vw)}
+      .settingsOrderGrid{grid-template-columns:1fr}
+      .settingsLayout{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}.settingsNav{display:flex;gap:5px;
+        padding:9px 12px;overflow-x:auto;overflow-y:hidden;border-right:0;border-bottom:1px solid var(--line);
+        scrollbar-width:thin}.settingsNav button{flex:0 0 auto;width:auto;margin:0;padding:7px 10px;white-space:nowrap}}
     @media(max-width:460px){.filters,.settingsGrid{grid-template-columns:1fr}.settingsGrid .full{grid-column:1}
       .fields,.smartChoiceGrid,.visualForm{grid-template-columns:1fr}
       .editorFindBar{grid-template-columns:repeat(4,1fr)}.editorFindBar input{grid-column:1/-1}
@@ -636,7 +668,8 @@
       .orgGuideGrid{grid-template-columns:1fr}.orgGuideGrid .guideCode{border-right:0}
       .orgGuideGrid div:nth-last-child(-n+2){border-bottom:1px solid var(--line)}.orgGuideGrid div:last-child{border-bottom:0}
       .task{padding:15px 13px}.path{display:none}.yearGrid{grid-template-columns:1fr}
-      .calendarDay{min-height:60px;padding:4px}.dayNumber{font-size:12px}.dayCount{min-width:14px;height:14px;font-size:6px}
+      .calendarDay{min-height:60px;padding:4px}.dayNumber{font-size:12px}.dayCount{min-width:0;height:auto;padding:0;font-size:8px}
+      .dayCountTotal{min-width:20px;height:18px;padding:0 4px;font-size:10px}
       .weekGrid{gap:6px}.weekDay,.weekPicker{min-height:200px;padding:9px}.calendarTaskButton{padding:6px;font-size:8px}}
   </style>
 </head>
@@ -655,21 +688,21 @@
       <button class="btn secondary full mt8" id="openFiles">选择一个或多个文件</button>
       <div class="sideSections" id="sideSections">
         <section class="sideSection" data-side-section="smart">
-          <div class="label labelRow"><span class="sectionDragHandle sideHeading" draggable="true" data-section-handle="smart">⋮⋮ 智能清单</span><button class="smartSettings" id="smartSettings">显示设置</button></div>
+          <div class="label labelRow"><span class="sideHeading">智能清单</span><button class="smartSettings" id="smartSettings">显示设置</button></div>
           <nav id="nav"></nav>
         </section>
         <section class="sideSection" data-side-section="custom">
-          <div class="label labelRow"><span class="sectionDragHandle sideHeading" draggable="true" data-section-handle="custom">⋮⋮ 自定义清单</span><button class="saveList" id="saveCustom">＋ 保存当前</button></div>
+          <div class="label labelRow"><span class="sideHeading">自定义清单</span><button class="saveList" id="saveCustom">＋ 保存当前</button></div>
           <div class="customLists" id="customLists"></div>
         </section>
         <section class="sideSection" data-side-section="files">
-          <div class="label labelRow"><span class="sectionDragHandle sideHeading" draggable="true" data-section-handle="files">⋮⋮ 文件</span><span id="fileTotal">0</span></div>
+          <div class="label labelRow"><span class="sideHeading">文件</span><span id="fileTotal">0</span></div>
           <div class="files" id="files"></div>
         </section>
       </div>
       <div class="label labelRow"><span class="sideHeading">最近打开</span><button class="clearHistory" id="clearHistory">清除</button></div>
       <div class="history" id="history"></div>
-      <button class="sideSettingsButton" id="settings"><span aria-hidden="true">⚙</span><span>设置与 WebDAV</span></button>
+      <button class="sideSettingsButton" id="settings"><span aria-hidden="true">⚙</span><span>设置</span></button>
     </aside>
     <button class="scrim" id="scrim" aria-label="关闭侧栏"></button>
     <section class="workspace">
@@ -798,6 +831,12 @@
         </div></aside>
       </div>
     </section>
+  </div>
+  <div class="apkSelectBackdrop" id="apkSelectBackdrop" role="dialog" aria-modal="true" aria-labelledby="apkSelectTitle">
+    <div class="apkSelectSheet">
+      <div class="apkSelectHead"><strong id="apkSelectTitle">请选择</strong><button id="closeApkSelect" aria-label="关闭">×</button></div>
+      <div class="apkSelectOptions" id="apkSelectOptions"></div>
+    </div>
   </div>
   <div class="modalBackdrop" id="syntaxModal" role="dialog" aria-modal="true" aria-labelledby="syntaxTitle">
     <div class="modal">
@@ -1046,10 +1085,21 @@ print("hello")
     </div>
   </div>
   <div class="modalBackdrop" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
-    <div class="modal">
+    <div class="modal settingsDialog">
       <div class="modalHead"><h2 id="settingsTitle">设置</h2><button class="iconBtn" id="closeSettings" aria-label="关闭">×</button></div>
-      <div class="modalBody">
-        <section class="settingsSection">
+      <div class="settingsLayout">
+        <nav class="settingsNav" id="settingsNav" aria-label="设置目录">
+          <button class="active" data-settings-target="settings-display" aria-current="true">显示与点击行为</button>
+          <button data-settings-target="settings-sidebar-order">侧栏排序</button>
+          <button data-settings-target="settings-defaults">默认筛选条件</button>
+          <button data-settings-target="settings-quadrant">四象限默认定义</button>
+          <button data-settings-target="settings-startup">启动页</button>
+          <button data-settings-target="settings-statuses">Org 自定义状态</button>
+          <button data-settings-target="settings-backup">配置备份</button>
+          <button data-settings-target="settings-webdav">WebDAV</button>
+        </nav>
+        <div class="modalBody settingsContent" id="settingsContent">
+        <section class="settingsSection" id="settings-display">
           <h3>显示与点击行为</h3>
           <p class="settingsHint">这些设置只保存在当前浏览器，不会写进 Org 文件。</p>
           <div class="settingsGrid">
@@ -1065,11 +1115,21 @@ print("hello")
           <div class="offlineInfo" style="margin-top:12px"><span class="lockMark">▣</span><div><strong>本地与隐私</strong>
             文件不会上传；只有你明确点击“写回原文件”时才会修改磁盘或 WebDAV 文件。</div></div>
         </section>
-        <section class="settingsSection">
+        <section class="settingsSection" id="settings-sidebar-order">
+          <h3>侧栏排序</h3>
+          <p class="settingsHint">使用上移、下移按钮调整顺序，修改会立即保存。侧栏中不再支持拖拽，避免浏览任务时误触。</p>
+          <div class="settingsOrderGrid">
+            <div class="settingsOrderGroup"><h4>大区块</h4><div class="settingsOrderList" id="settingsSideOrder"></div></div>
+            <div class="settingsOrderGroup"><h4>智能清单</h4><div class="settingsOrderList" id="settingsSmartOrder"></div></div>
+            <div class="settingsOrderGroup"><h4>自定义清单</h4><div class="settingsOrderList" id="settingsCustomOrder"></div></div>
+            <div class="settingsOrderGroup"><h4>文件</h4><div class="settingsOrderList" id="settingsFileOrder"></div></div>
+          </div>
+        </section>
+        <section class="settingsSection" id="settings-defaults">
           <h3>默认筛选条件</h3>
-          <p class="settingsHint">每次重新打开一批 Org 文件时自动采用这些条件。</p>
+          <p class="settingsHint">每次重新打开一批 Org 文件时自动采用这些条件。即使设置了启动页，默认状态、优先级、排序、日期字段和布局仍优先于启动页中曾保存的筛选。</p>
           <div class="settingsGrid">
-            <label class="visualField"><span>默认清单</span><select id="defaultView">
+            <label class="visualField"><span>默认清单（未设置启动页时）</span><select id="defaultView">
               <option value="open">待办</option><option value="today">今天</option><option value="upcoming">未来</option>
               <option value="overdue">已逾期</option><option value="no-date">无日期</option>
               <option value="completed">已完成</option><option value="all">全部条目</option>
@@ -1091,8 +1151,10 @@ print("hello")
               <option value="1">一列</option><option value="2">两列</option>
             </select></label>
           </div>
+          <div class="configActions" style="margin-top:12px"><button class="btn primary" id="applyDefaultFiltersNow">保存为默认并立即应用</button></div>
+          <div class="configNote" id="defaultFilterStartupHint"></div>
         </section>
-        <section class="settingsSection">
+        <section class="settingsSection" id="settings-quadrant">
           <h3>四象限默认定义</h3>
           <p class="settingsHint">这里保存的规则会作为四象限的默认判断方式；进入四象限后仍可临时调整。</p>
           <div class="settingsGrid">
@@ -1108,14 +1170,14 @@ print("hello")
             </select></label>
           </div>
         </section>
-        <section class="settingsSection">
+        <section class="settingsSection" id="settings-startup">
           <h3>启动页</h3>
-          <p class="settingsHint">可把当前所在的全局清单、层级位置或日历视图连同筛选条件设为下次打开文件后的首页。</p>
+          <p class="settingsHint">启动页只决定打开的视图、文件、层级位置或日历位置；状态、优先级、排序、日期字段和布局始终采用“默认筛选条件”。</p>
           <div class="configActions"><button class="btn primary" id="setStartupCurrent">将当前页设为启动页</button>
             <button class="btn secondary" id="clearStartup">恢复默认启动页</button></div>
           <div class="configNote" id="startupSummary">当前使用“默认筛选条件”作为启动页。</div>
         </section>
-        <section class="settingsSection">
+        <section class="settingsSection" id="settings-statuses">
           <h3>Org 自定义状态</h3>
           <p class="settingsHint">默认状态为 TODO、NEXT、DONE、CNCL。状态只能使用大写字母、数字、下划线或连字符。</p>
           <div class="settingsGrid">
@@ -1123,14 +1185,14 @@ print("hello")
             <label class="visualField full"><span>自定义已完成状态</span><input id="customDoneStatuses" autocomplete="off" placeholder="例如：ARCHIVED REJECTED"></label>
           </div>
         </section>
-        <section class="settingsSection">
+        <section class="settingsSection" id="settings-backup">
           <h3>配置备份</h3>
           <p class="settingsHint">导出搜索历史、自定义清单、显示设置、排序、状态、最近打开位置及 WebDAV 连接记录。</p>
           <div class="configActions"><button class="btn secondary" id="exportConfig">导出配置</button>
             <button class="btn secondary" id="importConfig">导入配置</button></div>
           <div class="configNote">为安全起见，导出的 WebDAV 记录不包含密码；文件访问权限和文件内容也不会被导出。</div>
         </section>
-        <section class="settingsSection">
+        <section class="settingsSection" id="settings-webdav">
           <h3>WebDAV</h3>
           <p class="settingsHint">从 WebDAV 文件夹读取全部 .org 文件并写回。电脑使用“启动Org清单-WebDAV.cmd”；手机和电脑连接同一 Wi‑Fi 后，使用“启动Org清单-手机WebDAV.cmd”，再在手机打开窗口显示的地址。</p>
           <div class="bridgeMode" id="webdavMode"><span class="bridgeDot"></span><div><strong id="webdavModeTitle">直连模式</strong>
@@ -1152,6 +1214,7 @@ print("hello")
         </section>
         <div class="modalActions"><button class="btn secondary" id="cancelSettings">取消</button>
           <button class="btn primary" id="saveSettings">保存设置与连接记录</button></div>
+        </div>
       </div>
     </div>
   </div>
@@ -1170,7 +1233,7 @@ print("hello")
     ];
     const state = {tasks:[],files:[],sources:[],mode:"global",view:"open",file:"all",status:"ALL",priority:"ALL",tag:"ALL",
       sort:"date",dateField:"date",dateFrom:"",dateTo:"",query:"",selected:null,hierParent:null,
-      columns:"2",quadrantImportant:"A",quadrantUrgent:"3",quadrantDefaults:{important:"A",urgent:"3"},visible:100,recent:[],
+      columns:"2",quadrantImportant:"A",quadrantUrgent:"3",quadrantDefaults:{important:"A",urgent:"3"},visible:100,recent:[],defaultRecentId:null,
       searchHistory:[],custom:[],customActive:null,smartVisible:[],calendarMode:"month",
       calendarCursor:"",calendarDateRule:"ACTION",dayStart:7,dayEnd:22,
       sideOrder:["smart","custom","files"],smartOrder:[],fileOrder:["all"],editMode:"plain",editorScale:100,
@@ -1180,8 +1243,10 @@ print("hello")
       customOpenStatuses:[],customDoneStatuses:[],defaultFilters:{view:"open",status:"ALL",priority:"ALL",
         sort:"date",dateField:"date",columns:"2"},batchMode:false,batchSelected:[],batchSources:[],
       suppressTaskClickUntil:0,startupPage:null,vimMode:false,vimState:"insert",vimPending:"",
-      vimLastKey:"",vimLastKeyAt:0,vimInputRestore:null,vimVisualAnchor:null,vimVisualCursor:null};
-    const HISTORY_KEY="org-task-recent-sources-v2",HISTORY_DB="org-task-local-history",HISTORY_STORE="handles";
+      vimLastKey:"",vimLastKeyAt:0,vimInputRestore:null,vimInputGuard:null,vimVisualAnchor:null,vimVisualCursor:null,
+      apkSelectTarget:null};
+    const HISTORY_KEY="org-task-recent-sources-v2",HISTORY_DEFAULT_KEY="org-task-default-recent-v1",
+      HISTORY_DB="org-task-local-history",HISTORY_STORE="handles";
     const CUSTOM_KEY="org-task-custom-lists-v1",LAYOUT_KEY="org-task-list-columns-v1",
       SEARCH_HISTORY_KEY="org-task-search-history-v1",QUADRANT_KEY="org-task-quadrant-rules-v1",
       SMART_KEY="org-task-smart-visibility-v1",CALENDAR_KEY="org-task-calendar-settings-v1",
@@ -1190,7 +1255,7 @@ print("hello")
       FILE_ORDER_KEY="org-task-file-order-v1",DISPLAY_KEY="org-task-display-settings-v1",
       WEBDAV_KEY="org-task-webdav-profiles-v1",STATUS_KEY="org-task-custom-status-v1",
       STARTUP_KEY="org-task-startup-page-v1",VIM_KEY="org-task-vim-mode-v1";
-    let searchHistoryTimer=null,draggedSideSection=null;
+    let searchHistoryTimer=null;
     const $ = id => document.getElementById(id);
     const today = () => {
       const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
@@ -1566,7 +1631,7 @@ print("hello")
           line:h.lineIndex+1,level:h.level,title:p.title,status:p.status,priority:p.priority,tags:p.tags,
           properties:props,body:bodyText,parentPath:h.parents,deadline,scheduled,closed,orgDate,date,
           deadlineTime,scheduledTime,closedTime,orgTime,time:deadlineTime||scheduledTime||orgTime||closedTime,hasChildren,
-          parentUid:null,childCount:0,isGroup:p.status==="NONE"&&hasChildren&&!bodyText&&!deadline&&!scheduled};
+          parentUid:null,childCount:0,childOpenCount:0,isGroup:p.status==="NONE"&&hasChildren&&!bodyText&&!deadline&&!scheduled};
       });
       const levelStack=[];
       parsed.forEach(task=>{
@@ -1575,7 +1640,9 @@ print("hello")
         levelStack.push({uid:task.uid,level:task.level});
       });
       const byId=new Map(parsed.map(task=>[task.uid,task]));
-      parsed.forEach(task=>{if(task.parentUid&&byId.has(task.parentUid))byId.get(task.parentUid).childCount++});
+      parsed.forEach(task=>{if(task.parentUid&&byId.has(task.parentUid)){
+        const parent=byId.get(task.parentUid);parent.childCount++;if(!isDone(task))parent.childOpenCount++
+      }});
       return parsed;
     }
     async function decode(file) {
@@ -1618,6 +1685,10 @@ print("hello")
     function loadRecent(){
       try{const saved=JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]");state.recent=Array.isArray(saved)?saved.slice(0,8):[]}
       catch(_){state.recent=[]}
+      try{state.defaultRecentId=localStorage.getItem(HISTORY_DEFAULT_KEY)||null}catch(_){state.defaultRecentId=null}
+      if(state.defaultRecentId&&!state.recent.some(item=>item.id===state.defaultRecentId)){
+        state.defaultRecentId=null;try{localStorage.removeItem(HISTORY_DEFAULT_KEY)}catch(_){}
+      }
     }
     function loadPreferences(){
       try{const saved=JSON.parse(localStorage.getItem(CUSTOM_KEY)||"[]");state.custom=Array.isArray(saved)?saved.slice(0,30):[]}
@@ -1734,6 +1805,25 @@ print("hello")
     function androidWebdavActive(){
       return typeof window.AndroidWebDav?.request==="function"
     }
+    function apkSelectLabel(select){
+      return select.getAttribute("aria-label")||select.closest("label")?.childNodes?.[0]?.textContent?.trim()||"请选择"
+    }
+    function closeApkSelect(){
+      state.apkSelectTarget=null;$("apkSelectBackdrop").classList.remove("show");$("apkSelectOptions").innerHTML=""
+    }
+    function openApkSelect(select){
+      if(!androidWebdavActive()||!select||select.disabled)return;
+      state.apkSelectTarget=select;$("apkSelectTitle").textContent=apkSelectLabel(select);
+      $("apkSelectOptions").innerHTML=[...select.options].map((option,index)=>
+        `<button class="apkSelectOption ${option.selected?"selected":""}" data-apk-option="${index}" ${option.disabled?"disabled":""}>${esc(option.textContent)}</button>`).join("");
+      $("apkSelectBackdrop").classList.add("show");
+      requestAnimationFrame(()=>$("apkSelectOptions").querySelector(".selected")?.scrollIntoView({block:"center"}))
+    }
+    function interceptApkSelect(event){
+      const select=event.target?.closest?.("select");if(!select||!androidWebdavActive())return;
+      event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
+      if(!state.apkSelectTarget)openApkSelect(select)
+    }
     const androidWebdavPending=new Map();
     function androidWebdavFetch(url,options,headers){
       return new Promise((resolve,reject)=>{
@@ -1827,6 +1917,24 @@ print("hello")
         persistWebdavProfiles()
       })
     }
+    function setSettingsNavActive(id){
+      $("settingsNav").querySelectorAll("[data-settings-target]").forEach(button=>{
+        const active=button.dataset.settingsTarget===id;button.classList.toggle("active",active);
+        if(active){button.setAttribute("aria-current","true");button.scrollIntoView({block:"nearest",inline:"nearest"})}
+        else button.removeAttribute("aria-current")
+      })
+    }
+    function navigateSettings(id,behavior="smooth"){
+      const content=$("settingsContent"),target=$(id);if(!content||!target)return;
+      const top=target.getBoundingClientRect().top-content.getBoundingClientRect().top+content.scrollTop;
+      content.scrollTo({top:Math.max(0,top-18),behavior});setSettingsNavActive(id)
+    }
+    function syncSettingsNavFromScroll(){
+      const content=$("settingsContent"),sections=Array.from(content.querySelectorAll(".settingsSection"));
+      const contentTop=content.getBoundingClientRect().top;let current=sections[0];
+      sections.forEach(section=>{if(section.getBoundingClientRect().top<=contentTop+52)current=section});
+      if(current)setSettingsNavActive(current.id)
+    }
     function openSettings(){
       syncStatusSelects();$("filterPreference").value=state.filterPreference;$("detailBehavior").value=state.detailBehavior;
       $("defaultView").value=state.defaultFilters.view;$("defaultStatus").value=state.defaultFilters.status;
@@ -1837,9 +1945,9 @@ print("hello")
       $("customOpenStatuses").value=state.customOpenStatuses.join(" ");
       $("customDoneStatuses").value=state.customDoneStatuses.join(" ");
       renderStartupSummary();
-      setWebdavStatus("");updateWebdavMode();renderWebdavProfiles();
+      setWebdavStatus("");updateWebdavMode();renderWebdavProfiles();renderSettingsOrdering();
       if(state.webdavProfiles.length)fillWebdavProfile(state.webdavProfiles[0]);
-      $("settingsModal").classList.add("show")
+      $("settingsModal").classList.add("show");requestAnimationFrame(()=>navigateSettings("settings-display","auto"))
     }
     function closeSettings(){$("settingsModal").classList.remove("show")}
     function saveSettingsForm(){
@@ -1849,13 +1957,10 @@ print("hello")
         .filter(status=>!state.customOpenStatuses.includes(status));
       refreshStatusWords();
       try{localStorage.setItem(STATUS_KEY,JSON.stringify({open:state.customOpenStatuses,done:state.customDoneStatuses}))}catch(_){}
-      state.defaultFilters={view:$("defaultView").value,status:$("defaultStatus").value,
-        priority:$("defaultPriority").value,sort:$("defaultSort").value,dateField:$("defaultDateField").value,
-        columns:$("defaultColumns").value};
+      state.defaultFilters=readDefaultFiltersForm();
       state.quadrantDefaults={important:$("defaultImportantRule").value,urgent:$("defaultUrgentRule").value};
       state.quadrantImportant=state.quadrantDefaults.important;state.quadrantUrgent=state.quadrantDefaults.urgent;
       try{localStorage.setItem(QUADRANT_KEY,JSON.stringify(state.quadrantDefaults))}catch(_){}
-      if(!["ALL","OPEN","NONE",...configuredStatuses()].includes(state.defaultFilters.status))state.defaultFilters.status="ALL";
       if(!["ALL","OPEN","DONE","NONE",...configuredStatuses()].includes(state.status))state.status="ALL";
       state.filterTouched=false;saveDisplaySettings();syncFilterCollapse(true);
       syncStatusSelects();if(state.sources.length)rebuildFromSources();
@@ -1863,9 +1968,9 @@ print("hello")
       if($("webdavUrl").value.trim()){
         try{saveWebdavProfile(webdavFormConfig())}catch(error){setWebdavStatus(error.message,true);return false}
       }
-      closeSettings();render();setNotice("设置已保存在当前浏览器。");return true
+      closeSettings();render();setNotice("设置已保存；默认筛选条件会优先于启动页曾保存的筛选。");return true
     }
-    const CONFIG_KEYS=[HISTORY_KEY,CUSTOM_KEY,LAYOUT_KEY,SEARCH_HISTORY_KEY,QUADRANT_KEY,SMART_KEY,
+    const CONFIG_KEYS=[HISTORY_KEY,HISTORY_DEFAULT_KEY,CUSTOM_KEY,LAYOUT_KEY,SEARCH_HISTORY_KEY,QUADRANT_KEY,SMART_KEY,
       CALENDAR_KEY,EDITOR_KEY,EDITOR_STYLE_KEY,SIDE_ORDER_KEY,SMART_ORDER_KEY,FILE_ORDER_KEY,
       DISPLAY_KEY,WEBDAV_KEY,STATUS_KEY,STARTUP_KEY,VIM_KEY];
     function buildConfigurationExport(){
@@ -2027,7 +2132,24 @@ print("hello")
       const defaults=state.defaultFilters;
       state.mode="global";state.view=defaults.view;state.status=defaults.status;state.priority=defaults.priority;
       state.sort=defaults.sort;state.dateField=defaults.dateField;state.columns=defaults.columns;
-      state.tag="ALL";state.dateFrom="";state.dateTo="";state.customActive=null;syncFilterControls()
+      state.tag="ALL";state.dateFrom="";state.dateTo="";state.customActive=null;state.hierParent=null;
+      state.selected=null;state.detailOpen=false;state.visible=100;state.navHistory=[];setSearchQuery("");syncFilterControls()
+    }
+    function readDefaultFiltersForm(){
+      const value={view:$("defaultView").value,status:$("defaultStatus").value,
+        priority:$("defaultPriority").value,sort:$("defaultSort").value,dateField:$("defaultDateField").value,
+        columns:$("defaultColumns").value};
+      if(!["open","today","upcoming","overdue","no-date","completed","all"].includes(value.view))value.view="open";
+      if(!["ALL","OPEN","NONE",...configuredStatuses()].includes(value.status))value.status="ALL";
+      if(!["ALL","A","B","C","NONE"].includes(value.priority))value.priority="ALL";
+      if(!["date","priority","source"].includes(value.sort))value.sort="date";
+      if(!["date","deadline","scheduled","closed","orgdate","anydate"].includes(value.dateField))value.dateField="date";
+      value.columns=value.columns==="1"?"1":"2";return value
+    }
+    function applyDefaultFiltersNow(){
+      state.defaultFilters=readDefaultFiltersForm();state.filterTouched=false;saveDisplaySettings();
+      applyDefaultFilters();syncFilterCollapse(true);closeSettings();render();
+      setNotice("默认筛选已保存并应用到当前页面。")
     }
     function currentStartupPage(){
       const file=state.sources.find(source=>source.id===state.file);
@@ -2039,14 +2161,22 @@ print("hello")
         hierParent:parent?{filePath:parent.filePath,line:parent.line,title:parent.title,level:parent.level}:null}
     }
     function startupPageLabel(page=state.startupPage){
-      if(!page)return "当前使用“默认筛选条件”作为启动页。";
+      if(!page)return "当前未设置独立启动页；打开页面和筛选都使用“默认筛选条件”。";
       const view=page.mode==="hierarchy"?"层级浏览":
         page.view==="calendar"?`日历 · ${{year:"年",month:"月",week:"周",day:"日"}[page.calendarMode]||"月"}`:
         (VIEWS.find(item=>item[0]===page.view)?.[2]||"全局清单");
       const file=page.filePath&&page.filePath!=="all"?` · ${page.filePath}`:" · 全部文件";
-      return `当前启动页：${view}${file}${page.query?` · 搜索“${page.query}”`:""}。`
+      return `当前启动页：${view}${file}；筛选使用“默认筛选条件”。`
     }
-    function renderStartupSummary(){if($("startupSummary"))$("startupSummary").textContent=startupPageLabel()}
+    function renderDefaultFilterStartupHint(){
+      if(!$("defaultFilterStartupHint"))return;
+      $("defaultFilterStartupHint").textContent=state.startupPage?
+        "当前已设置独立启动页；它只决定打开的页面和位置。这里的默认筛选条件优先，启动页以前保存的筛选不会覆盖它。":
+        "当前未设置独立启动页；打开的清单和全部筛选都会使用这里的默认值。"
+    }
+    function renderStartupSummary(){
+      if($("startupSummary"))$("startupSummary").textContent=startupPageLabel();renderDefaultFilterStartupHint()
+    }
     function saveCurrentAsStartup(){
       state.startupPage=currentStartupPage();
       try{localStorage.setItem(STARTUP_KEY,JSON.stringify(state.startupPage))}catch(_){}
@@ -2058,18 +2188,16 @@ print("hello")
     }
     function applyStartupPage(){
       const page=state.startupPage;if(!page){applyDefaultFilters();return}
+      const defaults=state.defaultFilters;
       state.mode=page.mode==="hierarchy"?"hierarchy":"global";
       state.view=VIEWS.some(item=>item[0]===page.view)?page.view:state.defaultFilters.view;
-      state.status=["ALL","OPEN","DONE","NONE",...configuredStatuses()].includes(page.status)?page.status:"ALL";
-      state.priority=["ALL","A","B","C","NONE"].includes(page.priority)?page.priority:"ALL";
-      state.sort=["date","priority","source"].includes(page.sort)?page.sort:"date";
-      state.dateField=["date","deadline","scheduled","closed","orgdate","anydate"].includes(page.dateField)?page.dateField:"date";
-      state.dateFrom=page.dateFrom||"";state.dateTo=page.dateTo||"";state.columns=page.columns==="1"?"1":"2";
-      state.query=String(page.query||"");state.customActive=null;state.selected=null;state.detailOpen=false;
+      state.status=defaults.status;state.priority=defaults.priority;state.sort=defaults.sort;
+      state.dateField=defaults.dateField;state.columns=defaults.columns;
+      state.tag="ALL";state.dateFrom="";state.dateTo="";state.query="";
+      state.customActive=null;state.selected=null;state.detailOpen=false;
       if(["year","month","week","day"].includes(page.calendarMode))state.calendarMode=page.calendarMode;
       if(["ACTION","PRIMARY","DEADLINE","SCHEDULED","ANY"].includes(page.calendarDateRule))state.calendarDateRule=page.calendarDateRule;
       const source=state.sources.find(item=>item.path===page.filePath);state.file=source?.id||"all";
-      state.tag=page.tag==="ALL"||state.tasks.some(task=>task.tags.includes(page.tag))?page.tag:"ALL";
       const parent=page.hierParent&&state.tasks.find(task=>task.filePath===page.hierParent.filePath&&
         task.line===page.hierParent.line&&task.level===page.hierParent.level&&task.title===page.hierParent.title);
       state.hierParent=parent?.uid||null;syncFilterControls();$("search").value=state.query
@@ -2079,56 +2207,44 @@ print("hello")
         const section=host.querySelector(`[data-side-section="${key}"]`);if(section)host.appendChild(section)
       })
     }
-    function saveSideOrder(){
-      state.sideOrder=[...$("sideSections").querySelectorAll("[data-side-section]")].map(section=>section.dataset.sideSection);
-      try{localStorage.setItem(SIDE_ORDER_KEY,JSON.stringify(state.sideOrder))}catch(_){}
+    function settingsOrderRows(scope,items){
+      if(!items.length)return '<div class="settingsHint" style="margin:0">当前没有可排序项目。</div>';
+      return items.map((item,index)=>`<div class="settingsOrderRow">
+        <span class="settingsOrderName" title="${esc(item.label)}">${esc(item.label)}${item.note?`<small>${esc(item.note)}</small>`:""}</span>
+        <button class="settingsOrderMove" data-order-scope="${scope}" data-order-key="${esc(item.key)}" data-order-direction="-1" aria-label="上移 ${esc(item.label)}" ${index===0?"disabled":""}>↑</button>
+        <button class="settingsOrderMove" data-order-scope="${scope}" data-order-key="${esc(item.key)}" data-order-direction="1" aria-label="下移 ${esc(item.label)}" ${index===items.length-1?"disabled":""}>↓</button>
+      </div>`).join("")
     }
-    function clearSideDragMarks(){
-      $("sideSections").querySelectorAll(".sideSection").forEach(section=>
-        section.classList.remove("dragging","dragBefore","dragAfter"))
+    function renderSettingsOrdering(){
+      const sideLabels={smart:"智能清单",custom:"自定义清单",files:"文件"};
+      $("settingsSideOrder").innerHTML=settingsOrderRows("side",state.sideOrder.map(key=>({key,label:sideLabels[key]||key})));
+      $("settingsSmartOrder").innerHTML=settingsOrderRows("smart",orderedViews().map(([key,,label])=>
+        ({key,label,note:state.smartVisible.includes(key)?"":"已隐藏"})));
+      $("settingsCustomOrder").innerHTML=settingsOrderRows("custom",state.custom.map(item=>({key:item.id,label:item.name})));
+      const fileEntries=[{path:"all",name:"全部文件"},...state.files],fileMap=new Map(fileEntries.map(item=>[item.path,item]));
+      const fileKeys=[...state.fileOrder.filter(key=>fileMap.has(key)),...fileEntries.map(item=>item.path).filter(key=>!state.fileOrder.includes(key))];
+      $("settingsFileOrder").innerHTML=settingsOrderRows("files",fileKeys.map(key=>({key,label:fileMap.get(key)?.name||key})));
+      $("settingsContent").querySelectorAll("[data-order-direction]").forEach(button=>button.onclick=()=>
+        moveSettingsOrder(button.dataset.orderScope,button.dataset.orderKey,Number(button.dataset.orderDirection)))
     }
-    function initSidebarSorting(){
-      $("sideSections").querySelectorAll("[data-section-handle]").forEach(handle=>handle.addEventListener("dragstart",event=>{
-        draggedSideSection=handle.closest("[data-side-section]");draggedSideSection.classList.add("dragging");
-        event.dataTransfer.effectAllowed="move";event.dataTransfer.setData("text/plain",draggedSideSection.dataset.sideSection)
-      }));
-      $("sideSections").querySelectorAll("[data-side-section]").forEach(section=>{
-        section.addEventListener("dragover",event=>{
-          if(!draggedSideSection||section===draggedSideSection)return;event.preventDefault();
-          clearSideDragMarks();draggedSideSection.classList.add("dragging");
-          const before=event.clientY<section.getBoundingClientRect().top+section.getBoundingClientRect().height/2;
-          section.classList.add(before?"dragBefore":"dragAfter");
-          $("sideSections").insertBefore(draggedSideSection,before?section:section.nextSibling)
-        });
-        section.addEventListener("drop",event=>{event.preventDefault();saveSideOrder();clearSideDragMarks()})
-      });
-      $("sideSections").querySelectorAll("[data-section-handle]").forEach(handle=>handle.addEventListener("dragend",()=>{
-        if(draggedSideSection)saveSideOrder();draggedSideSection=null;clearSideDragMarks()
-      }))
-    }
-    function bindChildSorting(container,itemSelector,dataKey,onSave){
-      let dragged=null;
-      const items=()=>[...container.querySelectorAll(itemSelector)],clear=()=>items().forEach(item=>
-        item.classList.remove("dragging","dragBefore","dragAfter"));
-      container.querySelectorAll("[data-item-handle]").forEach(handle=>{
-        handle.onclick=event=>{event.stopPropagation();event.preventDefault()};
-        handle.addEventListener("dragstart",event=>{
-          event.stopPropagation();dragged=handle.closest(itemSelector);dragged.classList.add("dragging");
-          event.dataTransfer.effectAllowed="move";event.dataTransfer.setData("text/plain",dragged.dataset[dataKey]||"")
-        });
-        handle.addEventListener("dragend",()=>{
-          if(dragged)onSave(items().map(item=>item.dataset[dataKey]));dragged=null;clear()
-        })
-      });
-      items().forEach(item=>{
-        item.addEventListener("dragover",event=>{
-          if(!dragged||item===dragged)return;event.preventDefault();event.stopPropagation();clear();dragged.classList.add("dragging");
-          const rect=item.getBoundingClientRect(),before=event.clientY<rect.top+rect.height/2;
-          item.classList.add(before?"dragBefore":"dragAfter");container.insertBefore(dragged,before?item:item.nextSibling)
-        });
-        item.addEventListener("drop",event=>{if(dragged){event.preventDefault();event.stopPropagation();
-          onSave(items().map(entry=>entry.dataset[dataKey]));clear()}})
-      })
+    function moveSettingsOrder(scope,key,direction){
+      let order;if(scope==="side")order=[...state.sideOrder];
+      else if(scope==="smart")order=[...state.smartOrder];
+      else if(scope==="custom")order=state.custom.map(item=>item.id);
+      else if(scope==="files")order=[...state.fileOrder];else return;
+      const index=order.indexOf(key),target=index+direction;if(index<0||target<0||target>=order.length)return;
+      [order[index],order[target]]=[order[target],order[index]];
+      if(scope==="side"){
+        state.sideOrder=order;try{localStorage.setItem(SIDE_ORDER_KEY,JSON.stringify(order))}catch(_){}applySideOrder()
+      }else if(scope==="smart"){
+        state.smartOrder=order;try{localStorage.setItem(SMART_ORDER_KEY,JSON.stringify(order))}catch(_){}renderNav()
+      }else if(scope==="custom"){
+        const byId=new Map(state.custom.map(item=>[item.id,item]));state.custom=order.map(id=>byId.get(id)).filter(Boolean);
+        try{localStorage.setItem(CUSTOM_KEY,JSON.stringify(state.custom))}catch(_){}renderCustomLists()
+      }else{
+        state.fileOrder=order;try{localStorage.setItem(FILE_ORDER_KEY,JSON.stringify(order))}catch(_){}renderFiles()
+      }
+      renderSettingsOrdering()
     }
     function saveSearchHistory(){
       try{localStorage.setItem(SEARCH_HISTORY_KEY,JSON.stringify(state.searchHistory))}catch(_){}
@@ -2179,8 +2295,8 @@ print("hello")
       if(!state.custom.length){
         $("customLists").innerHTML='<div class="historyText" style="padding:5px 9px"><small>保存当前筛选后会显示在这里</small></div>';return
       }
-      $("customLists").innerHTML=state.custom.map(item=>`<div class="customItem sortableItem ${state.customActive===item.id?"active":""}" data-custom-item="${esc(item.id)}">
-        <span class="itemDragHandle" draggable="true" data-item-handle>⋮</span><span class="navIcon">◆</span><button class="customOpen" data-custom="${esc(item.id)}" title="${esc(item.name)}">${esc(item.name)}</button>
+      $("customLists").innerHTML=state.custom.map(item=>`<div class="customItem ${state.customActive===item.id?"active":""}" data-custom-item="${esc(item.id)}">
+        <span class="navIcon">◆</span><button class="customOpen" data-custom="${esc(item.id)}" title="${esc(item.name)}">${esc(item.name)}</button>
         <button class="customRemove" data-remove-custom="${esc(item.id)}" aria-label="删除自定义清单">×</button></div>`).join("");
       $("customLists").querySelectorAll("[data-custom]").forEach(button=>button.onclick=()=>{
         const item=state.custom.find(entry=>entry.id===button.dataset.custom);if(!item)return;
@@ -2204,10 +2320,6 @@ print("hello")
         state.custom=state.custom.filter(item=>item.id!==button.dataset.removeCustom);
         if(state.customActive===button.dataset.removeCustom)state.customActive=null;saveCustomLists()
       });
-      bindChildSorting($("customLists"),"[data-custom-item]","customItem",order=>{
-        const byId=new Map(state.custom.map(item=>[item.id,item]));state.custom=order.map(id=>byId.get(id)).filter(Boolean);
-        try{localStorage.setItem(CUSTOM_KEY,JSON.stringify(state.custom))}catch(_){}
-      })
     }
     function customFilterSummary(){
       const view=VIEWS.find(item=>item[0]===state.view)?.[2]||"待办";
@@ -2241,8 +2353,19 @@ print("hello")
       setNotice(existing?`已更新自定义清单“${item.name}”。`:`已固定自定义清单“${item.name}”。`)
     }
     function saveRecent(){
+      if(state.defaultRecentId&&!state.recent.some(item=>item.id===state.defaultRecentId)){
+        state.defaultRecentId=null;try{localStorage.removeItem(HISTORY_DEFAULT_KEY)}catch(_){}
+      }
       try{localStorage.setItem(HISTORY_KEY,JSON.stringify(state.recent))}catch(_){}
       renderHistory()
+    }
+    function setDefaultRecent(id){
+      const item=state.recent.find(entry=>entry.id===id);if(!item)return;
+      state.defaultRecentId=state.defaultRecentId===id?null:id;
+      try{state.defaultRecentId?localStorage.setItem(HISTORY_DEFAULT_KEY,state.defaultRecentId):
+        localStorage.removeItem(HISTORY_DEFAULT_KEY)}catch(_){}
+      renderHistory();setNotice(state.defaultRecentId?`已将“${item.label}”设为默认打开。`:
+        "已取消默认打开；以后由你手动选择最近记录。")
     }
     async function rememberSource(source,cache=[]){
       if(!source?.label)return;
@@ -2265,12 +2388,14 @@ print("hello")
     }
     function renderHistory(){
       if(!state.recent.length){$("history").innerHTML='<div class="historyText" style="padding:5px 9px"><small>选择文件后会显示在这里</small></div>';return}
-      $("history").innerHTML=state.recent.map(item=>`<div class="historyItem" data-recent="${esc(item.id)}">
+      $("history").innerHTML=state.recent.map(item=>{const preferred=item.id===state.defaultRecentId;return `<div class="historyItem ${preferred?"isDefault":""}" data-recent="${esc(item.id)}">
         <span class="historyIcon">${item.kind==="folder"?"夹":item.kind==="webdav"?"云":"文"}</span>
         <button class="historyText" data-reopen="${esc(item.id)}" style="border:0;background:transparent;padding:0;text-align:left;color:inherit">
-          <strong>${esc(item.label)}</strong><small>${sourceTime(item.openedAt)} · ${item.hasHandle||item.hasCache?"可快速重开":"需重新选择"}</small>
-        </button><button class="historyRemove" data-remove-recent="${esc(item.id)}" aria-label="删除历史">×</button></div>`).join("");
+          <strong>${esc(item.label)}</strong><small>${preferred?"默认 · ":""}${sourceTime(item.openedAt)} · ${item.hasHandle||item.hasCache?"可快速重开":"需重新选择"}</small>
+        </button><button class="historyDefault ${preferred?"active":""}" data-default-recent="${esc(item.id)}" aria-label="${preferred?"取消默认打开":"设为默认打开"}" title="${preferred?"取消默认打开":"设为默认打开"}">${preferred?"★":"☆"}</button>
+        <button class="historyRemove" data-remove-recent="${esc(item.id)}" aria-label="删除历史">×</button></div>`}).join("");
       $("history").querySelectorAll("[data-reopen]").forEach(button=>button.onclick=()=>reopenRecent(button.dataset.reopen));
+      $("history").querySelectorAll("[data-default-recent]").forEach(button=>button.onclick=()=>setDefaultRecent(button.dataset.defaultRecent));
       $("history").querySelectorAll("[data-remove-recent]").forEach(button=>button.onclick=async()=>{
         const id=button.dataset.removeRecent;state.recent=state.recent.filter(item=>item.id!==id);
         await removeStoredHandle(id);saveRecent()
@@ -2282,6 +2407,12 @@ print("hello")
       if(typeof handle.queryPermission!=="function")return true;
       if(await handle.queryPermission({mode})==="granted")return true;
       return typeof handle.requestPermission==="function"&&await handle.requestPermission({mode})==="granted"
+    }
+    async function permissionAlreadyGranted(handle,mode="read"){
+      if(!handle)return false;
+      if(Array.isArray(handle)){for(const item of handle){if(!await permissionAlreadyGranted(item,mode))return false}return true}
+      if(typeof handle.queryPermission!=="function")return true;
+      try{return await handle.queryPermission({mode})==="granted"}catch(_){return false}
     }
     async function collectDirectory(handle,base=handle.name,output=[]){
       for await(const entry of handle.values()){
@@ -2310,7 +2441,7 @@ print("hello")
         await load(entries,{id:`files:${handles.map(item=>item.name).join("|")}`,kind:"files",label,handle:handles})
       }catch(error){if(error?.name!=="AbortError"){$("fileInput").click()}}
     }
-    async function reopenRecent(id){
+    async function reopenRecent(id,{automatic=false}={}){
       const item=state.recent.find(entry=>entry.id===id);if(!item)return;
       if(item.kind==="webdav"){
         const profile=state.webdavProfiles.find(entry=>`webdav:${entry.id}`===item.id);
@@ -2322,7 +2453,9 @@ print("hello")
       const stored=await readHandle(id),record=stored&&Object.prototype.hasOwnProperty.call(stored,"handle")?
         stored:{handle:stored,cache:[]},handle=record?.handle;
       try{
-        if(handle&&await permissionGranted(handle,"readwrite")){
+        const allowed=handle&&(automatic?await permissionAlreadyGranted(handle,"readwrite"):
+          await permissionGranted(handle,"readwrite"));
+        if(allowed){
           if(item.kind==="folder"){
             await load(await collectDirectory(handle),{...item,handle})
           }else{
@@ -2334,11 +2467,19 @@ print("hello")
         if(record?.cache?.length){
           const entries=record.cache.map(saved=>({file:new File([saved.text],saved.name,{type:"text/plain"}),path:saved.path}));
           await load(entries,{...item,handle:null});
-          setNotice("已从本地历史快照打开；如果原文件有更新，请重新选择文件夹。");return
+          setNotice(automatic?"已自动从默认历史快照打开；如原文件有更新，请手动点击最近记录重新授权。":
+            "已从本地历史快照打开；如果原文件有更新，请重新选择文件夹。");return
         }
+        if(automatic){setNotice("默认位置需要文件访问授权，请手动点击左侧对应的最近打开记录。");return}
         setNotice("浏览器需要你重新确认文件访问权限。");
         item.kind==="folder"?chooseFolder():chooseFiles()
       }catch(_){setNotice("历史位置暂时无法读取，请重新选择文件。")}
+    }
+    async function autoOpenDefaultRecent(){
+      if(!state.defaultRecentId)return;
+      const item=state.recent.find(entry=>entry.id===state.defaultRecentId);
+      if(!item){state.defaultRecentId=null;try{localStorage.removeItem(HISTORY_DEFAULT_KEY)}catch(_){};renderHistory();return}
+      await reopenRecent(item.id,{automatic:true})
     }
     const isDone = t => DONE.has(t.status)||!!t.closed;
     function setNotice(text){$("noticeText").textContent=text;$("notice").classList.toggle("show",!!text)}
@@ -2440,14 +2581,10 @@ print("hello")
     }
     function renderNav(){
       const c=counts();$("nav").innerHTML=orderedViews().filter(([key])=>state.smartVisible.includes(key)).map(([key,icon,label])=>
-        `<button class="navItem sortableItem ${state.mode==="global"&&state.view===key?"active":""}" data-view="${key}">
-        <span class="itemDragHandle" draggable="true" data-item-handle>⋮</span><span class="navIcon">${icon}</span><span class="navName">${label}</span><em class="count">${c[key]}</em></button>`).join("");
+        `<button class="navItem ${state.mode==="global"&&state.view===key?"active":""}" data-view="${key}">
+        <span class="navIcon">${icon}</span><span class="navName">${label}</span><em class="count">${c[key]}</em></button>`).join("");
       $("nav").querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{state.mode="global";state.view=b.dataset.view;
         state.customActive=null;state.selected=null;state.detailOpen=false;state.visible=100;closeSidebar();render()});
-      bindChildSorting($("nav"),"[data-view]","view",order=>{
-        state.smartOrder=[...order,...state.smartOrder.filter(key=>!order.includes(key))];
-        try{localStorage.setItem(SMART_ORDER_KEY,JSON.stringify(state.smartOrder))}catch(_){}
-      })
     }
     function renderFiles(){
       $("fileTotal").textContent=state.files.length;
@@ -2455,15 +2592,11 @@ print("hello")
         ...state.files],keys=entries.map(entry=>entry.path);
       state.fileOrder=[...state.fileOrder.filter(key=>keys.includes(key)),...keys.filter(key=>!state.fileOrder.includes(key))];
       const ordered=state.fileOrder.map(key=>entries.find(entry=>entry.path===key)).filter(Boolean);
-      const html=ordered.map((file,index)=>`<button class="fileItem sortableItem ${state.file===file.id?"active":""}" data-file="${file.id}" data-sort-key="${esc(file.path)}" title="${esc(file.path)}">
-        <span class="itemDragHandle" draggable="true" data-item-handle>⋮</span><span class="dot dot${index%5}"></span>
+      const html=ordered.map((file,index)=>`<button class="fileItem ${state.file===file.id?"active":""}" data-file="${file.id}" data-sort-key="${esc(file.path)}" title="${esc(file.path)}">
+        <span class="dot dot${index%5}"></span>
         <span class="fileName">${esc(file.name)}${file.dirty?' <span class="dirtyMark" title="有尚未写回的修改">●</span>':""}</span><em class="count">${file.count}</em></button>`).join("");
       $("files").innerHTML=html;$("files").querySelectorAll("[data-file]").forEach(b=>b.onclick=()=>{state.file=b.dataset.file;
         state.customActive=null;state.hierParent=null;state.selected=null;state.detailOpen=false;state.visible=100;closeSidebar();render()});
-      bindChildSorting($("files"),"[data-sort-key]","sortKey",order=>{
-        state.fileOrder=[...order,...state.fileOrder.filter(key=>!order.includes(key))];
-        try{localStorage.setItem(FILE_ORDER_KEY,JSON.stringify(state.fileOrder))}catch(_){}
-      })
     }
     function buildTags(){
       const tags=[...new Set(state.tasks.flatMap(t=>t.tags))].sort((a,b)=>a.localeCompare(b,"zh-CN"));
@@ -2766,7 +2899,7 @@ print("hello")
         <div class="hierSubtitle"><span class="chip statusColor ${statusToneClass(task.status)}">${esc(STATUS_LABEL[task.status]||task.status)}</span>
         ${task.tags.slice(0,2).map(tag=>`<span class="tag">#${esc(tag)}</span>`).join("")}<span class="hierPreview">${esc(preview)}</span></div></div>
         <div class="hierTail"><button class="hierDetail" data-detail="${task.uid}">详情</button>${task.childCount?
-          `<span class="childCount">${task.childCount} 个子项</span><span class="hierArrow">›</span>`:
+          `<span class="childCount" title="${task.childCount} 个子项，${task.childOpenCount} 个未完成">${task.childCount} 个子项 <b class="childOpenCount">(${task.childOpenCount})</b></span><span class="hierArrow">›</span>`:
           `<span class="source">${conciseDate(task)}</span><span class="hierArrow">·</span>`}</div>
       </article></div>`;
     }
@@ -2916,6 +3049,13 @@ print("hello")
       const time=calendarTaskTime(task,date);
       return `<button class="calendarTaskButton ${statusToneClass(task.status)} ${isDone(task)?"isDone":""}" data-calendar-task="${task.uid}" title="${esc(task.title)}">${time?`${time} · `:""}${esc(task.title)}</button>`
     }
+    function calendarCountParts(items){
+      return {unfinished:items.filter(task=>!isDone(task)).length,total:items.length}
+    }
+    function calendarCountMarkup(items){
+      const {unfinished,total}=calendarCountParts(items);if(!total)return "";
+      return `<span class="dayCount" title="未完成 ${unfinished} 项，共 ${total} 项" aria-label="未完成 ${unfinished} 项，共 ${total} 项"><span class="dayCountOpen">${unfinished}</span><span class="dayCountSlash">/</span><strong class="dayCountTotal">${total}</strong></span>`
+    }
     function bindCalendarContent(){
       $("listHost").querySelectorAll("[data-calendar-task]").forEach(button=>button.onclick=event=>{
         event.stopPropagation();selectTask(button.dataset.calendarTask,true)
@@ -2946,10 +3086,10 @@ print("hello")
       const cells=Array.from({length:42},(_,index)=>{
         const date=new Date(start);date.setDate(start.getDate()+index);const iso=todayFrom(date),items=map.get(iso)||[];
         return `<button class="calendarDay ${date.getMonth()===month?"":"outside"} ${iso===today()?"todayCell":""}" data-calendar-date="${iso}">
-          <span class="dayTop"><span class="dayNumber">${date.getDate()}</span>${items.length?`<span class="dayCount">${items.length}</span>`:""}</span>
+          <span class="dayTop"><span class="dayNumber">${date.getDate()}</span>${calendarCountMarkup(items)}</span>
           <span class="dayTasks">${items.slice(0,3).map(task=>`<span class="dayTask ${statusToneClass(task.status)}" style="color:var(--statusTone);background:var(--statusToneSoft)">${esc(task.title)}</span>`).join("")}${items.length>3?`<span class="dayTask">还有 ${items.length-3} 项…</span>`:""}</span></button>`
       }).join("");
-      return `<div class="calendarTitleRow"><h2>${year} 年 ${month+1} 月</h2><span>日期角标＝按当前定义归入当天的任务数</span></div>
+      return `<div class="calendarTitleRow"><h2>${year} 年 ${month+1} 月</h2><span>日期角标＝小号未完成数／<b>橙色总数</b></span></div>
         <div class="calendarMonthScroll"><div class="monthWeekdays">${weekdays}</div><div class="monthGrid">${cells}</div></div>`
     }
     function renderWeekPicker(map,cursor){
@@ -3184,7 +3324,8 @@ print("hello")
       $("vimEscButton").hidden=!state.vimMode;
       if(!$("vimCommandEntry").classList.contains("show"))
         $("vimCommandMessage").textContent=state.vimMode?(mode==="visual"?"v 退出选择，d/x 删除，c 删除后插入":"普通模式按 : 调出命令行"):
-          "开启 Vim 后按 : 调出命令行"
+          "开启 Vim 后按 : 调出命令行";
+      syncVimInputGuard($("editText"))
     }
     function toggleVimMode(){
       state.vimMode=!state.vimMode;try{localStorage.setItem(VIM_KEY,state.vimMode?"1":"0")}catch(_){}
@@ -3315,6 +3456,16 @@ print("hello")
       else if(key==="x"){input.setRangeText("",pos,Math.min(input.value.length,pos+1),"start");renderEditHighlight()}
       ensureEditorCaretVisible(input,activeVimPosition(input))
     }
+    function syncVimInputGuard(input){
+      if(!input||!state.vimMode||state.vimState==="insert"){state.vimInputGuard=null;return}
+      state.vimInputGuard={value:input.value,start:input.selectionStart,end:input.selectionEnd}
+    }
+    function insertedInputText(before,after){
+      let start=0;while(start<before.length&&start<after.length&&before[start]===after[start])start++;
+      let beforeEnd=before.length,afterEnd=after.length;
+      while(beforeEnd>start&&afterEnd>start&&before[beforeEnd-1]===after[afterEnd-1]){beforeEnd--;afterEnd--}
+      return after.slice(start,afterEnd)
+    }
     function handleVimKeydown(event){
       if(!state.vimMode||event.ctrlKey||event.metaKey||event.altKey)return;
       const input=event.currentTarget;
@@ -3324,7 +3475,7 @@ print("hello")
       event.preventDefault();if(event.key==="Escape"){
         event.stopPropagation();if(state.vimState==="visual")exitVimVisual(input);return
       }
-      state.vimLastKey=event.key;state.vimLastKeyAt=Date.now();runVimNormalKey(input,event.key)
+      state.vimLastKey=event.key;state.vimLastKeyAt=Date.now();runVimNormalKey(input,event.key);syncVimInputGuard(input)
     }
     function handleVimBeforeInput(event){
       if(!state.vimMode||state.vimState==="insert"||!String(event.inputType||"").startsWith("insert"))return;
@@ -3335,13 +3486,16 @@ print("hello")
       if(event.cancelable)event.preventDefault();
       runVimNormalKey(input,key);
       restore.value=input.value;restore.start=input.selectionStart;restore.end=input.selectionEnd;state.vimInputRestore=restore;
-      setTimeout(()=>{if(state.vimInputRestore===restore)state.vimInputRestore=null},0)
+      syncVimInputGuard(input);setTimeout(()=>{if(state.vimInputRestore===restore)state.vimInputRestore=null},500)
     }
     function handleEditorInput(event){
-      const restore=state.vimInputRestore;
-      if(restore){
-        state.vimInputRestore=null;event.currentTarget.value=restore.value;
-        event.currentTarget.setSelectionRange(restore.start,restore.end)
+      const input=event.currentTarget,restore=state.vimInputRestore;
+      if(state.vimMode&&state.vimState!=="insert"){
+        const guard=restore||state.vimInputGuard,inserted=guard?insertedInputText(guard.value,input.value):String(event.data||"");
+        state.vimInputRestore=null;
+        if(guard){input.value=guard.value;input.setSelectionRange(guard.start,guard.end)}
+        if(!restore)for(const key of inserted)runVimNormalKey(input,key);
+        syncVimInputGuard(input)
       }
       renderEditHighlight()
     }
@@ -3898,7 +4052,11 @@ print("hello")
     $("writeBatch").onclick=()=>writeBatchSources();$("clearBatch").onclick=()=>setBatchMode(false);
     $("filterToggle").onclick=()=>{state.filtersCollapsed=!state.filtersCollapsed;state.filterTouched=true;updateFilterToggle()};
     $("settings").onclick=openSettings;$("closeSettings").onclick=$("cancelSettings").onclick=closeSettings;
+    $("settingsNav").querySelectorAll("[data-settings-target]").forEach(button=>button.onclick=()=>
+      navigateSettings(button.dataset.settingsTarget));
+    $("settingsContent").onscroll=syncSettingsNavFromScroll;
     $("saveSettings").onclick=saveSettingsForm;$("testWebdav").onclick=()=>testWebdavConnection();
+    $("applyDefaultFiltersNow").onclick=applyDefaultFiltersNow;
     $("setStartupCurrent").onclick=saveCurrentAsStartup;$("clearStartup").onclick=clearStartupPage;
     $("exportConfig").onclick=exportConfiguration;$("importConfig").onclick=()=>$("configImport").click();
     $("configImport").onchange=async event=>{await importConfigurationFile(event.target.files?.[0]);event.target.value=""};
@@ -3951,7 +4109,8 @@ print("hello")
     $("globalMode").onclick=()=>{state.mode="global";state.selected=null;state.detailOpen=false;render()};
     $("hierMode").onclick=()=>{state.mode="hierarchy";state.hierParent=null;state.selected=null;state.detailOpen=false;render()};
     $("closeNotice").onclick=()=>setNotice("");
-    $("clearHistory").onclick=async()=>{state.recent=[];saveRecent();await clearStoredHandles()};
+    $("clearHistory").onclick=async()=>{state.recent=[];state.defaultRecentId=null;
+      try{localStorage.removeItem(HISTORY_DEFAULT_KEY)}catch(_){}saveRecent();await clearStoredHandles()};
     $("searchHelp").onclick=()=>{$("syntaxModal").classList.add("show")};
     $("closeSyntax").onclick=()=>{$("syntaxModal").classList.remove("show")};
     $("syntaxModal").onclick=event=>{if(event.target===$("syntaxModal"))$("syntaxModal").classList.remove("show")};
@@ -3980,7 +4139,7 @@ print("hello")
     $("editText").onbeforeinput=handleVimBeforeInput;
     $("editText").oninput=handleEditorInput;
     $("editText").onkeydown=handleVimKeydown;
-    $("editText").onclick=$("editText").onselect=()=>updateVimCursorStatus();
+    $("editText").onclick=$("editText").onselect=()=>{updateVimCursorStatus();syncVimInputGuard($("editText"))};
     $("editText").onscroll=syncEditorScroll;
     $("orgFormatHelp").onclick=()=>{$("orgHelpModal").classList.add("show")};
     $("closeOrgHelp").onclick=()=>{$("orgHelpModal").classList.remove("show")};
@@ -4015,10 +4174,19 @@ print("hello")
     $("closeSmart").onclick=$("cancelSmart").onclick=closeSmartModal;
     $("saveSmart").onclick=saveSmartVisibility;
     $("smartModal").onclick=event=>{if(event.target===$("smartModal"))closeSmartModal()};
+    $("closeApkSelect").onclick=closeApkSelect;
+    $("apkSelectBackdrop").onclick=event=>{if(event.target===$("apkSelectBackdrop"))closeApkSelect()};
+    $("apkSelectOptions").onclick=event=>{
+      const button=event.target.closest("[data-apk-option]"),select=state.apkSelectTarget;if(!button||!select)return;
+      const option=select.options[Number(button.dataset.apkOption)];if(!option||option.disabled)return;
+      select.selectedIndex=Number(button.dataset.apkOption);select.dispatchEvent(new Event("change",{bubbles:true}));closeApkSelect()
+    };
+    document.addEventListener("pointerdown",interceptApkSelect,true);
+    document.addEventListener("click",interceptApkSelect,true);
     const navigationClickSelector="[data-view],[data-file],[data-custom],[data-hier],[data-crumb],[data-task]," +
       "[data-task-detail],[data-detail],[data-tag],[data-calendar-mode],#globalMode,#hierMode,#calendarPrev,#calendarNext,#calendarToday";
     document.addEventListener("click",event=>{
-      if(event.target.closest?.("[data-toggle],[data-remove-custom],[data-item-handle]"))return;
+      if(event.target.closest?.("[data-toggle],[data-remove-custom]"))return;
       if(event.target.closest?.(navigationClickSelector))rememberNavigation()
     },true);
     document.addEventListener("click",event=>{if(!event.target.closest(".search"))hideSearchHistory()});
@@ -4027,6 +4195,7 @@ print("hello")
     document.addEventListener("keydown",event=>{
       if(event.altKey&&event.key==="ArrowLeft"){event.preventDefault();goBack();return}
       if(event.key==="Escape"){
+      if($("apkSelectBackdrop").classList.contains("show")){closeApkSelect();return}
       if($("vimHelpModal").classList.contains("show")){$("vimHelpModal").classList.remove("show");return}
       if($("orgHelpModal").classList.contains("show")){$("orgHelpModal").classList.remove("show");return}
       $("syntaxModal").classList.remove("show");closeEditor();closeVisualEditor();closeMoveModal();closeDeleteModal();closeCustomModal();closeSmartModal();closeSettings();hideSearchHistory()
@@ -4037,7 +4206,7 @@ print("hello")
     window.addEventListener("resize",()=>syncFilterCollapse());
     document.body.ondragover=e=>e.preventDefault();
     document.body.ondrop=e=>{e.preventDefault();if(e.dataTransfer.files.length)load(e.dataTransfer.files)};
-    loadRecent();loadPreferences();initSidebarSorting();render();
+    loadRecent();loadPreferences();render();autoOpenDefaultRecent();
   })();
   </script>
 </body>
