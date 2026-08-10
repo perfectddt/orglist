@@ -535,6 +535,13 @@
     .visualField textarea:focus{border-color:var(--accent)}.visualField textarea{min-height:150px;resize:vertical;
       font-family:ui-monospace,"Cascadia Code","Microsoft YaHei",monospace}.visualField small{
       color:var(--muted2);font-size:8px;line-height:1.5}.formHidden{display:none!important}
+    .dualPickerField{position:relative;display:flex;align-items:stretch;gap:6px;min-width:0}
+    .dualPickerField>input[data-picker-type]{flex:1 1 auto;width:0}
+    .dateTimePickerButton{flex:0 0 38px;padding:0;border:1px solid var(--line);border-radius:8px;
+      color:var(--accent);background:var(--soft);font-size:16px;line-height:1;cursor:pointer}
+    .dateTimePickerButton:hover{border-color:var(--accent);background:var(--accentSoft)}
+    .nativePickerProxy{position:absolute!important;width:1px!important;height:1px!important;right:38px;bottom:0;
+      padding:0!important;opacity:0;pointer-events:none;border:0!important}
     .visualSource{grid-column:1/-1;padding:9px 11px;color:var(--muted);background:var(--soft);
       border:1px solid var(--line);border-radius:8px;font-size:9px;overflow-wrap:anywhere}
     .bulkModeSwitch{display:flex;gap:3px;width:max-content;margin:0 0 13px;padding:3px;
@@ -821,8 +828,8 @@
               <option value="DEADLINE">设置 DEADLINE</option><option value="CLOSED">设置 CLOSED</option>
               <option value="CLEAR_ALL">清除三个日期</option>
             </select>
-            <input id="batchDate" type="date" aria-label="批量日期">
-            <input id="batchTime" type="time" aria-label="批量时间">
+            <input id="batchDate" type="text" inputmode="numeric" data-picker-type="date" placeholder="YYYY-MM-DD" aria-label="批量日期">
+            <input id="batchTime" type="text" inputmode="numeric" data-picker-type="time" placeholder="HH:MM" aria-label="批量时间">
             <button id="applyBatchStatus">应用批量修改</button>
             <button id="writeBatch">写回已修改文件</button>
             <button class="batchDanger" id="deleteBatch">删除</button>
@@ -970,12 +977,12 @@
           </select></label>
           <label class="visualField full visualSingleOnly"><span>标签</span><input id="visualTags" autocomplete="off" placeholder="工作, 报名, 重要">
             <small>可用逗号、空格或冒号分隔，保存时会转换为 Org 的 :标签: 格式。</small></label>
-          <label class="visualField visualSingleOnly"><span>SCHEDULED 日期</span><input id="visualScheduledDate" type="date"></label>
-          <label class="visualField visualSingleOnly"><span>SCHEDULED 时间</span><input id="visualScheduledTime" type="time"></label>
-          <label class="visualField visualSingleOnly"><span>DEADLINE 日期</span><input id="visualDeadlineDate" type="date"></label>
-          <label class="visualField visualSingleOnly"><span>DEADLINE 时间</span><input id="visualDeadlineTime" type="time"></label>
-          <label class="visualField visualSingleOnly"><span>CLOSED 日期</span><input id="visualClosedDate" type="date"></label>
-          <label class="visualField visualSingleOnly"><span>CLOSED 时间</span><input id="visualClosedTime" type="time"></label>
+          <label class="visualField visualSingleOnly"><span>SCHEDULED 日期</span><input id="visualScheduledDate" type="text" inputmode="numeric" data-picker-type="date" placeholder="YYYY-MM-DD"></label>
+          <label class="visualField visualSingleOnly"><span>SCHEDULED 时间</span><input id="visualScheduledTime" type="text" inputmode="numeric" data-picker-type="time" placeholder="HH:MM"></label>
+          <label class="visualField visualSingleOnly"><span>DEADLINE 日期</span><input id="visualDeadlineDate" type="text" inputmode="numeric" data-picker-type="date" placeholder="YYYY-MM-DD"></label>
+          <label class="visualField visualSingleOnly"><span>DEADLINE 时间</span><input id="visualDeadlineTime" type="text" inputmode="numeric" data-picker-type="time" placeholder="HH:MM"></label>
+          <label class="visualField visualSingleOnly"><span>CLOSED 日期</span><input id="visualClosedDate" type="text" inputmode="numeric" data-picker-type="date" placeholder="YYYY-MM-DD"></label>
+          <label class="visualField visualSingleOnly"><span>CLOSED 时间</span><input id="visualClosedTime" type="text" inputmode="numeric" data-picker-type="time" placeholder="HH:MM"></label>
           <label class="visualField full visualSingleOnly"><span>正文与备注</span><textarea id="visualBody" spellcheck="false" placeholder="可输入普通文字、列表、链接等 Org 内容"></textarea></label>
         </div>
         <p class="editWarning">“应用到当前页面”只修改当前浏览器中的副本；只有“写回原文件”会覆盖磁盘文件。通过普通文件选择器打开时，浏览器可能只允许下载副本。</p>
@@ -1100,7 +1107,7 @@ print("hello")
           <button data-settings-target="settings-startup">启动页</button>
           <button data-settings-target="settings-statuses">Org 自定义状态</button>
           <button data-settings-target="settings-backup">配置备份</button>
-          <button data-settings-target="settings-reminder">Windows 提醒</button>
+          <button id="reminderNavLabel" data-settings-target="settings-reminder">Windows 提醒</button>
           <button data-settings-target="settings-webdav">WebDAV</button>
           <button data-settings-target="settings-about">关于</button>
         </nav>
@@ -1199,11 +1206,11 @@ print("hello")
           <div class="configNote">为安全起见，导出的 WebDAV 记录不包含密码；文件访问权限和文件内容也不会被导出。</div>
         </section>
         <section class="settingsSection" id="settings-reminder">
-          <h3>Windows 后台提醒</h3>
-          <p class="settingsHint">浏览器关闭后仍可提醒。首次使用请双击同目录的 <code>OrglistReminderSetup.cmd</code> 安装 Windows 登录启动项；此处设置需通过 <code>OrglistWebDAV.cmd</code> 打开的页面保存。</p>
+          <h3 id="reminderHeading">Windows 后台提醒</h3>
+          <p class="settingsHint" id="reminderHint">浏览器关闭后仍可提醒。首次使用请双击同目录的 <code>OrglistReminderSetup.cmd</code> 安装 Windows 登录启动项；此处设置需通过 <code>OrglistWebDAV.cmd</code> 打开的页面保存。</p>
           <div class="settingsGrid">
             <label class="settingsCheck full"><input id="reminderEnabled" type="checkbox"><span>启用 Windows 后台提醒</span></label>
-            <label class="visualField full"><span>提醒数据来源</span><select id="reminderSourceType"><option value="folder">本地 Org 文件夹</option><option value="webdav">WebDAV</option></select></label>
+            <label class="visualField full" id="reminderSourceField"><span>提醒数据来源</span><select id="reminderSourceType"><option value="folder">本地 Org 文件夹</option><option value="webdav">WebDAV</option></select></label>
             <label class="visualField full" id="reminderLocalFields"><span>扫描 Org 文件夹</span><input id="reminderFolder" autocomplete="off" value="D:\gtd" placeholder="例如：D:\gtd"></label>
             <div class="settingsGrid full" id="reminderWebdavFields" hidden>
               <label class="visualField full"><span>使用 WebDAV 设置中的连接</span><select id="reminderWebdavProfile"><option value="">请先在下方 WebDAV 设置保存连接</option></select><small>这里不再重复填写地址和账号。后台读取需要密码；有账号的连接请在下方勾选“保存密码”。</small></label>
@@ -1216,8 +1223,10 @@ print("hello")
           </div>
           <div class="webdavActions"><button class="btn primary" id="saveReminder">保存提醒设置</button>
             <button class="btn secondary" id="testReminder">测试 Windows 通知</button>
-            <button class="btn secondary" id="refreshReminder">刷新状态</button></div>
+            <button class="btn secondary" id="refreshReminder" title="重新读取后台助手的运行信息，不修改任务与设置">刷新运行状态</button>
+            <button class="btn secondary" id="exactAlarmPermission" hidden>允许精确提醒</button></div>
           <div class="webdavStatus info" id="reminderStatus">尚未读取提醒助手状态。</div>
+          <p class="settingsHint">“刷新运行状态”只重新读取最近同步/检查时间、扫描条目数、下次提醒及权限状态；不会立即同步、发送通知，也不会修改任务或设置。</p>
           <div class="configNote">只有日期：每个设定时间汇总提醒一次。若启动时已经错过，可选择立即补发最近一次，或跳过并等待下一个时间。带具体时间的 DEADLINE 仍按提前分钟数单独提醒。</div>
         </section>
         <section class="settingsSection" id="settings-webdav">
@@ -1244,7 +1253,7 @@ print("hello")
           <h3>关于</h3>
           <div class="aboutCard"><strong>Orglist</strong>
             <p>面向 Org 文件的本地任务清单与浏览工具。数据默认保存在本地，只有在你主动使用写回或 WebDAV 时才会与文件交互。</p>
-            <dl><div><dt>当前版本</dt><dd>1.3.2</dd></div>
+            <dl><div><dt>当前版本</dt><dd>1.4.1</dd></div>
               <div><dt>项目地址</dt><dd><a href="https://github.com/perfectddt/orglist" target="_blank" rel="noopener noreferrer">github.com/perfectddt/orglist</a></dd></div>
               <div><dt>使用方式</dt><dd>支持本地 HTML、Android APK 与 WebDAV。</dd></div>
             </dl>
@@ -1843,6 +1852,9 @@ print("hello")
     function androidWebdavActive(){
       return typeof window.AndroidWebDav?.request==="function"
     }
+    function androidReminderActive(){
+      return typeof window.AndroidReminder?.getConfig==="function"
+    }
     function apkSelectLabel(select){
       return select.getAttribute("aria-label")||select.closest("label")?.childNodes?.[0]?.textContent?.trim()||"请选择"
     }
@@ -1999,7 +2011,7 @@ print("hello")
       $("customOpenStatuses").value=state.customOpenStatuses.join(" ");
       $("customDoneStatuses").value=state.customDoneStatuses.join(" ");
       renderStartupSummary();
-      setWebdavStatus("");updateWebdavMode();renderWebdavProfiles();renderSettingsOrdering();loadReminderSettings();
+      setWebdavStatus("");updateWebdavMode();renderWebdavProfiles();renderSettingsOrdering();syncReminderPlatformUI();loadReminderSettings();
       if(state.webdavProfiles.length)fillWebdavProfile(state.webdavProfiles[0]);
       $("settingsModal").classList.add("show");requestAnimationFrame(()=>navigateSettings("settings-display","auto"))
     }
@@ -2013,6 +2025,15 @@ print("hello")
       const element=$("reminderStatus");element.textContent=message;element.className=`webdavStatus ${type}`
     }
     async function reminderRequest(path,options={}){
+      if(androidReminderActive()){
+        let raw;
+        if(path==="/reminder-config"&&options.method==="POST")raw=window.AndroidReminder.saveConfig(String(options.body||"{}"));
+        else if(path==="/reminder-config")raw=window.AndroidReminder.getConfig();
+        else if(path==="/reminder-status")raw=window.AndroidReminder.getStatus();
+        else if(path==="/reminder-test"){window.AndroidReminder.testNotification();return {ok:true}}
+        else throw new Error("Android 提醒接口不支持此操作。");
+        const value=typeof raw==="string"?JSON.parse(raw):raw;if(value?.ok===false)throw new Error(value.error||"Android 提醒操作失败。");return value
+      }
       const url=reminderEndpoint(path);if(!url)throw new Error("请先双击 OrglistWebDAV.cmd，并在它自动打开的页面中设置提醒。");
       const response=await fetch(url,{...options,headers:{"Content-Type":"application/json",...(options.headers||{})},credentials:"omit"});
       const value=await response.json().catch(()=>({}));if(!response.ok)throw new Error(value.error||`提醒助手返回 ${response.status}`);return value
@@ -2024,7 +2045,38 @@ print("hello")
       $("reminderSummaryTimes").value=(config.dailySummaryTimes||[config.dailySummaryTime||"09:00"]).join(", ");
       $("reminderMissedPolicy").value=config.missedSummaryPolicy==="skip"?"skip":"latest";
       $("reminderGroupNotifications").checked=config.groupNotifications!==false;
-      $("reminderAdvance").value=String(config.deadlineAdvanceMinutes??15);renderReminderProfiles(config);syncReminderSourceFields()
+      $("reminderAdvance").value=String(config.deadlineAdvanceMinutes??15);renderReminderProfiles(config);syncReminderPlatformUI();syncReminderSourceFields()
+    }
+    function syncReminderPlatformUI(){
+      const android=androidReminderActive();
+      $("reminderNavLabel").textContent=android?"Android 提醒":"Windows 提醒";
+      $("reminderHeading").textContent=android?"Android 系统提醒":"Windows 后台提醒";
+      $("reminderHint").innerHTML=android?"App 关闭后仍可从 WebDAV 后台同步并使用安卓系统通知提醒。后台同步最短 15 分钟；精确时间使用系统闹钟。":"浏览器关闭后仍可提醒。首次使用请双击同目录的 <code>OrglistReminderSetup.cmd</code> 安装 Windows 登录启动项；此处设置需通过 <code>OrglistWebDAV.cmd</code> 打开的页面保存。";
+      $("reminderEnabled").nextElementSibling.textContent=android?"启用 Android 后台提醒":"启用 Windows 后台提醒";
+      $("testReminder").textContent=android?"测试 Android 通知":"测试 Windows 通知";
+      $("exactAlarmPermission").hidden=!android;
+      $("reminderSourceType").disabled=android;if(android)$("reminderSourceType").value="webdav";
+      $("reminderInterval").min=android?"15":"1";if(android&&Number($("reminderInterval").value)<15)$("reminderInterval").value="15"
+    }
+
+    function enhanceDateTimeInputs(){
+      if(typeof document==="undefined")return;
+      document.querySelectorAll("input[data-picker-type]").forEach(input=>{
+        if(input.closest(".dualPickerField"))return;
+        const kind=input.dataset.pickerType,wrapper=document.createElement("div");
+        wrapper.className="dualPickerField";input.parentNode.insertBefore(wrapper,input);wrapper.appendChild(input);
+        const picker=document.createElement("input");picker.type=kind;picker.className="nativePickerProxy";
+        picker.tabIndex=-1;picker.setAttribute("aria-hidden","true");wrapper.appendChild(picker);
+        const button=document.createElement("button");button.type="button";button.className="dateTimePickerButton";
+        button.textContent=kind==="date"?"▣":"◷";button.title=kind==="date"?"打开日期选择器":"打开时间选择器";
+        button.setAttribute("aria-label",button.title);wrapper.appendChild(button);
+        picker.addEventListener("change",()=>{input.value=picker.value;input.dispatchEvent(new Event("input",{bubbles:true}));input.dispatchEvent(new Event("change",{bubbles:true}))});
+        button.addEventListener("click",()=>{
+          const valid=kind==="date"?/^\d{4}-\d{2}-\d{2}$/.test(input.value):/^\d{2}:\d{2}$/.test(input.value);
+          picker.value=valid?input.value:"";
+          try{if(typeof picker.showPicker==="function")picker.showPicker();else picker.click()}catch(_error){picker.click()}
+        })
+      })
     }
     function syncReminderSourceFields(){
       const remote=$("reminderSourceType").value==="webdav";$("reminderLocalFields").hidden=remote;$("reminderWebdavFields").hidden=!remote
@@ -2036,7 +2088,7 @@ print("hello")
       select.value=match?.id||(state.webdavProfiles.length===1?state.webdavProfiles[0].id:"")
     }
     async function loadReminderSettings(){
-      if(!webdavBridgeActive()){fillReminderForm();setReminderStatus("当前是直接打开 HTML 的模式。请通过 OrglistWebDAV.cmd 打开页面后配置 Windows 提醒。","info");return}
+      if(!androidReminderActive()&&!webdavBridgeActive()){fillReminderForm();setReminderStatus("当前是直接打开 HTML 的模式。请通过 OrglistWebDAV.cmd 打开页面后配置 Windows 提醒。","info");return}
       try{const config=await reminderRequest("/reminder-config");fillReminderForm(config);await refreshReminderStatus()}
       catch(error){setReminderStatus(error?.message||String(error),"error")}
     }
@@ -2064,13 +2116,17 @@ print("hello")
     async function refreshReminderStatus(){
       try{const result=await reminderRequest("/reminder-status"),status=result.state||{};
         if(status.lastError){setReminderStatus(`最近检查失败：${status.lastError}`,"error");return}
+        if(status.platform==="android"){
+          const next=status.nextAlarmAt?new Date(status.nextAlarmAt).toLocaleString():"尚未安排";
+          setReminderStatus(`${status.lastSync?`最近同步：${new Date(status.lastSync).toLocaleString()} · `:""}扫描到 ${status.lastTaskCount||0} 个条目 · 下次提醒：${next} · ${status.exactAlarmAllowed?"精确提醒已允许":"当前为近似提醒，请允许精确提醒"}`,status.exactAlarmAllowed?"success":"info");return
+        }
         if(status.lastCheck){setReminderStatus(`最近检查：${status.lastCheck} · ${status.lastSource==="webdav"?"WebDAV":"本地文件夹"} · 扫描到 ${status.lastTaskCount||0} 个条目`,"success");return}
         setReminderStatus(result.scriptAvailable?"提醒助手文件已就绪；安装并启用后会显示最近检查时间。":"没有找到提醒助手文件。",result.scriptAvailable?"info":"error")
       }catch(error){setReminderStatus(error?.message||String(error),"error")}
     }
     async function testReminderNotification(){
       setReminderStatus("正在发送测试通知…");try{await reminderRequest("/reminder-test",{method:"POST",body:"{}"});
-        setReminderStatus("测试通知已发送，请查看 Windows 通知中心。","success")}
+        setReminderStatus(`测试通知已发送，请查看 ${androidReminderActive()?"Android":"Windows"} 通知中心。`,"success")}
       catch(error){setReminderStatus(error?.message||String(error),"error")}
     }
     function saveSettingsForm(){
@@ -4165,6 +4221,7 @@ print("hello")
     function setSearchQuery(value){
       state.query=value;$("search").value=value;state.visible=100;state.customActive=null
     }
+    enhanceDateTimeInputs();
     $("openFolder").onclick=()=>chooseFolder();
     $("openFiles").onclick=()=>chooseFiles();
     $("backView").onclick=goBack;
@@ -4185,6 +4242,7 @@ print("hello")
     $("saveSettings").onclick=saveSettingsForm;$("testWebdav").onclick=()=>testWebdavConnection();
     $("saveReminder").onclick=saveReminderSettings;$("testReminder").onclick=testReminderNotification;
     $("refreshReminder").onclick=refreshReminderStatus;
+    $("exactAlarmPermission").onclick=()=>window.AndroidReminder?.openExactAlarmSettings?.();
     $("reminderSourceType").onchange=syncReminderSourceFields;
     $("applyDefaultFiltersNow").onclick=applyDefaultFiltersNow;
     $("setStartupCurrent").onclick=saveCurrentAsStartup;$("clearStartup").onclick=clearStartupPage;

@@ -229,7 +229,9 @@ WebDAV 会递归扫描子文件夹，默认最多 4 层、80 个目录、500 个
 
 ### 手机独立使用、电脑关机
 
-Android 用户可以安装同目录的 `OrglistAndroid.apk`。Android App 内置原生 WebDAV 网络桥接，打开 App 后直接连接 HTTPS WebDAV，不需要电脑、CMD、同一 Wi-Fi 或云端网页代理。App 只在使用时联网，不需要常驻后台。
+Android 用户可以安装同目录的 `OrglistAndroid.apk`。Android App 内置原生 WebDAV 网络桥接和系统级后台提醒，不需要电脑、CMD、同一 Wi-Fi 或云端网页代理。启用 Android 提醒后，系统会按设置周期在后台同步 WebDAV，并把已知任务交给 Android 系统闹钟提醒。
+
+在“设置 → Android 系统提醒”中选择已经保存的 WebDAV 连接，设置同步间隔、每日汇总时间和 DEADLINE 提前分钟数。后台同步最短为 15 分钟；如需尽量准时，请点击“允许精确提醒”并在系统页面授权。
 
 安装和配置请阅读 [`README-Android.md`](README-Android.md)。
 
