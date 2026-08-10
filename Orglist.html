@@ -615,6 +615,10 @@
       color:var(--red);border-color:var(--red)}
     .configActions{display:flex;flex-wrap:wrap;gap:8px}.configNote{margin-top:9px;color:var(--muted2);
       font-size:8px;line-height:1.6}
+    .aboutCard{padding:15px 16px;background:var(--soft);border:1px solid var(--line);border-radius:10px}
+    .aboutCard strong{display:block;margin-bottom:4px;font-size:14px}.aboutCard p{margin:0;color:var(--muted);
+      font-size:10px;line-height:1.7}.aboutCard dl{margin-top:13px;background:var(--panel)}.aboutCard a{color:var(--accent);
+      font-weight:750;overflow-wrap:anywhere}
     .batchBar{position:sticky;z-index:12;bottom:10px;display:none;align-items:center;flex-wrap:wrap;
       gap:7px;margin:0 0 12px;padding:9px 10px;background:var(--panel);border:1px solid var(--line);
       border-radius:11px;box-shadow:0 13px 36px rgba(28,26,22,.16)}
@@ -1096,7 +1100,9 @@ print("hello")
           <button data-settings-target="settings-startup">启动页</button>
           <button data-settings-target="settings-statuses">Org 自定义状态</button>
           <button data-settings-target="settings-backup">配置备份</button>
+          <button data-settings-target="settings-reminder">Windows 提醒</button>
           <button data-settings-target="settings-webdav">WebDAV</button>
+          <button data-settings-target="settings-about">关于</button>
         </nav>
         <div class="modalBody settingsContent" id="settingsContent">
         <section class="settingsSection" id="settings-display">
@@ -1192,6 +1198,28 @@ print("hello")
             <button class="btn secondary" id="importConfig">导入配置</button></div>
           <div class="configNote">为安全起见，导出的 WebDAV 记录不包含密码；文件访问权限和文件内容也不会被导出。</div>
         </section>
+        <section class="settingsSection" id="settings-reminder">
+          <h3>Windows 后台提醒</h3>
+          <p class="settingsHint">浏览器关闭后仍可提醒。首次使用请双击同目录的 <code>OrglistReminderSetup.cmd</code> 安装 Windows 登录启动项；此处设置需通过 <code>OrglistWebDAV.cmd</code> 打开的页面保存。</p>
+          <div class="settingsGrid">
+            <label class="settingsCheck full"><input id="reminderEnabled" type="checkbox"><span>启用 Windows 后台提醒</span></label>
+            <label class="visualField full"><span>提醒数据来源</span><select id="reminderSourceType"><option value="folder">本地 Org 文件夹</option><option value="webdav">WebDAV</option></select></label>
+            <label class="visualField full" id="reminderLocalFields"><span>扫描 Org 文件夹</span><input id="reminderFolder" autocomplete="off" value="D:\gtd" placeholder="例如：D:\gtd"></label>
+            <div class="settingsGrid full" id="reminderWebdavFields" hidden>
+              <label class="visualField full"><span>使用 WebDAV 设置中的连接</span><select id="reminderWebdavProfile"><option value="">请先在下方 WebDAV 设置保存连接</option></select><small>这里不再重复填写地址和账号。后台读取需要密码；有账号的连接请在下方勾选“保存密码”。</small></label>
+            </div>
+            <label class="visualField"><span>检查间隔（分钟）</span><input id="reminderInterval" type="number" min="1" max="1440" step="1" value="10"><small>默认 10 分钟，可设置 1–1440 分钟。</small></label>
+            <label class="visualField"><span>无具体时间任务的每日提醒时间</span><input id="reminderSummaryTimes" autocomplete="off" value="09:00" placeholder="例如：09:00, 14:00, 20:30"><small>可设置多个，用逗号或空格分隔，最多 12 个。</small></label>
+            <label class="visualField"><span>已经错过提醒时间时</span><select id="reminderMissedPolicy"><option value="latest">立即补发最近一次</option><option value="skip">跳过，等待下一个时间</option></select><small>补发模式不会把多个错过的提醒一起弹出。</small></label>
+            <label class="settingsCheck full"><input id="reminderGroupNotifications" type="checkbox" checked><span>同一轮检查中的多个提醒合并成一条通知</span></label>
+            <label class="visualField"><span>DEADLINE 提前提醒（分钟）</span><input id="reminderAdvance" type="number" min="0" max="10080" step="1" value="15"><small>填 0 表示到期时提醒。</small></label>
+          </div>
+          <div class="webdavActions"><button class="btn primary" id="saveReminder">保存提醒设置</button>
+            <button class="btn secondary" id="testReminder">测试 Windows 通知</button>
+            <button class="btn secondary" id="refreshReminder">刷新状态</button></div>
+          <div class="webdavStatus info" id="reminderStatus">尚未读取提醒助手状态。</div>
+          <div class="configNote">只有日期：每个设定时间汇总提醒一次。若启动时已经错过，可选择立即补发最近一次，或跳过并等待下一个时间。带具体时间的 DEADLINE 仍按提前分钟数单独提醒。</div>
+        </section>
         <section class="settingsSection" id="settings-webdav">
           <h3>WebDAV</h3>
           <p class="settingsHint">从 WebDAV 文件夹读取全部 .org 文件并写回。电脑使用“OrglistWebDAV.cmd”；手机和电脑连接同一 Wi‑Fi 后，使用“启动Org清单-手机WebDAV.cmd”，再在手机打开窗口显示的地址。</p>
@@ -1211,6 +1239,16 @@ print("hello")
           </div>
           <div class="webdavStatus info" id="webdavStatus"></div>
           <div class="profileList" id="webdavProfiles"></div>
+        </section>
+        <section class="settingsSection" id="settings-about">
+          <h3>关于</h3>
+          <div class="aboutCard"><strong>Orglist</strong>
+            <p>面向 Org 文件的本地任务清单与浏览工具。数据默认保存在本地，只有在你主动使用写回或 WebDAV 时才会与文件交互。</p>
+            <dl><div><dt>当前版本</dt><dd>1.3.2</dd></div>
+              <div><dt>项目地址</dt><dd><a href="https://github.com/perfectddt/orglist" target="_blank" rel="noopener noreferrer">github.com/perfectddt/orglist</a></dd></div>
+              <div><dt>使用方式</dt><dd>支持本地 HTML、Android APK 与 WebDAV。</dd></div>
+            </dl>
+          </div>
         </section>
         <div class="modalActions"><button class="btn secondary" id="cancelSettings">取消</button>
           <button class="btn primary" id="saveSettings">保存设置与连接记录</button></div>
@@ -1961,11 +1999,80 @@ print("hello")
       $("customOpenStatuses").value=state.customOpenStatuses.join(" ");
       $("customDoneStatuses").value=state.customDoneStatuses.join(" ");
       renderStartupSummary();
-      setWebdavStatus("");updateWebdavMode();renderWebdavProfiles();renderSettingsOrdering();
+      setWebdavStatus("");updateWebdavMode();renderWebdavProfiles();renderSettingsOrdering();loadReminderSettings();
       if(state.webdavProfiles.length)fillWebdavProfile(state.webdavProfiles[0]);
       $("settingsModal").classList.add("show");requestAnimationFrame(()=>navigateSettings("settings-display","auto"))
     }
     function closeSettings(){$("settingsModal").classList.remove("show")}
+    function reminderEndpoint(path){
+      if(!webdavBridgeActive())return "";
+      const token=new URLSearchParams(window.location.search||"").get("token")||"";
+      return `${window.location.origin}${path}${token?`?token=${encodeURIComponent(token)}`:""}`
+    }
+    function setReminderStatus(message,type="info"){
+      const element=$("reminderStatus");element.textContent=message;element.className=`webdavStatus ${type}`
+    }
+    async function reminderRequest(path,options={}){
+      const url=reminderEndpoint(path);if(!url)throw new Error("请先双击 OrglistWebDAV.cmd，并在它自动打开的页面中设置提醒。");
+      const response=await fetch(url,{...options,headers:{"Content-Type":"application/json",...(options.headers||{})},credentials:"omit"});
+      const value=await response.json().catch(()=>({}));if(!response.ok)throw new Error(value.error||`提醒助手返回 ${response.status}`);return value
+    }
+    function fillReminderForm(config={}){
+      $("reminderEnabled").checked=!!config.enabled;$("reminderSourceType").value=config.sourceType==="webdav"?"webdav":"folder";
+      $("reminderFolder").value=config.folder||"D:\\gtd";
+      state.reminderConfig=config;$("reminderInterval").value=String(config.intervalMinutes||10);
+      $("reminderSummaryTimes").value=(config.dailySummaryTimes||[config.dailySummaryTime||"09:00"]).join(", ");
+      $("reminderMissedPolicy").value=config.missedSummaryPolicy==="skip"?"skip":"latest";
+      $("reminderGroupNotifications").checked=config.groupNotifications!==false;
+      $("reminderAdvance").value=String(config.deadlineAdvanceMinutes??15);renderReminderProfiles(config);syncReminderSourceFields()
+    }
+    function syncReminderSourceFields(){
+      const remote=$("reminderSourceType").value==="webdav";$("reminderLocalFields").hidden=remote;$("reminderWebdavFields").hidden=!remote
+    }
+    function renderReminderProfiles(config={}){
+      const select=$("reminderWebdavProfile");select.innerHTML='<option value="">请先在下方 WebDAV 设置保存连接</option>'+state.webdavProfiles.map(profile=>
+        `<option value="${esc(profile.id)}">${esc(webdavProfileLabel(profile))}</option>`).join("");
+      const match=state.webdavProfiles.find(profile=>profile.url===(config.webdavUrl||"")&&profile.username===(config.webdavUsername||"")&&profile.folder===(config.webdavFolder||""));
+      select.value=match?.id||(state.webdavProfiles.length===1?state.webdavProfiles[0].id:"")
+    }
+    async function loadReminderSettings(){
+      if(!webdavBridgeActive()){fillReminderForm();setReminderStatus("当前是直接打开 HTML 的模式。请通过 OrglistWebDAV.cmd 打开页面后配置 Windows 提醒。","info");return}
+      try{const config=await reminderRequest("/reminder-config");fillReminderForm(config);await refreshReminderStatus()}
+      catch(error){setReminderStatus(error?.message||String(error),"error")}
+    }
+    function readReminderForm(){
+      const remote=$("reminderSourceType").value==="webdav",profile=remote?state.webdavProfiles.find(item=>item.id===$("reminderWebdavProfile").value):null;
+      if(remote&&!profile)throw new Error("请先在下方 WebDAV 设置保存连接，然后在这里选择该连接。");
+      const previous=state.reminderConfig||{},samePrevious=profile&&profile.url===previous.webdavUrl&&profile.username===previous.webdavUsername&&profile.folder===previous.webdavFolder;
+      const password=profile?(profile.password||(samePrevious?previous.webdavPassword||"":"")):"";
+      if(remote&&profile.username&&!password)throw new Error("该 WebDAV 连接没有保存密码。请在下方 WebDAV 设置勾选“保存密码”并重新保存连接。");
+      const times=$("reminderSummaryTimes").value.split(/[,，;；\s]+/).map(item=>item.trim()).filter(Boolean);
+      return {enabled:$("reminderEnabled").checked,sourceType:$("reminderSourceType").value,folder:$("reminderFolder").value.trim(),
+        webdavUrl:profile?.url||"",webdavUsername:profile?.username||"",webdavPassword:password,
+        webdavFolder:profile?.folder||"",webdavRecursive:profile?.recursive!==false,
+        intervalMinutes:Number($("reminderInterval").value)||10,dailySummaryTimes:times,
+        missedSummaryPolicy:$("reminderMissedPolicy").value,
+        groupNotifications:$("reminderGroupNotifications").checked,
+        deadlineAdvanceMinutes:Number($("reminderAdvance").value)||0,
+        doneStatuses:["DONE","CNCL",...parseStatusList($("customDoneStatuses").value)]}
+    }
+    async function saveReminderSettings(){
+      setReminderStatus("正在保存提醒设置…");try{const result=await reminderRequest("/reminder-config",{method:"POST",body:JSON.stringify(readReminderForm())});
+        fillReminderForm(result.config);setReminderStatus("提醒设置已保存。后台助手会在下一轮检查时自动采用新设置。","success")}
+      catch(error){setReminderStatus(error?.message||String(error),"error")}
+    }
+    async function refreshReminderStatus(){
+      try{const result=await reminderRequest("/reminder-status"),status=result.state||{};
+        if(status.lastError){setReminderStatus(`最近检查失败：${status.lastError}`,"error");return}
+        if(status.lastCheck){setReminderStatus(`最近检查：${status.lastCheck} · ${status.lastSource==="webdav"?"WebDAV":"本地文件夹"} · 扫描到 ${status.lastTaskCount||0} 个条目`,"success");return}
+        setReminderStatus(result.scriptAvailable?"提醒助手文件已就绪；安装并启用后会显示最近检查时间。":"没有找到提醒助手文件。",result.scriptAvailable?"info":"error")
+      }catch(error){setReminderStatus(error?.message||String(error),"error")}
+    }
+    async function testReminderNotification(){
+      setReminderStatus("正在发送测试通知…");try{await reminderRequest("/reminder-test",{method:"POST",body:"{}"});
+        setReminderStatus("测试通知已发送，请查看 Windows 通知中心。","success")}
+      catch(error){setReminderStatus(error?.message||String(error),"error")}
+    }
     function saveSettingsForm(){
       state.filterPreference=$("filterPreference").value;state.detailBehavior=$("detailBehavior").value;
       state.customOpenStatuses=parseStatusList($("customOpenStatuses").value);
@@ -4076,6 +4183,9 @@ print("hello")
       navigateSettings(button.dataset.settingsTarget));
     $("settingsContent").onscroll=syncSettingsNavFromScroll;
     $("saveSettings").onclick=saveSettingsForm;$("testWebdav").onclick=()=>testWebdavConnection();
+    $("saveReminder").onclick=saveReminderSettings;$("testReminder").onclick=testReminderNotification;
+    $("refreshReminder").onclick=refreshReminderStatus;
+    $("reminderSourceType").onchange=syncReminderSourceFields;
     $("applyDefaultFiltersNow").onclick=applyDefaultFiltersNow;
     $("setStartupCurrent").onclick=saveCurrentAsStartup;$("clearStartup").onclick=clearStartupPage;
     $("exportConfig").onclick=exportConfiguration;$("importConfig").onclick=()=>$("configImport").click();

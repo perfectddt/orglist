@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import http.client
+import json
 import os
 import secrets
 import socket
+import subprocess
+import sys
 import threading
 import urllib.error
 import urllib.parse
@@ -19,6 +22,93 @@ HTML_NAME = "Orglist.html"
 BASE_DIR = Path(__file__).resolve().parent
 HTML_PATH = BASE_DIR / HTML_NAME
 MAX_BODY = 25 * 1024 * 1024
+REMINDER_CONFIG_PATH = BASE_DIR / "orglist-reminder-config.json"
+REMINDER_STATE_PATH = BASE_DIR / "orglist-reminder-state.json"
+REMINDER_SCRIPT_PATH = BASE_DIR / "orglist-reminder.py"
+REMINDER_DEFAULTS = {
+    "enabled": False,
+    "sourceType": "folder",
+    "folder": r"D:\gtd",
+    "webdavUrl": "",
+    "webdavUsername": "",
+    "webdavPassword": "",
+    "webdavFolder": "",
+    "webdavRecursive": True,
+    "intervalMinutes": 10,
+    "dailySummaryTime": "09:00",
+    "dailySummaryTimes": ["09:00"],
+    "missedSummaryPolicy": "latest",
+    "groupNotifications": True,
+    "deadlineAdvanceMinutes": 15,
+    "doneStatuses": ["DONE", "CNCL"],
+}
+
+
+def read_json_file(path: Path, fallback: object) -> object:
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return fallback
+
+
+def validate_reminder_config(value: object) -> dict:
+    if not isinstance(value, dict):
+        raise ValueError("提醒配置格式无效。")
+    source_type = "webdav" if value.get("sourceType") == "webdav" else "folder"
+    folder = str(value.get("folder", REMINDER_DEFAULTS["folder"])).strip()
+    if source_type == "folder" and (not folder or len(folder) > 1000):
+        raise ValueError("请选择有效的 Org 文件夹。")
+    webdav_url = str(value.get("webdavUrl", "")).strip()
+    if source_type == "webdav" and not webdav_url.lower().startswith(("http://", "https://")):
+        raise ValueError("请选择 WebDAV 时必须填写有效的服务器地址。")
+    try:
+        interval = max(1, min(1440, int(value.get("intervalMinutes", 10))))
+        advance = max(0, min(10080, int(value.get("deadlineAdvanceMinutes", 15))))
+    except (TypeError, ValueError) as error:
+        raise ValueError("检查间隔或提前提醒时间无效。") from error
+    raw_times = value.get("dailySummaryTimes", [value.get("dailySummaryTime", "09:00")])
+    if not isinstance(raw_times, list):
+        raw_times = str(raw_times).replace("，", ",").split(",")
+    summary_times = []
+    for raw_time in raw_times:
+        summary_time = str(raw_time).strip()
+        try:
+            hour, minute = [int(part) for part in summary_time.split(":")]
+            if len(summary_time) != 5 or not 0 <= hour <= 23 or not 0 <= minute <= 59:
+                raise ValueError
+        except (ValueError, TypeError) as error:
+            raise ValueError("每日提醒时间无效，请使用 09:00, 14:30 这样的格式。") from error
+        if summary_time not in summary_times:
+            summary_times.append(summary_time)
+    summary_times = sorted(summary_times)[:12]
+    if not summary_times:
+        raise ValueError("请至少设置一个每日提醒时间。")
+    done_statuses = value.get("doneStatuses", ["DONE", "CNCL"])
+    if not isinstance(done_statuses, list):
+        done_statuses = ["DONE", "CNCL"]
+    return {
+        "enabled": bool(value.get("enabled", False)),
+        "sourceType": source_type,
+        "folder": folder,
+        "webdavUrl": webdav_url,
+        "webdavUsername": str(value.get("webdavUsername", "")).strip(),
+        "webdavPassword": str(value.get("webdavPassword", "")),
+        "webdavFolder": str(value.get("webdavFolder", "")).strip(),
+        "webdavRecursive": bool(value.get("webdavRecursive", True)),
+        "intervalMinutes": interval,
+        "dailySummaryTime": summary_times[0],
+        "dailySummaryTimes": summary_times,
+        "missedSummaryPolicy": "skip" if value.get("missedSummaryPolicy") == "skip" else "latest",
+        "groupNotifications": bool(value.get("groupNotifications", True)),
+        "deadlineAdvanceMinutes": advance,
+        "doneStatuses": [str(item).upper() for item in done_statuses if str(item).strip()],
+    }
+
+
+def save_reminder_config(value: dict) -> None:
+    temporary = REMINDER_CONFIG_PATH.with_suffix(".json.tmp")
+    temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2), encoding="utf-8")
+    temporary.replace(REMINDER_CONFIG_PATH)
 
 
 class OrgWebDavHandler(BaseHTTPRequestHandler):
@@ -29,10 +119,61 @@ class OrgWebDavHandler(BaseHTTPRequestHandler):
         print(f"[本地桥接] {self.command} {self.path.split('?', 1)[0]}")
 
     def do_GET(self) -> None:
+        parsed = urllib.parse.urlparse(self.path)
+        if parsed.path == "/reminder-config":
+            if self._authorized():
+                value = read_json_file(REMINDER_CONFIG_PATH, dict(REMINDER_DEFAULTS))
+                self._send_json(200, value)
+            return
+        if parsed.path == "/reminder-status":
+            if self._authorized():
+                state = read_json_file(REMINDER_STATE_PATH, {})
+                self._send_json(200, {"state": state, "scriptAvailable": REMINDER_SCRIPT_PATH.exists()})
+            return
         if self.path.startswith("/webdav-proxy?"):
             self._proxy()
             return
         self._serve_html()
+
+    def do_POST(self) -> None:
+        parsed = urllib.parse.urlparse(self.path)
+        if parsed.path not in {"/reminder-config", "/reminder-test"}:
+            self._send_text(404, "未知的本地桥接操作。")
+            return
+        if not self._authorized():
+            return
+        if parsed.path == "/reminder-config":
+            try:
+                value = validate_reminder_config(self._read_json_body())
+                save_reminder_config(value)
+                self._send_json(200, {"ok": True, "config": value})
+            except (OSError, ValueError) as error:
+                self._send_json(400, {"ok": False, "error": str(error)})
+            return
+        if not REMINDER_SCRIPT_PATH.exists():
+            self._send_json(404, {"ok": False, "error": "没有找到 Windows 提醒助手。"})
+            return
+        try:
+            flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+            result = subprocess.run(
+                [sys.executable, str(REMINDER_SCRIPT_PATH), "--test-notification"],
+                capture_output=True,
+                text=True,
+                timeout=20,
+                creationflags=flags,
+            )
+            if result.returncode:
+                raise RuntimeError((result.stderr or result.stdout or "通知发送失败").strip())
+            self._send_json(200, {"ok": True})
+        except Exception as error:
+            self._send_json(500, {"ok": False, "error": str(error)})
+
+    def do_OPTIONS(self) -> None:
+        self.send_response(204)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PROPFIND, PUT")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, Depth, If-Match")
+        self.end_headers()
 
     def do_PROPFIND(self) -> None:
         self._proxy()
@@ -154,6 +295,28 @@ class OrgWebDavHandler(BaseHTTPRequestHandler):
         self.send_header("Cache-Control", "no-store")
         self.end_headers()
         self.wfile.write(body)
+
+    def _send_json(self, status: int, value: object) -> None:
+        body = json.dumps(value, ensure_ascii=False).encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _read_json_body(self) -> object:
+        try:
+            length = int(self.headers.get("Content-Length", "0") or "0")
+        except ValueError as error:
+            raise ValueError("请求长度无效。") from error
+        if length <= 0 or length > 128 * 1024:
+            raise ValueError("提醒配置内容为空或过大。")
+        try:
+            return json.loads(self.rfile.read(length).decode("utf-8"))
+        except (UnicodeDecodeError, ValueError) as error:
+            raise ValueError("提醒配置不是有效 JSON。") from error
 
     def _authorized(self) -> bool:
         expected = getattr(self.server, "access_token", "")

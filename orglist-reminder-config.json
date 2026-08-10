@@ -1,0 +1,24 @@
+{
+  "enabled": true,
+  "sourceType": "webdav",
+  "folder": "D:\\gtd",
+  "webdavUrl": "https://dav.jianguoyun.com/dav/",
+  "webdavUsername": "1505107887@qq.com",
+  "webdavPassword": "ae78qzqntaztffnr",
+  "webdavFolder": "gtd/",
+  "webdavRecursive": true,
+  "intervalMinutes": 30,
+  "dailySummaryTime": "09:00",
+  "dailySummaryTimes": [
+    "09:00",
+    "14:00",
+    "20:30"
+  ],
+  "missedSummaryPolicy": "latest",
+  "groupNotifications": true,
+  "deadlineAdvanceMinutes": 60,
+  "doneStatuses": [
+    "DONE",
+    "CNCL"
+  ]
+}
