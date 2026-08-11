@@ -22,7 +22,7 @@
       --yellow:#d8af61;--yellowSoft:#3b3120;--red:#e7837d;--redSoft:#422725;
       --shadow:0 18px 45px rgba(0,0,0,.22)
     }
-    *{box-sizing:border-box}
+    *{box-sizing:border-box}[hidden]{display:none!important}
     html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);
       font-family:Inter,"PingFang SC","Microsoft YaHei",system-ui,sans-serif}
     button,input,select{font:inherit;color:inherit}
@@ -300,7 +300,7 @@
       background:var(--soft);border:1px solid var(--line);border-radius:7px;font-size:9px}
     .calendarTitleRow{display:flex;align-items:flex-end;justify-content:space-between;gap:15px;margin:2px 0 12px}
     .calendarTitleRow h2{margin:0;font:520 22px Georgia,"Songti SC",serif}.calendarTitleRow span{
-      color:var(--muted);font-size:10px}
+      color:var(--muted);font-size:10px}.calendarTitleRow b{color:var(--accent)}
     .monthWeekdays,.monthGrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
     .monthWeekdays{color:var(--muted2);font-size:9px;text-align:center}.monthWeekdays span{padding:8px}
     .monthGrid{overflow:hidden;background:var(--line);border:1px solid var(--line);border-radius:12px;gap:1px}
@@ -313,7 +313,9 @@
     .dayCountSlash{padding:0 2px 0 1px;color:var(--muted2);opacity:.72}.dayCountTotal{display:inline-flex;
       align-items:center;justify-content:center;min-width:24px;height:22px;padding:0 6px;color:#fff;background:var(--accent);
       border-radius:99px;font-size:13px;font-weight:950;line-height:1;font-variant-numeric:tabular-nums}
-    .dayTasks{display:grid;gap:4px;margin-top:7px}.dayTask{overflow:hidden;padding:3px 5px;color:var(--blue);
+    .dayMeta{display:flex;align-items:center;gap:5px;min-width:0;margin-top:5px;font-size:8px;line-height:1.2}
+    .dayLunar{flex:0 0 auto;color:var(--muted2)}.dayFestival{overflow:hidden;color:var(--accent);
+      font-weight:850;text-overflow:ellipsis;white-space:nowrap}.dayTasks{display:grid;gap:4px;margin-top:7px}.dayTask{overflow:hidden;padding:3px 5px;color:var(--blue);
       background:var(--blueSoft);border-radius:4px;font-size:8px;text-overflow:ellipsis;white-space:nowrap}
     .yearGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}.yearMonth{
       min-height:142px;padding:13px;background:var(--panel);border:1px solid var(--line);border-radius:12px;
@@ -321,7 +323,9 @@
     .yearMonthHead{display:flex;justify-content:space-between;gap:8px}.yearMonthHead strong{font-size:13px}
     .yearMonthHead span{color:var(--accent);font-size:10px;font-weight:800}.yearMonthDates{display:flex;
       flex-wrap:wrap;gap:5px;margin-top:13px}.yearMonthDates span{padding:4px 6px;color:var(--muted);
-      background:var(--soft);border-radius:5px;font-size:8px}
+      background:var(--soft);border-radius:5px;font-size:8px}.yearMonthFestivals{display:flex;flex-wrap:wrap;
+      gap:4px;margin-top:9px}.yearMonthFestivals span{padding:3px 5px;color:var(--accent);background:var(--accentSoft);
+      border-radius:5px;font-size:7px;font-weight:800}
     .weekGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.weekDay,.weekPicker{
       min-width:0;min-height:230px;padding:13px;background:var(--panel);border:1px solid var(--line);
       border-radius:12px;box-shadow:var(--shadow)}.weekDay.todayCell{box-shadow:inset 0 3px 0 var(--accent),var(--shadow)}
@@ -334,6 +338,7 @@
     .weekChoice:hover,.weekChoice.active{color:var(--text);border-color:var(--accent);background:var(--accentSoft)}
     .weekDayHead{padding-bottom:9px;border-bottom:1px solid var(--line);font-size:10px;font-weight:800}
     .weekDayHead span{display:block;margin-top:3px;color:var(--muted);font-size:8px;font-weight:500}
+    .weekDayHead .weekFestival{display:inline;margin-left:5px;color:var(--accent);font-weight:850}
     .weekItems{display:grid;gap:6px;margin-top:9px}.calendarTaskButton{width:100%;padding:7px 8px;
       overflow:hidden;color:var(--text);background:var(--soft);border:1px solid var(--line);border-radius:7px;
       font-size:9px;text-align:left;text-overflow:ellipsis;white-space:nowrap}.calendarTaskButton.isDone{
@@ -587,6 +592,8 @@
       font-weight:750;text-align:left}.settingsNav button:hover{color:var(--accent);background:var(--accentSoft)}
     .settingsNav button.active{color:#fff;background:var(--accent)}.settingsContent{min-height:0;overflow:auto;
       scroll-behavior:smooth}.settingsSection{scroll-margin-top:18px;padding:0 0 20px}
+    .settingsNav button.settingsNavSub{padding-left:24px;font-size:9px;font-weight:700}.settingsNavSub::before{
+      content:"·";margin-right:6px;color:var(--accent)}.settingsNav button.settingsNavSub.active::before{color:#fff}
     .settingsSection+.settingsSection{padding-top:20px;border-top:1px solid var(--line)}
     .settingsSection h3{margin:0 0 6px;font-size:12px}.settingsHint{margin:0 0 13px;color:var(--muted);
       font-size:9px;line-height:1.65}.settingsGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
@@ -605,6 +612,63 @@
       color:var(--accent);border-color:var(--accent)}.settingsOrderMove:disabled{opacity:.25}
     .webdavActions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.webdavStatus{
       display:none;margin-top:10px;padding:9px 11px;border-radius:8px;font-size:9px;line-height:1.6}
+    .reminderUtilityActions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+    .planningEditorGroup{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;
+      padding:11px;background:var(--soft);border:1px solid var(--line);border-radius:10px}
+    .planningEditorTitle{grid-column:1/-1;color:var(--text);font-size:10px;font-weight:850}
+    .planningEditorGroup .settingsCheck{grid-column:1/-1;background:var(--panel)}
+    .specialScheduleGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .specialScheduleCard{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start;gap:9px;
+      padding:11px;background:var(--soft);border:1px solid var(--line);border-radius:10px}
+    .specialScheduleCard .settingsCheck,.specialScheduleCard .specialScheduleHint{grid-column:1/-1}
+    .specialScheduleCard .settingsCheck{margin:0;background:var(--panel)}
+    .specialScheduleHint{margin:0;color:var(--muted);font-size:8px;line-height:1.55}
+    .reminderSubnav{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 13px;padding:4px;background:var(--soft);
+      border:1px solid var(--line);border-radius:10px}
+    .reminderSubnav button{padding:7px 11px;color:var(--muted);background:transparent;border:0;border-radius:7px;
+      font-size:9px;font-weight:800;cursor:pointer}.reminderSubnav button.active{color:#fff;background:var(--accent)}
+    .reminderSubsection{display:none}.reminderSubsection.active{display:block}.reminderSubsection h4{margin:0 0 10px;font-size:10px}
+    .reminderSyncCard,.reminderPropertyCard,.reminderTimingCard{padding:12px;background:var(--soft);
+      border:1px solid var(--line);border-radius:10px}.reminderSyncHead,.reminderCardHead{margin-bottom:9px}
+    .reminderSyncHead strong,.reminderCardHead strong{display:block;font-size:10px}.reminderSyncHead small,
+    .reminderCardHead small{display:block;margin-top:3px;color:var(--muted2);font-size:8px;line-height:1.55}
+    .reminderSyncControls{display:grid;grid-template-columns:minmax(130px,190px) minmax(170px,max-content);gap:8px;align-items:end}
+    .reminderSyncControls label{display:flex;flex-direction:column;gap:5px;color:var(--muted);font-size:9px;font-weight:800}
+    .reminderSyncControls input{width:100%;min-height:40px;padding:9px 11px;color:var(--text);background:var(--panel);
+      border:1px solid var(--line);border-radius:8px;outline:0}.reminderSyncControls .btn{min-height:40px;white-space:nowrap}
+    .reminderTimingGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .reminderTimingCard .visualField input{background:var(--panel)}.reminderPropertyGrid{display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.reminderPropertyGrid .visualField input{background:var(--panel)}
+    .reminderClearPanel{margin-top:10px;padding:10px 11px;background:var(--soft);
+      border:1px solid var(--line);border-radius:8px}
+    .reminderClearPanel[hidden]{display:none}
+    .reminderClearRow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    .reminderClearRow label{display:flex;flex-direction:column;gap:5px;color:var(--muted);
+      font-size:9px;font-weight:800}
+    .reminderClearRow input{width:100%;padding:9px 10px;color:var(--text);background:var(--panel);
+      border:1px solid var(--line);border-radius:7px;font:inherit;font-size:11px}
+    .reminderClearActions{display:flex;flex-wrap:wrap;gap:8px;margin-top:9px}
+    .reminderClearActions .btn{padding:8px 10px;font-size:10px}
+    .alarmSoundRow{display:flex;gap:6px;min-width:0}
+    .alarmSoundRow input{flex:1 1 auto;width:0}
+    .alarmSoundRow button{flex:0 0 auto}
+    .stateEditorText{width:100%;min-height:320px;padding:10px 11px;color:var(--text);
+      background:var(--soft);border:1px solid var(--line);border-radius:8px;font:inherit;
+      font-family:ui-monospace,"Cascadia Code","Microsoft YaHei",monospace;font-size:11px;line-height:1.55;
+      resize:vertical;outline:0}
+    .stateEditorText:focus{border-color:var(--accent)}
+    .reminderClearPreview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:9px}
+    .reminderClearPreview[hidden]{display:none}
+    .reminderClearPreviewCard{min-width:0;padding:8px 9px;background:var(--panel);
+      border:1px solid var(--line);border-radius:8px}
+    .reminderClearPreviewCard strong{display:block;margin-bottom:4px;color:var(--muted);font-size:9px}
+    .reminderClearPreviewCard .reminderClearCount{display:block;margin-bottom:6px;color:var(--text);
+      font-size:11px;font-weight:800}
+    .reminderClearRecords{max-height:150px;overflow:auto;display:grid;gap:3px;padding-right:2px}
+    .reminderClearRecord{padding:4px 6px;color:var(--muted);background:var(--soft);border-radius:5px;
+      font-size:9px;line-height:1.45;overflow-wrap:anywhere}
+    .reminderClearRecord.removed{color:var(--red);background:var(--redSoft)}
+    .reminderClearMore{margin-top:4px;color:var(--muted2);font-size:8px;text-align:center}
     .bridgeMode{display:flex;align-items:flex-start;gap:9px;margin:0 0 12px;padding:10px 11px;
       color:var(--muted);background:var(--soft);border:1px solid var(--line);border-radius:8px;
       font-size:9px;line-height:1.65}.bridgeMode strong{color:var(--text)}
@@ -666,6 +730,7 @@
       .monthWeekdays{font-size:7px}.monthWeekdays span{padding:6px 0}.calendarDay{min-height:70px;padding:5px}
       .dayTop{align-items:flex-start;flex-direction:column;gap:3px}.dayNumber{font-size:13px}.dayCount{
         min-width:0;height:auto;padding:0;font-size:9px}.dayCountTotal{min-width:22px;height:20px;padding:0 5px;font-size:11px}.dayTasks{display:none}
+      .dayMeta{display:grid;gap:2px;margin-top:4px;font-size:7px}.dayFestival{max-width:100%}
       .calendarTitleRow{align-items:flex-start}.calendarTitleRow h2{font-size:18px}.calendarTitleRow span{
         max-width:150px;font-size:8px;text-align:right}.settingsDialog{width:min(720px,96vw)}
       .settingsOrderGrid{grid-template-columns:1fr}
@@ -674,6 +739,8 @@
         scrollbar-width:thin}.settingsNav button{flex:0 0 auto;width:auto;margin:0;padding:7px 10px;white-space:nowrap}}
     @media(max-width:460px){.filters,.settingsGrid{grid-template-columns:1fr}.settingsGrid .full{grid-column:1}
       .fields,.smartChoiceGrid,.visualForm{grid-template-columns:1fr}
+      .planningEditorGroup,.specialScheduleGrid,.reminderSyncControls,.reminderTimingGrid,.reminderPropertyGrid{grid-template-columns:1fr}
+      .reminderSyncControls .btn{width:100%}
       .editorFindBar{grid-template-columns:repeat(4,1fr)}.editorFindBar input{grid-column:1/-1}
       .visualField.full,.visualSource,.bulkPanel{grid-column:1}.bulkPanel{grid-template-columns:1fr}.bulkPanel .full{grid-column:1}
       .orgGuideGrid{grid-template-columns:1fr}.orgGuideGrid .guideCode{border-right:0}
@@ -681,6 +748,7 @@
       .task{padding:15px 13px}.path{display:none}.yearGrid{grid-template-columns:1fr}
       .calendarDay{min-height:60px;padding:4px}.dayNumber{font-size:12px}.dayCount{min-width:0;height:auto;padding:0;font-size:8px}
       .dayCountTotal{min-width:20px;height:18px;padding:0 4px;font-size:10px}
+      .dayMeta{font-size:6px}.dayFestival{max-width:46px}
       .weekGrid{gap:6px}.weekDay,.weekPicker{min-height:200px;padding:9px}.calendarTaskButton{padding:6px;font-size:8px}}
   </style>
 </head>
@@ -741,6 +809,7 @@
             <div class="headingActions">
               <button class="fileEditButton" id="editCurrentFile">编辑整个文件</button>
               <button class="fileEditButton" id="writeCurrentFile">写回整个文件</button>
+              <button class="fileEditButton" id="refreshReminderTop" title="按当前提醒来源立即重新扫描并安排提醒">立即刷新提醒</button>
               <div class="modeSwitch" role="tablist" aria-label="查看模式">
                 <button id="globalMode" class="active" role="tab">全局清单</button>
                 <button id="hierMode" role="tab">层级浏览</button>
@@ -831,6 +900,7 @@
             <input id="batchDate" type="text" inputmode="numeric" data-picker-type="date" placeholder="YYYY-MM-DD" aria-label="批量日期">
             <input id="batchTime" type="text" inputmode="numeric" data-picker-type="time" placeholder="HH:MM" aria-label="批量时间">
             <button id="applyBatchStatus">应用批量修改</button>
+            <button id="moveBatchAsChild">移为子项</button>
             <button id="writeBatch">写回已修改文件</button>
             <button class="batchDanger" id="deleteBatch">删除</button>
             <button id="clearBatch">取消</button>
@@ -965,6 +1035,8 @@
               <option value="">无优先级</option><option value="A">A</option><option value="B">B</option><option value="C">C</option>
             </select></label>
             <label class="visualField full"><span>所有条目追加标签</span><input id="bulkDefaultTags" autocomplete="off" placeholder="例如：收集箱, 工作"></label>
+            <label class="settingsCheck"><input id="bulkScheduledAlarm" type="checkbox"><span>SCHEDULED 闹钟声音</span></label>
+            <label class="settingsCheck"><input id="bulkDeadlineAlarm" type="checkbox"><span>DEADLINE 闹钟声音</span></label>
             <div class="bulkPreview" id="bulkPreview"></div>
           </div>
           <label class="visualField full visualSingleOnly"><span>标题 *</span><input id="visualTitle" maxlength="240" autocomplete="off" placeholder="例如：整理报名材料"></label>
@@ -977,10 +1049,31 @@
           </select></label>
           <label class="visualField full visualSingleOnly"><span>标签</span><input id="visualTags" autocomplete="off" placeholder="工作, 报名, 重要">
             <small>可用逗号、空格或冒号分隔，保存时会转换为 Org 的 :标签: 格式。</small></label>
-          <label class="visualField visualSingleOnly"><span>SCHEDULED 日期</span><input id="visualScheduledDate" type="text" inputmode="numeric" data-picker-type="date" placeholder="YYYY-MM-DD"></label>
-          <label class="visualField visualSingleOnly"><span>SCHEDULED 时间</span><input id="visualScheduledTime" type="text" inputmode="numeric" data-picker-type="time" placeholder="HH:MM"></label>
-          <label class="visualField visualSingleOnly"><span>DEADLINE 日期</span><input id="visualDeadlineDate" type="text" inputmode="numeric" data-picker-type="date" placeholder="YYYY-MM-DD"></label>
-          <label class="visualField visualSingleOnly"><span>DEADLINE 时间</span><input id="visualDeadlineTime" type="text" inputmode="numeric" data-picker-type="time" placeholder="HH:MM"></label>
+          <div class="planningEditorGroup full visualSingleOnly">
+            <div class="planningEditorTitle">SCHEDULED 计划时间</div>
+            <label class="visualField"><span>日期</span><input id="visualScheduledDate" type="text" inputmode="numeric" data-picker-type="date" placeholder="YYYY-MM-DD"></label>
+            <label class="visualField"><span>时间</span><input id="visualScheduledTime" type="text" inputmode="numeric" data-picker-type="time" placeholder="HH:MM"></label>
+            <label class="settingsCheck"><input id="visualScheduledAlarm" type="checkbox"><span>SCHEDULED 闹钟声音</span><small>在“计划时间－SCHEDULED 提前分钟数”触发；不影响系统通知。</small></label>
+          </div>
+          <div class="planningEditorGroup full visualSingleOnly">
+            <div class="planningEditorTitle">DEADLINE 截止时间</div>
+            <label class="visualField"><span>日期</span><input id="visualDeadlineDate" type="text" inputmode="numeric" data-picker-type="date" placeholder="YYYY-MM-DD"></label>
+            <label class="visualField"><span>时间</span><input id="visualDeadlineTime" type="text" inputmode="numeric" data-picker-type="time" placeholder="HH:MM"></label>
+            <label class="settingsCheck"><input id="visualDeadlineAlarm" type="checkbox"><span>DEADLINE 闹钟声音</span><small>在“截止时间－DEADLINE 提前分钟数”触发；不影响系统通知。</small></label>
+          </div>
+          <div class="specialScheduleGrid full visualSingleOnly">
+            <div class="specialScheduleCard">
+              <label class="settingsCheck"><input id="visualHabit" type="checkbox"><span>习惯（Org Habit）</span><small>完成本次后记录历史，并自动推进下一次 SCHEDULED。</small></label>
+              <label class="visualField full"><span>重复规则</span><input id="visualHabitRepeat" autocomplete="off" placeholder="例如：.+1d、++1w、++1m"></label>
+              <p class="specialScheduleHint"><code>.+</code> 从实际完成日继续；<code>++</code> 保持固定节奏；<code>+</code> 从原计划日顺延。习惯必须设置 SCHEDULED 日期。</p>
+            </div>
+            <div class="specialScheduleCard">
+              <label class="settingsCheck"><input id="visualLunar" type="checkbox"><span>农历周年</span><small>按农历月日每年显示并参与系统通知。</small></label>
+              <label class="visualField"><span>农历月</span><input id="visualLunarMonth" type="number" min="1" max="12" step="1" placeholder="1–12"></label>
+              <label class="visualField"><span>农历日</span><input id="visualLunarDay" type="number" min="1" max="30" step="1" placeholder="1–30"></label>
+              <p class="specialScheduleHint">保存为 <code>&lt;%%(diary-chinese-anniversary 月 日)&gt;</code>；农历周年不是 Habit，不会自动写入 <code>:STYLE: habit</code>。</p>
+            </div>
+          </div>
           <label class="visualField visualSingleOnly"><span>CLOSED 日期</span><input id="visualClosedDate" type="text" inputmode="numeric" data-picker-type="date" placeholder="YYYY-MM-DD"></label>
           <label class="visualField visualSingleOnly"><span>CLOSED 时间</span><input id="visualClosedTime" type="text" inputmode="numeric" data-picker-type="time" placeholder="HH:MM"></label>
           <label class="visualField full visualSingleOnly"><span>正文与备注</span><textarea id="visualBody" spellcheck="false" placeholder="可输入普通文字、列表、链接等 Org 内容"></textarea></label>
@@ -1019,6 +1112,25 @@
       </div>
     </div>
   </div>
+  <div class="modalBackdrop" id="batchMoveModal" role="dialog" aria-modal="true" aria-labelledby="batchMoveTitle">
+    <div class="modal" style="width:min(680px,96vw)">
+      <div class="modalHead"><h2 id="batchMoveTitle">批量移为子项</h2><button class="iconBtn" id="closeBatchMove" aria-label="关闭">×</button></div>
+      <div class="modalBody">
+        <div class="deleteSummary" id="batchMoveSummary"></div>
+        <div class="visualForm">
+          <label class="visualField"><span>目标文件</span><select id="batchMoveFile"></select></label>
+          <label class="visualField"><span>目标父项</span><select id="batchMoveParent"></select>
+            <small>所选条目会依次放到该条目的子项末尾，并自动调整标题星号层级。</small></label>
+          <div class="visualSource" id="batchMoveDestination"></div>
+        </div>
+        <p class="editWarning">移动包含每个所选标题的完整子树。若同时选中父项和它的子项，只移动父项一次；操作先应用到当前页面，之后仍需写回涉及的文件。</p>
+        <div class="modalActions">
+          <button class="btn secondary" id="cancelBatchMove">取消</button>
+          <button class="btn primary" id="applyBatchMove">移到目标父项下</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="modalBackdrop" id="deleteModal" role="dialog" aria-modal="true" aria-labelledby="deleteTitle">
     <div class="modal" style="width:min(600px,96vw)">
       <div class="modalHead"><h2 id="deleteTitle">删除 Org 条目</h2><button class="iconBtn" id="closeDelete" aria-label="关闭">×</button></div>
@@ -1052,6 +1164,13 @@ CLOSED: [2026-07-30 Thu 09:45]</code></div><div>CNCL 表示已取消，也按已
 :OWNER: 张三
 :ORG_GTD: Calendar
 :END:</code></div><div>属性抽屉。属性名写在两个冒号之间。</div>
+          <div class="guideCode"><code>* NEXT 每天阅读
+SCHEDULED: &lt;2026-08-11 Tue .+1d&gt;
+:PROPERTIES:
+:STYLE: habit
+:END:</code></div><div>Org Habit。<code>.+</code> 按实际完成日顺延，<code>++</code> 保持固定周期；在页面点完成会记录历史并续期。</div>
+          <div class="guideCode"><code>* NEXT 农历生日
+&lt;%%(diary-chinese-anniversary 8 15)&gt;</code></div><div>农历周年。两个数字分别是农历月和日，不要再添加 <code>:STYLE: habit</code>。</div>
           <div class="guideCode"><code>- [ ] 未完成
 - [X] 已完成
 1. 有序列表</code></div><div>项目符号、复选框和有序列表。</div>
@@ -1103,11 +1222,15 @@ print("hello")
           <button class="active" data-settings-target="settings-display" aria-current="true">显示与点击行为</button>
           <button data-settings-target="settings-sidebar-order">侧栏排序</button>
           <button data-settings-target="settings-defaults">默认筛选条件</button>
+          <button data-settings-target="settings-add-defaults">新增条目默认项</button>
           <button data-settings-target="settings-quadrant">四象限默认定义</button>
           <button data-settings-target="settings-startup">启动页</button>
           <button data-settings-target="settings-statuses">Org 自定义状态</button>
           <button data-settings-target="settings-backup">配置备份</button>
           <button id="reminderNavLabel" data-settings-target="settings-reminder">Windows 提醒</button>
+          <button class="settingsNavSub" data-settings-target="settings-reminder-source">数据与同步</button>
+          <button class="settingsNavSub" data-settings-target="settings-reminder-rules">提醒规则</button>
+          <button class="settingsNavSub" data-settings-target="settings-reminder-alarm">闹钟与维护</button>
           <button data-settings-target="settings-webdav">WebDAV</button>
           <button data-settings-target="settings-about">关于</button>
         </nav>
@@ -1143,7 +1266,8 @@ print("hello")
           <p class="settingsHint">每次重新打开一批 Org 文件时自动采用这些条件。即使设置了启动页，默认状态、优先级、排序、日期字段和布局仍优先于启动页中曾保存的筛选。</p>
           <div class="settingsGrid">
             <label class="visualField"><span>默认清单（未设置启动页时）</span><select id="defaultView">
-              <option value="open">待办</option><option value="today">今天</option><option value="upcoming">未来</option>
+              <option value="open">待办</option><option value="today">今天</option><option value="habits">习惯</option>
+              <option value="upcoming">未来</option>
               <option value="overdue">已逾期</option><option value="no-date">无日期</option>
               <option value="completed">已完成</option><option value="all">全部条目</option>
             </select></label>
@@ -1166,6 +1290,18 @@ print("hello")
           </div>
           <div class="configActions" style="margin-top:12px"><button class="btn primary" id="applyDefaultFiltersNow">保存为默认并立即应用</button></div>
           <div class="configNote" id="defaultFilterStartupHint"></div>
+        </section>
+        <section class="settingsSection" id="settings-add-defaults">
+          <h3>新增条目默认项</h3>
+          <p class="settingsHint">控制点击“＋”打开新增窗口时，新条目默认放到哪里。“当前浏览位置”指层级视图中你展开或选中的标题位置。</p>
+          <div class="settingsGrid">
+            <label class="visualField"><span>默认添加位置</span><select id="addPositionDefault">
+              <option value="auto">层级视图用当前浏览位置；其他视图用上次父级（推荐）</option>
+              <option value="last-parent">总是使用上次添加条目的父级标题</option>
+              <option value="selected">总是使用当前选中条目作为父级（旧行为）</option>
+              <option value="top">总是顶层（H1）</option>
+            </select><small>“上次父级”指上一次新增条目的父级标题；连续新增会排在同一个父级下，而不是嵌套进刚添加的条目。</small></label>
+          </div>
         </section>
         <section class="settingsSection" id="settings-quadrant">
           <h3>四象限默认定义</h3>
@@ -1208,26 +1344,87 @@ print("hello")
         <section class="settingsSection" id="settings-reminder">
           <h3 id="reminderHeading">Windows 后台提醒</h3>
           <p class="settingsHint" id="reminderHint">浏览器关闭后仍可提醒。首次使用请双击同目录的 <code>OrglistReminderSetup.cmd</code> 安装 Windows 登录启动项；此处设置需通过 <code>OrglistWebDAV.cmd</code> 打开的页面保存。</p>
-          <div class="settingsGrid">
+          <div class="reminderSubnav" id="reminderSubnav">
+            <button type="button" class="active" data-reminder-section="source">数据与同步</button>
+            <button type="button" data-reminder-section="rules">提醒规则</button>
+            <button type="button" data-reminder-section="alarm">闹钟与维护</button>
+          </div>
+          <div class="reminderSubsection active" data-reminder-panel="source"><h4>数据来源与后台检查</h4><div class="settingsGrid">
             <label class="settingsCheck full"><input id="reminderEnabled" type="checkbox"><span>启用 Windows 后台提醒</span></label>
             <label class="visualField full" id="reminderSourceField"><span>提醒数据来源</span><select id="reminderSourceType"><option value="folder">本地 Org 文件夹</option><option value="webdav">WebDAV</option></select></label>
             <label class="visualField full" id="reminderLocalFields"><span>扫描 Org 文件夹</span><input id="reminderFolder" autocomplete="off" value="D:\gtd" placeholder="例如：D:\gtd"></label>
             <div class="settingsGrid full" id="reminderWebdavFields" hidden>
               <label class="visualField full"><span>使用 WebDAV 设置中的连接</span><select id="reminderWebdavProfile"><option value="">请先在下方 WebDAV 设置保存连接</option></select><small>这里不再重复填写地址和账号。后台读取需要密码；有账号的连接请在下方勾选“保存密码”。</small></label>
             </div>
-            <label class="visualField"><span>检查间隔（分钟）</span><input id="reminderInterval" type="number" min="1" max="1440" step="1" value="10"><small>默认 10 分钟，可设置 1–1440 分钟。</small></label>
+            <div class="reminderSyncCard full"><div class="reminderSyncHead"><strong>检查与立即刷新</strong>
+              <small>后台按间隔自动检查；修改时间后可立即重新读取当前来源并安排提醒。</small></div>
+              <div class="reminderSyncControls"><label><span>检查间隔（分钟）</span><input id="reminderInterval" type="number" min="1" max="1440" step="1" value="10" title="检查间隔（分钟），可设置 1–1440"></label>
+                <button class="btn secondary" id="syncReminderNow" title="立即重新读取当前提醒来源、安排提醒并自动显示最新运行状态">立即刷新提醒</button></div></div>
+          </div></div>
+          <div class="reminderSubsection" data-reminder-panel="rules"><h4>提醒时间与 Org 闹钟属性</h4><div class="settingsGrid">
             <label class="visualField"><span>无具体时间任务的每日提醒时间</span><input id="reminderSummaryTimes" autocomplete="off" value="09:00" placeholder="例如：09:00, 14:00, 20:30"><small>可设置多个，用逗号或空格分隔，最多 12 个。</small></label>
             <label class="visualField"><span>已经错过提醒时间时</span><select id="reminderMissedPolicy"><option value="latest">立即补发最近一次</option><option value="skip">跳过，等待下一个时间</option></select><small>补发模式不会把多个错过的提醒一起弹出。</small></label>
             <label class="settingsCheck full"><input id="reminderGroupNotifications" type="checkbox" checked><span>同一轮检查中的多个提醒合并成一条通知</span></label>
-            <label class="visualField"><span>DEADLINE 提前提醒（分钟）</span><input id="reminderAdvance" type="number" min="0" max="10080" step="1" value="15"><small>填 0 表示到期时提醒。</small></label>
+            <div class="reminderTimingGrid full">
+              <div class="reminderTimingCard"><div class="reminderCardHead"><strong>SCHEDULED 提前提醒</strong><small>相对计划开始时间提前触发；填 0 表示开始时提醒。</small></div>
+                <label class="visualField"><span>提前分钟数</span><input id="scheduledAdvance" type="number" min="0" max="10080" step="1" value="0"></label></div>
+              <div class="reminderTimingCard"><div class="reminderCardHead"><strong>DEADLINE 提前提醒</strong><small>相对截止时间提前触发；填 0 表示到期时提醒。</small></div>
+                <label class="visualField"><span>提前分钟数</span><input id="reminderAdvance" type="number" min="0" max="10080" step="1" value="15"></label></div>
+            </div>
+            <div class="reminderPropertyCard full"><div class="reminderCardHead"><strong>Org 闹钟属性名</strong>
+              <small>用于条目编辑器写入和后台扫描。只能使用字母、数字、下划线或连字符，三个名称不能重复。</small></div>
+              <div class="reminderPropertyGrid">
+                <label class="visualField"><span>SCHEDULED 属性</span><input id="scheduledAlarmProperty" autocomplete="off" value="SCHEDULED_ALARM"><small>默认 :SCHEDULED_ALARM: true</small></label>
+                <label class="visualField"><span>DEADLINE 属性</span><input id="deadlineAlarmProperty" autocomplete="off" value="DEADLINE_ALARM"><small>默认 :DEADLINE_ALARM: true</small></label>
+                <label class="visualField"><span>旧版兼容属性</span><input id="legacyAlarmProperty" autocomplete="off" value="ALARM"><small>默认 :ALARM: true，视为两项都启用</small></label>
+              </div></div>
+          </div></div>
+          <div class="reminderSubsection" data-reminder-panel="alarm"><h4>闹钟声音与记录维护</h4><div class="settingsGrid">
+            <label class="visualField" id="alarmRepeatField"><span>闹钟重复次数</span><input id="alarmRepeat" type="number" min="1" max="20" step="1" value="3"><small>每次提醒播放 1–20 次。</small></label>
+            <label class="visualField" id="alarmIntervalField"><span>重复间隔（秒）</span><input id="alarmIntervalSeconds" type="number" min="0" max="60" step="1" value="2"><small>每次声音之间的间隔，0–60 秒。</small></label>
+            <label class="visualField full" id="alarmSoundField"><span>闹钟声音文件（Windows，支持 .wav）</span><input id="alarmSoundPath" autocomplete="off" placeholder="例如：D:\alarm.wav"><small>留空使用 Windows 默认闹钟声；自定义文件读取失败时自动回退到系统提示音。</small></label>
+            <label class="visualField full" id="alarmSoundAndroidField" hidden><span>Android 闹钟铃声</span><div class="alarmSoundRow"><input id="alarmSoundUri" readonly placeholder="系统默认闹钟铃声"><button class="btn secondary" id="chooseAlarmSound">选择铃声</button><button class="btn secondary" id="clearAlarmSound">恢复默认</button></div><small>条目勾选相应的 SCHEDULED / DEADLINE 闹钟后，触发时播放这里选择的铃声。</small></label>
           </div>
+          <div class="reminderUtilityActions"><button class="btn secondary" id="clearReminder" title="清除已提醒记录，符合条件的任务可能再次提醒">清除已提醒</button>
+            <button class="btn secondary" id="editReminderState" title="直接编辑后台保存的已提醒记录 JSON">编辑已提醒记录</button></div></div>
           <div class="webdavActions"><button class="btn primary" id="saveReminder">保存提醒设置</button>
             <button class="btn secondary" id="testReminder">测试 Windows 通知</button>
-            <button class="btn secondary" id="refreshReminder" title="重新读取后台助手的运行信息，不修改任务与设置">刷新运行状态</button>
+            <button class="btn secondary" id="testAlarm">测试闹钟声音</button>
             <button class="btn secondary" id="exactAlarmPermission" hidden>允许精确提醒</button></div>
+          <div class="reminderClearPanel" id="reminderClearPanel" hidden>
+            <div id="reminderClearForm">
+              <div class="reminderClearRow">
+                <label><span>开始日期</span><input id="reminderClearFrom" type="text" inputmode="numeric" data-picker-type="date" placeholder="YYYY-MM-DD" autocomplete="off"></label>
+                <label><span>开始时间</span><input id="reminderClearFromTime" type="text" inputmode="numeric" data-picker-type="time" placeholder="HH:MM" autocomplete="off"></label>
+                <label><span>结束日期</span><input id="reminderClearTo" type="text" inputmode="numeric" data-picker-type="date" placeholder="YYYY-MM-DD" autocomplete="off"></label>
+                <label><span>结束时间</span><input id="reminderClearToTime" type="text" inputmode="numeric" data-picker-type="time" placeholder="HH:MM" autocomplete="off"></label>
+              </div>
+              <div class="reminderClearActions">
+                <button class="btn primary" id="confirmClearReminder">预览并清除该时间段</button>
+                <button class="btn secondary" id="clearAllReminder">预览并全部清除</button>
+                <button class="btn secondary" id="cancelClearReminder">取消</button>
+              </div>
+              <p class="settingsHint" style="margin:9px 0 0">按已提醒记录中的计划提醒时间精确筛选，可精确到分钟；时间不填时按整天计算。点击后先显示清除前后的记录供确认。</p>
+            </div>
+            <div class="reminderClearPreview" id="reminderClearPreview" hidden>
+              <div class="reminderClearPreviewCard">
+                <strong>清除前（当前已提醒）</strong>
+                <span class="reminderClearCount" id="clearBeforeCount"></span>
+                <div class="reminderClearRecords" id="clearBeforeRecords"></div>
+              </div>
+              <div class="reminderClearPreviewCard">
+                <strong>清除后（仍保留）</strong>
+                <span class="reminderClearCount" id="clearAfterCount"></span>
+                <div class="reminderClearRecords" id="clearAfterRecords"></div>
+              </div>
+              <div class="reminderClearActions" style="grid-column:1/-1">
+                <button class="btn primary" id="confirmClearReminderNow">确认清除</button>
+                <button class="btn secondary" id="cancelClearReminderPreview">返回修改</button>
+              </div>
+            </div>
+          </div>
           <div class="webdavStatus info" id="reminderStatus">尚未读取提醒助手状态。</div>
-          <p class="settingsHint">“刷新运行状态”只重新读取最近同步/检查时间、扫描条目数、下次提醒及权限状态；不会立即同步、发送通知，也不会修改任务或设置。</p>
-          <div class="configNote">只有日期：每个设定时间汇总提醒一次。若启动时已经错过，可选择立即补发最近一次，或跳过并等待下一个时间。带具体时间的 DEADLINE 仍按提前分钟数单独提醒。</div>
+          <div class="configNote">只有日期：每个设定时间汇总提醒一次。若启动时已经错过，可选择立即补发最近一次，或跳过并等待下一个时间。带具体时间的 SCHEDULED 与 DEADLINE 分别按各自的提前分钟数单独提醒。</div>
         </section>
         <section class="settingsSection" id="settings-webdav">
           <h3>WebDAV</h3>
@@ -1253,7 +1450,7 @@ print("hello")
           <h3>关于</h3>
           <div class="aboutCard"><strong>Orglist</strong>
             <p>面向 Org 文件的本地任务清单与浏览工具。数据默认保存在本地，只有在你主动使用写回或 WebDAV 时才会与文件交互。</p>
-            <dl><div><dt>当前版本</dt><dd>1.4.1</dd></div>
+            <dl><div><dt>当前版本</dt><dd>1.6.0</dd></div>
               <div><dt>项目地址</dt><dd><a href="https://github.com/perfectddt/orglist" target="_blank" rel="noopener noreferrer">github.com/perfectddt/orglist</a></dd></div>
               <div><dt>使用方式</dt><dd>支持本地 HTML、Android APK 与 WebDAV。</dd></div>
             </dl>
@@ -1262,6 +1459,20 @@ print("hello")
         <div class="modalActions"><button class="btn secondary" id="cancelSettings">取消</button>
           <button class="btn primary" id="saveSettings">保存设置与连接记录</button></div>
         </div>
+      </div>
+    </div>
+  </div>
+  <div class="modalBackdrop" id="stateEditorModal" role="dialog" aria-modal="true" aria-labelledby="stateEditorTitle">
+    <div class="modal settingsDialog">
+      <div class="modalHead"><h2 id="stateEditorTitle">编辑已提醒记录</h2><button class="iconBtn" id="closeStateEditor" aria-label="关闭">×</button></div>
+      <div class="modalBody">
+        <p class="settingsHint">直接编辑后台保存的已提醒记录（sent）。保存前会校验 JSON；格式必须是包含 <code>sent</code> 对象的 JSON。</p>
+        <textarea id="stateEditorText" class="stateEditorText" spellcheck="false" placeholder="{&quot;sent&quot;: {}}"></textarea>
+        <div class="modalActions">
+          <button class="btn secondary" id="cancelStateEditor">取消</button>
+          <button class="btn primary" id="saveStateEditor">保存</button>
+        </div>
+        <div class="webdavStatus info" id="stateEditorStatus">尚未读取状态文件。</div>
       </div>
     </div>
   </div>
@@ -1274,7 +1485,7 @@ print("hello")
     const DONE = new Set(["DONE","CNCL"]);
     const STATUS_LABEL = {NONE:"未设状态",TODO:"待办",NEXT:"下一步",DONE:"已完成",CNCL:"已取消"};
     const VIEWS = [
-      ["open","○","待办"],["today","日","今天"],["upcoming","→","未来"],["overdue","!","已逾期"],
+      ["open","○","待办"],["today","日","今天"],["habits","惯","习惯"],["upcoming","→","未来"],["overdue","!","已逾期"],
       ["no-date","—","无日期"],["completed","✓","已完成"],["quadrant","田","四象限"],
       ["calendar","历","日历"],["all","层","全部条目"]
     ];
@@ -1286,9 +1497,10 @@ print("hello")
       sideOrder:["smart","custom","files"],smartOrder:[],fileOrder:["all"],editMode:"plain",editorScale:100,
       filterPreference:"auto",filtersCollapsed:false,filterTouched:false,detailBehavior:"desktop",detailOpen:false,
       webdavProfiles:[],webdavBusy:false,editing:null,visualMode:"edit",visualAddMode:"single",
-      visualEditing:null,deleting:null,moving:null,searchError:"",navHistory:[],editingScope:"task",editingFileId:null,
+      visualEditing:null,deleting:null,moving:null,batchMoving:false,searchError:"",navHistory:[],editingScope:"task",editingFileId:null,
       customOpenStatuses:[],customDoneStatuses:[],defaultFilters:{view:"open",status:"ALL",priority:"ALL",
-        sort:"date",dateField:"date",columns:"2"},batchMode:false,batchSelected:[],batchSources:[],
+        sort:"date",dateField:"date",columns:"2"},addDefaults:{position:"auto"},lastAddParent:null,
+      batchMode:false,batchSelected:[],batchSources:[],
       suppressTaskClickUntil:0,startupPage:null,vimMode:false,vimState:"insert",vimPending:"",
       vimLastKey:"",vimLastKeyAt:0,vimInputRestore:null,vimInputGuard:null,vimVisualAnchor:null,vimVisualCursor:null,
       apkSelectTarget:null,apkSelectPending:null,apkSelectScheduled:false};
@@ -1299,7 +1511,7 @@ print("hello")
       SMART_KEY="org-task-smart-visibility-v1",CALENDAR_KEY="org-task-calendar-settings-v1",
       EDITOR_KEY="org-task-editor-mode-v1",EDITOR_STYLE_KEY="org-task-editor-style-v1",
       SIDE_ORDER_KEY="org-task-sidebar-order-v1",SMART_ORDER_KEY="org-task-smart-order-v1",
-      FILE_ORDER_KEY="org-task-file-order-v1",DISPLAY_KEY="org-task-display-settings-v1",
+      FILE_ORDER_KEY="org-task-file-order-v1",DISPLAY_KEY="org-task-display-settings-v1",ADD_KEY="org-task-add-defaults-v1",
       WEBDAV_KEY="org-task-webdav-profiles-v1",STATUS_KEY="org-task-custom-status-v1",
       STARTUP_KEY="org-task-startup-page-v1",VIM_KEY="org-task-vim-mode-v1";
     let searchHistoryTimer=null;
@@ -1359,6 +1571,69 @@ print("hello")
       const value=block.match(new RegExp("(?:^|\\s)"+key+":\\s*([<\\[][^>\\]\\n]+[>\\]])","i"))?.[1];
       return extractTime(value)
     };
+    const planningRepeat = (block,key="SCHEDULED") => {
+      const value=block.match(new RegExp("(?:^|\\s)"+key+":\\s*([<\\[][^>\\]\\n]+[>\\]])","i"))?.[1]||"";
+      return value.match(/\s((?:\.\+|\+\+|\+)\d+[dwmy](?:\/\d+[dwmy])?)(?=[>\]])/i)?.[1]||""
+    };
+    const lunarAnniversary = value => {
+      const match=String(value||"").match(/<%%\(diary-chinese-anniversary\s+(\d{1,2})\s+(\d{1,2})\s*\)>/i);
+      if(!match)return null;const month=Number(match[1]),day=Number(match[2]);
+      return month>=1&&month<=12&&day>=1&&day<=30?{month,day}:null
+    };
+    const lunarDateCache=new Map(),calendarDateMetaCache=new Map(),
+      LUNAR_MONTH_NAMES=["","正","二","三","四","五","六","七","八","九","十","冬","腊"],
+      SOLAR_FESTIVALS={"01-01":"元旦","02-14":"情人节","03-08":"妇女节","05-01":"劳动节","05-04":"青年节",
+        "06-01":"儿童节","10-01":"国庆节","12-25":"圣诞节"},
+      LUNAR_FESTIVALS={"01-01":"春节","01-15":"元宵节","05-05":"端午节","07-07":"七夕","07-15":"中元节",
+        "08-15":"中秋节","09-09":"重阳节","12-08":"腊八节","12-23":"小年"};
+    let chineseLunarFormatter=null;
+    function lunarDayName(day){
+      const digits=["","一","二","三","四","五","六","七","八","九","十"],value=Number(day);
+      if(value<=10)return `初${digits[value]}`;if(value<20)return `十${digits[value-10]}`;
+      if(value===20)return "二十";if(value<30)return `廿${digits[value-20]}`;return "三十"
+    }
+    function rawChineseLunar(date){
+      try{
+        chineseLunarFormatter=chineseLunarFormatter||new Intl.DateTimeFormat("en-u-ca-chinese",{month:"numeric",day:"numeric"});
+        const parts=chineseLunarFormatter.formatToParts(date),monthText=parts.find(part=>part.type==="month")?.value||"",
+          day=Number(parts.find(part=>part.type==="day")?.value||0);
+        return {month:Number(monthText.replace(/\D/g,"")),day,isLeap:monthText.includes("bis")}
+      }catch(_error){return {month:0,day:0,isLeap:false}}
+    }
+    function calendarDateMeta(value){
+      const date=value instanceof Date?new Date(value):localDate(value),iso=todayFrom(date);
+      if(calendarDateMetaCache.has(iso))return calendarDateMetaCache.get(iso);
+      const lunar=rawChineseLunar(date),monthName=LUNAR_MONTH_NAMES[lunar.month]||String(lunar.month),
+        fullLunar=lunar.month?`${lunar.isLeap?"闰":""}${monthName}月${lunarDayName(lunar.day)}`:"",
+        shortLunar=lunar.day===1?`${lunar.isLeap?"闰":""}${monthName}月`:lunarDayName(lunar.day),festivals=[];
+      const solarName=SOLAR_FESTIVALS[iso.slice(5)];if(solarName)festivals.push(solarName);
+      if(!lunar.isLeap){const lunarName=LUNAR_FESTIVALS[`${String(lunar.month).padStart(2,"0")}-${String(lunar.day).padStart(2,"0")}`];
+        if(lunarName)festivals.push(lunarName)}
+      if(!lunar.isLeap&&lunar.month===12){const next=new Date(date);next.setDate(next.getDate()+1);const nextLunar=rawChineseLunar(next);
+        if(!nextLunar.isLeap&&nextLunar.month===1&&nextLunar.day===1)festivals.push("除夕")}
+      const result={...lunar,iso,fullLunar,shortLunar,festivals:[...new Set(festivals)]};
+      calendarDateMetaCache.set(iso,result);return result
+    }
+    function lunarOccurrenceForYear(year,month,day){
+      const key=`${year}-${month}-${day}`;if(lunarDateCache.has(key))return lunarDateCache.get(key);
+      let result="";
+      try{
+        for(let date=new Date(year,0,1,12);date.getFullYear()===year;date.setDate(date.getDate()+1)){
+          const lunar=rawChineseLunar(date);
+          if(!lunar.isLeap&&lunar.month===Number(month)&&lunar.day===Number(day)){
+            result=todayFrom(date);break
+          }
+        }
+      }catch(_error){}
+      lunarDateCache.set(key,result);return result
+    }
+    function lunarNextDate(month,day,reference=today()){
+      const year=Number(String(reference).slice(0,4))||new Date().getFullYear();
+      for(let value=year;value<=year+2;value++){
+        const occurrence=lunarOccurrenceForYear(value,month,day);if(occurrence&&occurrence>=reference)return occurrence
+      }
+      return ""
+    }
     function relativeDate(word){
       const value=new Date();if(word==="yesterday")value.setDate(value.getDate()-1);
       if(word==="tomorrow")value.setDate(value.getDate()+1);
@@ -1407,6 +1682,7 @@ print("hello")
         `STATUS: ${task.status}`,`PRIORITY: ${task.priority}`,`TAGS: ${task.tags.join(" ")}`,
         task.scheduled?`SCHEDULED: <${task.scheduled}>`:"",task.deadline?`DEADLINE: <${task.deadline}>`:"",
         task.closed?`CLOSED: [${task.closed}]`:"",task.orgDate?`ORG_GTD_TIMESTAMP: <${task.orgDate}>`:"",
+        task.isHabit?`STYLE: habit ${task.habitRepeat}`:"",task.lunarMonth?`农历: ${task.lunarMonth}月${task.lunarDay}日`:"",
         ...Object.entries(task.properties).map(([key,value])=>`${key}: ${value}`)].join("\n")
     }
     function dateValues(task,field){
@@ -1414,8 +1690,8 @@ print("hello")
       if(field==="deadline")return [task.deadline].filter(Boolean);
       if(field==="closed")return [task.closed].filter(Boolean);
       if(field==="orgdate")return [task.orgDate].filter(Boolean);
-      if(field==="anydate")return [task.scheduled,task.deadline,task.closed,task.orgDate].filter(Boolean);
-      return [task.scheduled,task.deadline,task.orgDate].filter(Boolean)
+      if(field==="anydate")return [task.scheduled,task.deadline,task.closed,task.orgDate,task.lunarNext].filter(Boolean);
+      return [task.scheduled,task.deadline,task.orgDate,task.lunarNext].filter(Boolean)
     }
     function dateExpressionMatches(values,expression){
       const value=relativeDate(expression.toLocaleLowerCase());
@@ -1500,9 +1776,10 @@ print("hello")
       return [...new Set(values.map(tag=>String(tag).replace(/^:+|:+$/g,"").trim().replace(/\s+/g,"_"))
         .filter(Boolean))]
     }
-    function formatOrgTimestamp(date,time,closed=false){
+    function formatOrgTimestamp(date,time,closed=false,repeat=""){
       if(!/^\d{4}-\d{2}-\d{2}$/.test(date||""))return "";
-      return orgTimestamp(date,/^\d{2}:\d{2}$/.test(time||"")?time:"",closed)
+      const timestamp=orgTimestamp(date,/^\d{2}:\d{2}$/.test(time||"")?time:"",closed);
+      return repeat&&!closed?timestamp.replace(/>$/,` ${repeat}>`):timestamp
     }
     function currentCompletionParts(){
       const now=new Date();
@@ -1531,6 +1808,57 @@ print("hello")
       value=value.replace(/^\[#[A-Z0-9]\]\s*/,"");
       return value.trim()
     }
+    function orgBooleanProperty(value){
+      return ["true","1","yes","on"].includes(String(value||"").trim().toLowerCase())
+    }
+    function normalizedOrgPropertyName(value,fallback){
+      const name=String(value||"").trim().toUpperCase();return /^[A-Z0-9_-]+$/.test(name)?name:fallback
+    }
+    function storedAlarmPropertyNames(){
+      try{return typeof localStorage!=="undefined"?JSON.parse(localStorage.getItem("org-alarm-properties-v1")||"{}"):{} }
+      catch(_error){return {}}
+    }
+    function rememberAlarmPropertyNames(names){
+      try{if(typeof localStorage!=="undefined")localStorage.setItem("org-alarm-properties-v1",JSON.stringify(names))}catch(_error){}
+    }
+    function alarmPropertyNames(){
+      const stored=storedAlarmPropertyNames(),inputValue=(id,fallback)=>typeof document!=="undefined"?
+        (document.getElementById(id)?.value||fallback):fallback;
+      return {scheduled:normalizedOrgPropertyName(inputValue("scheduledAlarmProperty",stored.scheduled||"SCHEDULED_ALARM"),"SCHEDULED_ALARM"),
+        deadline:normalizedOrgPropertyName(inputValue("deadlineAlarmProperty",stored.deadline||"DEADLINE_ALARM"),"DEADLINE_ALARM"),
+        legacy:normalizedOrgPropertyName(inputValue("legacyAlarmProperty",stored.legacy||"ALARM"),"ALARM")}
+    }
+    function firstTaskProperty(task,names){
+      const props=task?.properties||{};
+      for(const name of [...new Set(names.map(item=>String(item||"").toUpperCase()))]){
+        if(Object.prototype.hasOwnProperty.call(props,name))return props[name]
+      }
+      return undefined
+    }
+    function updateDrawerBoolean(drawer,name,enabled){
+      let result=String(drawer||"").trim();
+      const propertyLine=new RegExp(`^\\s*:${name}:\\s*[^\\n]*(?:\\n|$)`,"im");
+      result=result.replace(propertyLine,"").trim();
+      if(enabled){
+        if(/^\s*:PROPERTIES:/im.test(result)){
+          result=result.replace(/(\s*:END:\s*)/i,`\n  :${name}: true$1`)
+        }else{
+          result=result?`  :PROPERTIES:\n  :${name}: true\n  :END:\n${result}`:
+            `  :PROPERTIES:\n  :${name}: true\n  :END:`
+        }
+      }
+      return /^\s*:PROPERTIES:\s*\n\s*:END:\s*$/i.test(result)?"":result
+    }
+    function updateDrawerValue(drawer,name,value){
+      let result=String(drawer||"").trim(),line=new RegExp(`^\\s*:${name}:\\s*[^\\n]*(?:\\n|$)`,"im");
+      result=result.replace(line,"").trim();
+      if(value!==undefined&&value!==null&&String(value).trim()){
+        if(/^\s*:PROPERTIES:/im.test(result))result=result.replace(/(\s*:END:\s*)/i,`\n  :${name}: ${String(value).trim()}$1`);
+        else result=result?`  :PROPERTIES:\n  :${name}: ${String(value).trim()}\n  :END:\n${result}`:
+          `  :PROPERTIES:\n  :${name}: ${String(value).trim()}\n  :END:`
+      }
+      return /^\s*:PROPERTIES:\s*\n\s*:END:\s*$/i.test(result)?"":result
+    }
     function buildOrgBlock(values,level,propertyDrawer=""){
       values=withAutomaticClosed(values);
       const safeLevel=Math.max(1,Math.min(30,Number(level)||1));
@@ -1541,11 +1869,34 @@ print("hello")
       const tags=normalizeOrgTags(values.tags);
       const heading=[`${"*".repeat(safeLevel)}${status?` ${status}`:""}`,priority?`[#${priority}]`:"",title,
         tags.length?`:${tags.join(":")}:`:""].filter(Boolean).join(" ");
+      const habit=orgBooleanProperty(values.habit),lunar=orgBooleanProperty(values.lunar),
+        habitRepeat=String(values.habitRepeat||"").trim();
+      if(habit&&!values.scheduledDate)throw new Error("习惯必须设置 SCHEDULED 日期。");
+      if(habit&&DONE.has(values.status))throw new Error("习惯应保持 TODO/NEXT 等未完成状态；点击完成时会自动记录并续期。");
+      if(habit&&!/^(?:\.\+|\+\+|\+)\d+[dwmy](?:\/\d+[dwmy])?$/i.test(habitRepeat))
+        throw new Error("习惯重复规则无效，请使用 .+1d、++1w、++1m 等格式。");
+      const lunarMonth=Number(values.lunarMonth),lunarDay=Number(values.lunarDay);
+      if(lunar&&(!(lunarMonth>=1&&lunarMonth<=12)||!(lunarDay>=1&&lunarDay<=30)))
+        throw new Error("农历周年需要填写 1–12 月、1–30 日。");
+      if(habit&&lunar)throw new Error("同一条目不能同时设为习惯和农历周年。");
       const closedLine=values.closedDate?`CLOSED: ${formatOrgTimestamp(values.closedDate,values.closedTime,true)}`:"",
-        planningLine=[values.scheduledDate?`SCHEDULED: ${formatOrgTimestamp(values.scheduledDate,values.scheduledTime)}`:"",
+        planningLine=[values.scheduledDate?`SCHEDULED: ${formatOrgTimestamp(values.scheduledDate,values.scheduledTime,false,habit?habitRepeat:"")}`:"",
           values.deadlineDate?`DEADLINE: ${formatOrgTimestamp(values.deadlineDate,values.deadlineTime)}`:""].filter(Boolean).join(" ");
-      return [heading,closedLine,planningLine,String(propertyDrawer||"").trim(),
-        String(values.body||"").replace(/\r\n?/g,"\n").trim()].filter(Boolean).join("\n")
+      let drawer=String(propertyDrawer||"").trim();
+      const propertyNames=alarmPropertyNames(),legacyAlarm=orgBooleanProperty(values.alarm),
+        scheduledAlarm=values.scheduledAlarm===undefined?legacyAlarm:orgBooleanProperty(values.scheduledAlarm),
+        deadlineAlarm=values.deadlineAlarm===undefined?legacyAlarm:orgBooleanProperty(values.deadlineAlarm);
+      for(const name of new Set(["ALARM","SCHEDULED_ALARM","DEADLINE_ALARM",propertyNames.legacy,
+        propertyNames.scheduled,propertyNames.deadline]))drawer=updateDrawerBoolean(drawer,name,false);
+      drawer=updateDrawerBoolean(drawer,propertyNames.scheduled,scheduledAlarm);
+      drawer=updateDrawerBoolean(drawer,propertyNames.deadline,deadlineAlarm);
+      const currentStyle=String(drawer.match(/^\s*:STYLE:\s*(.*?)\s*$/im)?.[1]||"").toLowerCase();
+      if(habit)drawer=updateDrawerValue(drawer,"STYLE","habit");
+      else if(currentStyle==="habit")drawer=updateDrawerValue(drawer,"STYLE",null);
+      const lunarLine=lunar?`<%%(diary-chinese-anniversary ${lunarMonth} ${lunarDay})>`:"",
+        body=String(values.body||"").replace(/\r\n?/g,"\n")
+          .replace(/^\s*<%%\(diary-chinese-anniversary\s+\d{1,2}\s+\d{1,2}\s*\)>\s*$/gim,"").trim();
+      return [heading,closedLine,planningLine,drawer,lunarLine,body].filter(Boolean).join("\n")
     }
     function insertOrgBlock(text,block,requestedIndex,eol="\n"){
       const lines=String(text||"").replace(/\r\n?/g,"\n").split("\n");
@@ -1671,14 +2022,18 @@ print("hello")
           closed=planning(block,"CLOSED"), orgDate=extractDate(props.ORG_GTD_TIMESTAMP),
           deadlineTime=planningTime(block,"DEADLINE"),scheduledTime=planningTime(block,"SCHEDULED"),
           closedTime=planningTime(block,"CLOSED"),orgTime=extractTime(props.ORG_GTD_TIMESTAMP),
-          date=deadline||scheduled||orgDate, hasChildren=i<heads.length-1&&heads[i+1].level>h.level;
-        const bodyText=body.filter(x=>!/^\s*(DEADLINE|SCHEDULED|CLOSED):/i.test(x)).join("\n").trim();
+          habitRepeat=planningRepeat(block,"SCHEDULED"),isHabit=String(props.STYLE||"").trim().toLowerCase()==="habit",
+          lunar=lunarAnniversary(block),lunarNext=lunar?lunarNextDate(lunar.month,lunar.day):"",
+          date=deadline||scheduled||orgDate||lunarNext, hasChildren=i<heads.length-1&&heads[i+1].level>h.level;
+        const bodyText=body.filter(x=>!/^\s*(DEADLINE|SCHEDULED|CLOSED):/i.test(x)&&
+          !/^\s*<%%\(diary-chinese-anniversary\s+\d{1,2}\s+\d{1,2}\s*\)>\s*$/i.test(x)).join("\n").trim();
         return {uid:String(offset+i),sourceIndex:offset+i,fileId:file.id,fileName:file.name,filePath:file.path,
           startIndex:h.lineIndex,endIndex:end,rawBlock:lines.slice(h.lineIndex,end).join("\n"),
           line:h.lineIndex+1,level:h.level,title:p.title,status:p.status,priority:p.priority,tags:p.tags,
           properties:props,body:bodyText,parentPath:h.parents,deadline,scheduled,closed,orgDate,date,
+          isHabit,habitRepeat,lunarMonth:lunar?.month||0,lunarDay:lunar?.day||0,lunarNext,
           deadlineTime,scheduledTime,closedTime,orgTime,time:deadlineTime||scheduledTime||orgTime||closedTime,hasChildren,
-          parentUid:null,childCount:0,childOpenCount:0,isGroup:p.status==="NONE"&&hasChildren&&!bodyText&&!deadline&&!scheduled};
+          parentUid:null,childCount:0,childOpenCount:0,isGroup:p.status==="NONE"&&hasChildren&&!bodyText&&!deadline&&!scheduled&&!lunar};
       });
       const levelStack=[];
       parsed.forEach(task=>{
@@ -1783,12 +2138,15 @@ print("hello")
         if(["auto","collapsed","expanded"].includes(display.filterPreference))state.filterPreference=display.filterPreference;
         if(["desktop","always","manual"].includes(display.detailBehavior))state.detailBehavior=display.detailBehavior;
         const defaults=display.defaultFilters||{};
-        if(["open","today","upcoming","overdue","no-date","completed","all"].includes(defaults.view))state.defaultFilters.view=defaults.view;
+        if(["open","today","habits","upcoming","overdue","no-date","completed","all"].includes(defaults.view))state.defaultFilters.view=defaults.view;
         if(["ALL","OPEN","NONE",...configuredStatuses()].includes(defaults.status))state.defaultFilters.status=defaults.status;
         if(["ALL","A","B","C","NONE"].includes(defaults.priority))state.defaultFilters.priority=defaults.priority;
         if(["date","priority","source"].includes(defaults.sort))state.defaultFilters.sort=defaults.sort;
         if(["date","deadline","scheduled","closed","orgdate","anydate"].includes(defaults.dateField))state.defaultFilters.dateField=defaults.dateField;
         if(["1","2"].includes(defaults.columns))state.defaultFilters.columns=defaults.columns
+      }catch(_){}
+      try{const addDefaults=JSON.parse(localStorage.getItem(ADD_KEY)||"{}");
+        if(["auto","last-parent","selected","top"].includes(addDefaults.position))state.addDefaults.position=addDefaults.position
       }catch(_){}
       try{
         const startup=JSON.parse(localStorage.getItem(STARTUP_KEY)||"null");
@@ -1991,21 +2349,25 @@ print("hello")
       })
     }
     function navigateSettings(id,behavior="smooth"){
-      const content=$("settingsContent"),target=$(id);if(!content||!target)return;
+      const reminderMatch=String(id||"").match(/^settings-reminder-(source|rules|alarm)$/),navId=id;
+      if(reminderMatch)setReminderSubsection(reminderMatch[1],false);
+      else if(id==="settings-reminder")setReminderSubsection("source",false);
+      const content=$("settingsContent"),target=$(reminderMatch?"settings-reminder":id);if(!content||!target)return;
       const top=target.getBoundingClientRect().top-content.getBoundingClientRect().top+content.scrollTop;
-      content.scrollTo({top:Math.max(0,top-18),behavior});setSettingsNavActive(id)
+      content.scrollTo({top:Math.max(0,top-18),behavior});setSettingsNavActive(navId)
     }
     function syncSettingsNavFromScroll(){
       const content=$("settingsContent"),sections=Array.from(content.querySelectorAll(".settingsSection"));
       const contentTop=content.getBoundingClientRect().top;let current=sections[0];
       sections.forEach(section=>{if(section.getBoundingClientRect().top<=contentTop+52)current=section});
-      if(current)setSettingsNavActive(current.id)
+      if(current)setSettingsNavActive(current.id==="settings-reminder"?`settings-reminder-${state.reminderSubsection||"source"}`:current.id)
     }
     function openSettings(){
       syncStatusSelects();$("filterPreference").value=state.filterPreference;$("detailBehavior").value=state.detailBehavior;
       $("defaultView").value=state.defaultFilters.view;$("defaultStatus").value=state.defaultFilters.status;
       $("defaultPriority").value=state.defaultFilters.priority;$("defaultSort").value=state.defaultFilters.sort;
       $("defaultDateField").value=state.defaultFilters.dateField;$("defaultColumns").value=state.defaultFilters.columns;
+      $("addPositionDefault").value=state.addDefaults.position;
       $("defaultImportantRule").value=state.quadrantDefaults.important;
       $("defaultUrgentRule").value=state.quadrantDefaults.urgent;
       $("customOpenStatuses").value=state.customOpenStatuses.join(" ");
@@ -2031,6 +2393,11 @@ print("hello")
         else if(path==="/reminder-config")raw=window.AndroidReminder.getConfig();
         else if(path==="/reminder-status")raw=window.AndroidReminder.getStatus();
         else if(path==="/reminder-test"){window.AndroidReminder.testNotification();return {ok:true}}
+        else if(path==="/reminder-test-alarm"){window.AndroidReminder.testAlarm();return {ok:true}}
+        else if(path==="/reminder-clear")raw=window.AndroidReminder.clearReminded(String(options.body||"{}"));
+        else if(path==="/reminder-state-file"&&options.method==="POST")raw=window.AndroidReminder.saveStateFile(String(options.body||"{}"));
+        else if(path==="/reminder-state-file")raw=window.AndroidReminder.getStateFile();
+        else if(path==="/reminder-sync-now"){window.AndroidReminder.syncNow();return {ok:true,queued:true}}
         else throw new Error("Android 提醒接口不支持此操作。");
         const value=typeof raw==="string"?JSON.parse(raw):raw;if(value?.ok===false)throw new Error(value.error||"Android 提醒操作失败。");return value
       }
@@ -2045,18 +2412,42 @@ print("hello")
       $("reminderSummaryTimes").value=(config.dailySummaryTimes||[config.dailySummaryTime||"09:00"]).join(", ");
       $("reminderMissedPolicy").value=config.missedSummaryPolicy==="skip"?"skip":"latest";
       $("reminderGroupNotifications").checked=config.groupNotifications!==false;
-      $("reminderAdvance").value=String(config.deadlineAdvanceMinutes??15);renderReminderProfiles(config);syncReminderPlatformUI();syncReminderSourceFields()
+      $("scheduledAdvance").value=String(config.scheduledAdvanceMinutes??0);
+      $("reminderAdvance").value=String(config.deadlineAdvanceMinutes??15);
+      $("alarmRepeat").value=String(config.alarmRepeat??3);
+      $("alarmIntervalSeconds").value=String(config.alarmIntervalSeconds??2);
+      $("alarmSoundPath").value=config.alarmSoundPath||"";
+      $("alarmSoundUri").value=config.alarmSoundUri||"";
+      const storedProperties=storedAlarmPropertyNames();
+      $("scheduledAlarmProperty").value=config.scheduledAlarmProperty||storedProperties.scheduled||"SCHEDULED_ALARM";
+      $("deadlineAlarmProperty").value=config.deadlineAlarmProperty||storedProperties.deadline||"DEADLINE_ALARM";
+      $("legacyAlarmProperty").value=config.legacyAlarmProperty||storedProperties.legacy||"ALARM";
+      rememberAlarmPropertyNames({scheduled:$("scheduledAlarmProperty").value,deadline:$("deadlineAlarmProperty").value,
+        legacy:$("legacyAlarmProperty").value});
+      renderReminderProfiles(config);syncReminderPlatformUI();syncReminderSourceFields()
+    }
+    function setReminderSubsection(name="source",syncNavigation=true){
+      const selected=["source","rules","alarm"].includes(name)?name:"source";
+      state.reminderSubsection=selected;
+      document.querySelectorAll("[data-reminder-section]").forEach(button=>
+        button.classList.toggle("active",button.dataset.reminderSection===selected));
+      document.querySelectorAll("[data-reminder-panel]").forEach(panel=>
+        panel.classList.toggle("active",panel.dataset.reminderPanel===selected));
+      if(syncNavigation&&$("settingsModal")?.classList.contains("show"))setSettingsNavActive(`settings-reminder-${selected}`)
     }
     function syncReminderPlatformUI(){
       const android=androidReminderActive();
       $("reminderNavLabel").textContent=android?"Android 提醒":"Windows 提醒";
       $("reminderHeading").textContent=android?"Android 系统提醒":"Windows 后台提醒";
-      $("reminderHint").innerHTML=android?"App 关闭后仍可从 WebDAV 后台同步并使用安卓系统通知提醒。后台同步最短 15 分钟；精确时间使用系统闹钟。":"浏览器关闭后仍可提醒。首次使用请双击同目录的 <code>OrglistReminderSetup.cmd</code> 安装 Windows 登录启动项；此处设置需通过 <code>OrglistWebDAV.cmd</code> 打开的页面保存。";
+      $("reminderHint").innerHTML=android?"App 关闭后仍可从 WebDAV 后台同步并使用安卓系统通知提醒。检查间隔可设为 1–1440 分钟；到点使用系统闹钟。":"浏览器关闭后仍可提醒。首次使用请双击同目录的 <code>OrglistReminderSetup.cmd</code> 安装 Windows 登录启动项；此处设置需通过 <code>OrglistWebDAV.cmd</code> 打开的页面保存。";
       $("reminderEnabled").nextElementSibling.textContent=android?"启用 Android 后台提醒":"启用 Windows 后台提醒";
       $("testReminder").textContent=android?"测试 Android 通知":"测试 Windows 通知";
+      $("testAlarm").textContent=android?"测试闹钟声音":"测试闹钟声音";
       $("exactAlarmPermission").hidden=!android;
+      $("alarmRepeatField").hidden=android;$("alarmIntervalField").hidden=android;
+      $("alarmSoundField").hidden=android;$("alarmSoundAndroidField").hidden=!android;
       $("reminderSourceType").disabled=android;if(android)$("reminderSourceType").value="webdav";
-      $("reminderInterval").min=android?"15":"1";if(android&&Number($("reminderInterval").value)<15)$("reminderInterval").value="15"
+      $("reminderInterval").min="1";if(Number($("reminderInterval").value)<1)$("reminderInterval").value="1"
     }
 
     function enhanceDateTimeInputs(){
@@ -2099,36 +2490,157 @@ print("hello")
       const password=profile?(profile.password||(samePrevious?previous.webdavPassword||"":"")):"";
       if(remote&&profile.username&&!password)throw new Error("该 WebDAV 连接没有保存密码。请在下方 WebDAV 设置勾选“保存密码”并重新保存连接。");
       const times=$("reminderSummaryTimes").value.split(/[,，;；\s]+/).map(item=>item.trim()).filter(Boolean);
+      const propertyInputs=[
+        ["scheduledAlarmProperty","SCHEDULED_ALARM"],["deadlineAlarmProperty","DEADLINE_ALARM"],["legacyAlarmProperty","ALARM"]
+      ];
+      const propertyNames=propertyInputs.map(([id,fallback])=>{
+        const value=String($(id).value||fallback).trim().toUpperCase();
+        if(!/^[A-Z0-9_-]+$/.test(value))throw new Error("闹钟属性名只能包含字母、数字、下划线或连字符。");
+        return value
+      });
+      if(new Set(propertyNames).size!==propertyNames.length)throw new Error("三个闹钟属性名不能重复。");
       return {enabled:$("reminderEnabled").checked,sourceType:$("reminderSourceType").value,folder:$("reminderFolder").value.trim(),
         webdavUrl:profile?.url||"",webdavUsername:profile?.username||"",webdavPassword:password,
         webdavFolder:profile?.folder||"",webdavRecursive:profile?.recursive!==false,
         intervalMinutes:Number($("reminderInterval").value)||10,dailySummaryTimes:times,
         missedSummaryPolicy:$("reminderMissedPolicy").value,
         groupNotifications:$("reminderGroupNotifications").checked,
+        scheduledAdvanceMinutes:Number($("scheduledAdvance").value)||0,
         deadlineAdvanceMinutes:Number($("reminderAdvance").value)||0,
+        alarmEnabled:true,
+        alarmRepeat:Number($("alarmRepeat").value)||3,
+        alarmIntervalSeconds:Number($("alarmIntervalSeconds").value)||2,
+        alarmSoundPath:$("alarmSoundPath").value.trim(),
+        alarmSoundUri:$("alarmSoundUri").value.trim(),
+        scheduledAlarmProperty:propertyNames[0],deadlineAlarmProperty:propertyNames[1],legacyAlarmProperty:propertyNames[2],
         doneStatuses:["DONE","CNCL",...parseStatusList($("customDoneStatuses").value)]}
     }
     async function saveReminderSettings(){
       setReminderStatus("正在保存提醒设置…");try{const result=await reminderRequest("/reminder-config",{method:"POST",body:JSON.stringify(readReminderForm())});
-        fillReminderForm(result.config);setReminderStatus("提醒设置已保存。后台助手会在下一轮检查时自动采用新设置。","success")}
+        fillReminderForm(result.config);setReminderStatus(androidReminderActive()?"提醒设置已保存，并已启动一次后台同步。":"提醒设置已保存。后台助手会在下一轮检查时自动采用新设置。","success")}
       catch(error){setReminderStatus(error?.message||String(error),"error")}
     }
     async function refreshReminderStatus(){
       try{const result=await reminderRequest("/reminder-status"),status=result.state||{};
-        if(status.lastError){setReminderStatus(`最近检查失败：${status.lastError}`,"error");return}
+        if(status.lastError){setReminderStatus(`最近检查失败：${status.lastError}`,"error");return status}
         if(status.platform==="android"){
           const next=status.nextAlarmAt?new Date(status.nextAlarmAt).toLocaleString():"尚未安排";
-          setReminderStatus(`${status.lastSync?`最近同步：${new Date(status.lastSync).toLocaleString()} · `:""}扫描到 ${status.lastTaskCount||0} 个条目 · 下次提醒：${next} · ${status.exactAlarmAllowed?"精确提醒已允许":"当前为近似提醒，请允许精确提醒"}`,status.exactAlarmAllowed?"success":"info");return
+          const notification=status.notificationAllowed!==false?"通知权限已允许":"通知权限未允许";
+          setReminderStatus(`${status.lastSync?`最近同步：${new Date(status.lastSync).toLocaleString()} · `:""}扫描到 ${status.lastTaskCount||0} 个条目 · 已安排 ${status.pendingReminderCount||0} 个提醒 · 下次提醒：${next} · ${notification} · ${status.exactAlarmAllowed?"精确提醒已允许":"当前为近似提醒，可允许精确提醒"}`,status.exactAlarmAllowed&&status.notificationAllowed!==false?"success":"info");return status
         }
-        if(status.lastCheck){setReminderStatus(`最近检查：${status.lastCheck} · ${status.lastSource==="webdav"?"WebDAV":"本地文件夹"} · 扫描到 ${status.lastTaskCount||0} 个条目`,"success");return}
-        setReminderStatus(result.scriptAvailable?"提醒助手文件已就绪；安装并启用后会显示最近检查时间。":"没有找到提醒助手文件。",result.scriptAvailable?"info":"error")
+        if(status.lastCheck){setReminderStatus(`最近检查：${status.lastCheck} · ${status.lastSource==="webdav"?"WebDAV":"本地文件夹"} · 扫描到 ${status.lastTaskCount||0} 个条目`,"success");return status}
+        setReminderStatus(result.scriptAvailable?"提醒助手文件已就绪；安装并启用后会显示最近检查时间。":"没有找到提醒助手文件。",result.scriptAvailable?"info":"error");return status
+      }catch(error){setReminderStatus(error?.message||String(error),"error");return null}
+    }
+    let pendingClearRange=null;
+    function toggleReminderClearPanel(show){
+      $("reminderClearPanel").hidden=!show;
+      if(show){pendingClearRange=null;$("reminderClearForm").hidden=false;$("reminderClearPreview").hidden=true}
+    }
+    function reminderClearFormRange(){
+      const fromDate=$("reminderClearFrom").value.trim(),fromTime=$("reminderClearFromTime").value.trim();
+      const toDate=$("reminderClearTo").value.trim(),toTime=$("reminderClearToTime").value.trim();
+      return {from:fromDate+(fromTime?` ${fromTime}`:""),to:toDate+(toTime?` ${toTime}`:"")}
+    }
+    function renderReminderClearRecords(container,records,limit=60){
+      const list=Array.isArray(records)?records:[],total=list.length,shown=list.slice(0,limit);
+      container.innerHTML=shown.map(item=>`<div class="reminderClearRecord">${esc(item.label)}</div>`).join("")+
+        (total>limit?`<div class="reminderClearMore">… 共 ${total} 条</div>`:"")
+    }
+    async function previewClearReminder(range){
+      setReminderStatus("正在读取已提醒记录…");
+      try{
+        const result=await reminderRequest("/reminder-clear",{method:"POST",body:JSON.stringify({...range,preview:true})});
+        if(!result.removed){setReminderStatus("没有找到该范围内要清除的记录。","info");return}
+        pendingClearRange=range;
+        const removedSet=new Set((result.removedRecords||[]).map(item=>item.key));
+        const afterRecords=(result.beforeRecords||[]).filter(item=>!removedSet.has(item.key));
+        $("clearBeforeCount").textContent=`共 ${result.beforeCount||0} 条 · 将清除 ${result.removed} 条`;
+        $("clearAfterCount").textContent=`剩 ${result.afterCount||0} 条`;
+        renderReminderClearRecords($("clearBeforeRecords"),result.removedRecords||[],60);
+        renderReminderClearRecords($("clearAfterRecords"),afterRecords,60);
+        $("reminderClearForm").hidden=true;
+        $("reminderClearPreview").hidden=false;
+        setReminderStatus("","")
       }catch(error){setReminderStatus(error?.message||String(error),"error")}
+    }
+    async function confirmClearReminder(){
+      const range=reminderClearFormRange();
+      if(!range.from&&!range.to){setReminderStatus("请先填写开始和结束日期，或使用“全部清除”。","error");return}
+      await previewClearReminder(range)
+    }
+    async function clearAllReminder(){
+      await previewClearReminder({from:"",to:""})
+    }
+    async function confirmClearReminderNow(){
+      if(!pendingClearRange)return;
+      setReminderStatus("正在清除已提醒记录…");
+      try{
+        const result=await reminderRequest("/reminder-clear",{method:"POST",body:JSON.stringify(pendingClearRange)});
+        $("reminderClearFrom").value="";$("reminderClearFromTime").value="";
+        $("reminderClearTo").value="";$("reminderClearToTime").value="";
+        pendingClearRange=null;toggleReminderClearPanel(false);
+        setReminderStatus(`已清除 ${result.removed||0} 条已提醒记录。符合条件的任务将在下次检查时再次提醒。`,"success");
+        await refreshReminderStatus()
+      }catch(error){setReminderStatus(error?.message||String(error),"error")}
+    }
+    function cancelClearReminderPreview(){
+      pendingClearRange=null;$("reminderClearForm").hidden=false;$("reminderClearPreview").hidden=true
     }
     async function testReminderNotification(){
       setReminderStatus("正在发送测试通知…");try{await reminderRequest("/reminder-test",{method:"POST",body:"{}"});
         setReminderStatus(`测试通知已发送，请查看 ${androidReminderActive()?"Android":"Windows"} 通知中心。`,"success")}
       catch(error){setReminderStatus(error?.message||String(error),"error")}
     }
+    async function testAlarmNotification(){
+      setReminderStatus("正在测试闹钟声音…");try{await reminderRequest("/reminder-test-alarm",{method:"POST",body:"{}"});
+        setReminderStatus("闹钟声音已触发，请听系统声音。" ,"success")}
+      catch(error){setReminderStatus(error?.message||String(error),"error")}
+    }
+    async function syncReminderNow(showPageNotice=false){
+      setReminderStatus("正在重新读取任务并安排提醒…");
+      try{
+        let previousSync="";
+        try{const before=await reminderRequest("/reminder-status");previousSync=before.state?.lastSync||before.state?.lastCheck||""}catch(_error){}
+        const result=await reminderRequest("/reminder-sync-now",{method:"POST",body:"{}"});
+        const finish=status=>{
+          if(status?.lastError){if(showPageNotice)setNotice(`提醒刷新失败：${status.lastError}`);return}
+          if(showPageNotice)setNotice(`提醒刷新成功：已扫描 ${status?.lastTaskCount||0} 个条目，并重新安排提醒。`)
+        };
+        if(!result.queued){const status=await refreshReminderStatus();finish(status||result.state||{});return}
+        for(let attempt=0;attempt<8;attempt++){
+          await new Promise(resolve=>setTimeout(resolve,1000));
+          const status=await refreshReminderStatus();
+          const current=status?.lastSync||status?.lastCheck||"";
+          if(status?.lastError||current&&current!==previousSync){finish(status||{});return}
+        }
+        setReminderStatus("刷新任务已启动，后台仍在处理；状态会在下次打开设置时自动读取。","info");
+        if(showPageNotice)setNotice("提醒刷新已启动，后台仍在处理。")
+      }
+      catch(error){const message=error?.message||String(error);setReminderStatus(message,"error");if(showPageNotice)setNotice(`提醒刷新失败：${message}`)}
+    }
+    function setStateEditorStatus(message,type="info"){
+      const element=$("stateEditorStatus");element.textContent=message;element.className=`webdavStatus ${type}`
+    }
+    async function openStateEditor(){
+      setStateEditorStatus("正在读取状态文件…");$("stateEditorModal").classList.add("show");
+      try{
+        const result=await reminderRequest("/reminder-state-file");
+        $("stateEditorText").value=typeof result.text==="string"?result.text:JSON.stringify(result,null,2);setStateEditorStatus("")
+      }catch(error){setStateEditorStatus(error?.message||String(error),"error")}
+    }
+    async function saveStateEditor(){
+      setStateEditorStatus("正在保存…");
+      try{
+        const result=await reminderRequest("/reminder-state-file",{method:"POST",body:JSON.stringify({text:$("stateEditorText").value})});
+        closeStateEditor();setReminderStatus("已提醒记录已保存。","success");await refreshReminderStatus()
+      }catch(error){setStateEditorStatus(error?.message||String(error),"error")}
+    }
+    function closeStateEditor(){$("stateEditorModal").classList.remove("show")}
+    window.__orgAndroidRingtonePicked=(uri)=>{
+      const element=document.getElementById("alarmSoundUri");
+      if(element)element.value=String(uri||"")
+    };
     function saveSettingsForm(){
       state.filterPreference=$("filterPreference").value;state.detailBehavior=$("detailBehavior").value;
       state.customOpenStatuses=parseStatusList($("customOpenStatuses").value);
@@ -2137,6 +2649,8 @@ print("hello")
       refreshStatusWords();
       try{localStorage.setItem(STATUS_KEY,JSON.stringify({open:state.customOpenStatuses,done:state.customDoneStatuses}))}catch(_){}
       state.defaultFilters=readDefaultFiltersForm();
+      state.addDefaults.position=$("addPositionDefault").value;
+      try{localStorage.setItem(ADD_KEY,JSON.stringify(state.addDefaults))}catch(_){}
       state.quadrantDefaults={important:$("defaultImportantRule").value,urgent:$("defaultUrgentRule").value};
       state.quadrantImportant=state.quadrantDefaults.important;state.quadrantUrgent=state.quadrantDefaults.urgent;
       try{localStorage.setItem(QUADRANT_KEY,JSON.stringify(state.quadrantDefaults))}catch(_){}
@@ -2151,7 +2665,7 @@ print("hello")
     }
     const CONFIG_KEYS=[HISTORY_KEY,HISTORY_DEFAULT_KEY,CUSTOM_KEY,LAYOUT_KEY,SEARCH_HISTORY_KEY,QUADRANT_KEY,SMART_KEY,
       CALENDAR_KEY,EDITOR_KEY,EDITOR_STYLE_KEY,SIDE_ORDER_KEY,SMART_ORDER_KEY,FILE_ORDER_KEY,
-      DISPLAY_KEY,WEBDAV_KEY,STATUS_KEY,STARTUP_KEY,VIM_KEY];
+      DISPLAY_KEY,ADD_KEY,WEBDAV_KEY,STATUS_KEY,STARTUP_KEY,VIM_KEY];
     function buildConfigurationExport(){
       const values={};CONFIG_KEYS.forEach(key=>{const value=localStorage.getItem(key);if(value!==null)values[key]=value});
       if(values[WEBDAV_KEY]){
@@ -2322,7 +2836,7 @@ print("hello")
       const value={view:$("defaultView").value,status:$("defaultStatus").value,
         priority:$("defaultPriority").value,sort:$("defaultSort").value,dateField:$("defaultDateField").value,
         columns:$("defaultColumns").value};
-      if(!["open","today","upcoming","overdue","no-date","completed","all"].includes(value.view))value.view="open";
+      if(!["open","today","habits","upcoming","overdue","no-date","completed","all"].includes(value.view))value.view="open";
       if(!["ALL","OPEN","NONE",...configuredStatuses()].includes(value.status))value.status="ALL";
       if(!["ALL","A","B","C","NONE"].includes(value.priority))value.priority="ALL";
       if(!["date","priority","source"].includes(value.sort))value.sort="date";
@@ -2693,7 +3207,7 @@ print("hello")
           webdavUrl:item.webdavUrl||"",webdavEtag:item.webdavEtag||"",webdavConfig:item.webdavConfig||null,
           webdavBaseText:item.webdavUrl?item.text:null,dirty:false}));
         rebuildFromSources();
-        state.file="all";state.selected=null;state.hierParent=null;
+        state.file="all";state.selected=null;state.hierParent=null;state.lastAddParent=null;
         state.navHistory=[];state.batchMode=false;state.batchSelected=[];state.batchSources=[];
         setSearchQuery("");state.visible=100;applyStartupPage();
         setNotice(`已读取 ${state.files.length} 个文件，共识别 ${state.tasks.length} 个标题条目。`);
@@ -2705,6 +3219,7 @@ print("hello")
     function counts() {
       const base=state.tasks.filter(t=>!t.isGroup), d=today();
       return {open:base.filter(t=>!isDone(t)).length,today:base.filter(t=>!isDone(t)&&hasActionDate(t,d)).length,
+        habits:base.filter(t=>t.isHabit).length,
         upcoming:base.filter(t=>!isDone(t)&&dateValues(t,"date").some(date=>date>d)).length,
         overdue:base.filter(taskOverdue).length,
         "no-date":base.filter(t=>!isDone(t)&&!dateValues(t,"date").length).length,
@@ -2736,6 +3251,7 @@ print("hello")
         const done=isDone(t);
         if(state.view==="open"&&done)return false;
         if(state.view==="today"&&(done||!hasActionDate(t,d)))return false;
+        if(state.view==="habits"&&!t.isHabit)return false;
         if(state.view==="upcoming"&&(done||!dateValues(t,"date").some(date=>date>d)))return false;
         if(state.view==="overdue"&&!taskOverdue(t))return false;
         if(state.view==="no-date"&&(done||dateValues(t,"date").length))return false;
@@ -2749,10 +3265,12 @@ print("hello")
       return `${d.getMonth()+1}月${d.getDate()}日`}
     function renderDateBadges(task){
       const now=today(),badges=[];
+      if(task.isHabit)badges.push(`<span class="date orgdate" title="Org Habit · ${esc(task.habitRepeat)}">习惯 ${esc(task.habitRepeat)}</span>`);
       if(task.scheduled)badges.push(`<span class="date scheduled" title="SCHEDULED: ${task.scheduled}">计划 ${dateLabel(task.scheduled)}</span>`);
       if(task.deadline)badges.push(`<span class="date deadline ${!isDone(task)&&task.deadline<now?"overdue":""}" title="DEADLINE: ${task.deadline}">截止 ${dateLabel(task.deadline)}</span>`);
       if(task.closed)badges.push(`<span class="date closed" title="CLOSED: ${task.closed}">完成 ${dateLabel(task.closed)}</span>`);
       if(task.orgDate&&!task.scheduled&&!task.deadline)badges.push(`<span class="date orgdate" title="ORG_GTD_TIMESTAMP: ${task.orgDate}">日期 ${dateLabel(task.orgDate)}</span>`);
+      if(task.lunarMonth)badges.push(`<span class="date orgdate" title="农历 ${task.lunarMonth} 月 ${task.lunarDay} 日；下一次 ${task.lunarNext}">农历 ${task.lunarMonth}/${task.lunarDay} · ${dateLabel(task.lunarNext)}</span>`);
       return badges.join("")
     }
     function conciseDate(task){
@@ -2760,6 +3278,7 @@ print("hello")
       if(task.scheduled)return `计划 ${dateLabel(task.scheduled)}`;
       if(task.closed)return `完成 ${dateLabel(task.closed)}`;
       if(task.orgDate)return `日期 ${dateLabel(task.orgDate)}`;
+      if(task.lunarNext)return `农历 ${task.lunarMonth}/${task.lunarDay} · ${dateLabel(task.lunarNext)}`;
       return "查看详情"
     }
     function renderNav(){
@@ -2796,7 +3315,7 @@ print("hello")
           <button class="swipeDate" data-swipe-date="${task.uid}">日期</button>
           <button class="swipeDelete" data-swipe-delete="${task.uid}">删除</button></div>
         <button class="task ${statusToneClass(task.status)} ${done?"isDone":""} ${state.selected===task.uid?"selected":""}" data-task="${task.uid}">
-        <span class="check ${done?"done":task.status.toLowerCase()}" data-toggle="${task.uid}" title="${done?"取消完成并改为 TODO":"标记为 DONE 并写入 CLOSED 完成时间"}"></span>
+        <span class="check ${done?"done":task.status.toLowerCase()}" data-toggle="${task.uid}" title="${task.isHabit&&!done?"完成本次习惯、记录历史并推进下一次计划":done?"取消完成并改为 TODO":"标记为 DONE 并写入 CLOSED 完成时间"}"></span>
         <span class="taskBody"><span class="titleLine">${task.priority?`<span class="priority p${esc(task.priority)}">${esc(task.priority)}</span>`:""}<span class="taskTitle">${esc(task.title)}</span></span>
         <span class="meta"><span class="chip statusColor ${statusToneClass(task.status)}">${esc(STATUS_LABEL[task.status]||task.status)}</span>${task.tags.slice(0,3).map(tag=>`<span class="tag">#${esc(tag)}</span>`).join("")}${task.parentPath.length?`<span class="path">${esc(task.parentPath.slice(-2).join(" / "))}</span>`:""}</span></span>
         <span class="tail">${renderDateBadges(task)}<span class="source">${esc(task.fileName)}</span><span class="taskDetailHint" data-task-detail="${task.uid}">详情</span></span>
@@ -2932,6 +3451,49 @@ print("hello")
       if(!DONE.has(status)||planning(block,"CLOSED"))return block;
       const now=currentCompletionParts();return updateBatchPlanning(block,"CLOSED",now.date,now.time)
     }
+    function addHabitInterval(dateText,amount,unit){
+      const source=localDate(dateText),value=Math.max(1,Number(amount)||1);
+      if(unit==="d")source.setDate(source.getDate()+value);
+      else if(unit==="w")source.setDate(source.getDate()+value*7);
+      else{
+        const day=source.getDate(),month=source.getMonth()+(unit==="m"?value:0),year=source.getFullYear()+(unit==="y"?value:0);
+        source.setDate(1);source.setFullYear(year);source.setMonth(month);
+        const last=new Date(source.getFullYear(),source.getMonth()+1,0).getDate();source.setDate(Math.min(day,last))
+      }
+      return todayFrom(source)
+    }
+    function nextHabitDate(task,completedDate=today()){
+      const match=String(task?.habitRepeat||"").match(/^(\.\+|\+\+|\+)(\d+)([dwmy])/i);
+      if(!match||!task?.scheduled)return "";
+      const mode=match[1],amount=Number(match[2]),unit=match[3].toLowerCase();
+      let next=addHabitInterval(mode===".+"?completedDate:task.scheduled,amount,unit);
+      if(mode==="++")while(next<=completedDate)next=addHabitInterval(next,amount,unit);
+      return next
+    }
+    function replaceOrInsertPropertyDrawer(block,drawer){
+      const original=extractPropertyDrawer(block);if(original)return block.replace(original,drawer);
+      const lines=String(block).split("\n"),planningIndex=lines.findIndex((line,index)=>index>0&&/\b(?:SCHEDULED|DEADLINE|CLOSED):/.test(line));
+      lines.splice(planningIndex>=0?planningIndex+1:1,0,...drawer.split("\n"));return lines.join("\n")
+    }
+    function addHabitLogEntry(block,fromStatus,stamp){
+      const entry=`- State "DONE" from "${fromStatus}" ${stamp}`,lines=String(block).split("\n"),
+        logbook=lines.findIndex(line=>/^\s*:LOGBOOK:\s*$/i.test(line));
+      if(logbook>=0){lines.splice(logbook+1,0,entry);return lines.join("\n")}
+      const drawerEnd=lines.findIndex((line,index)=>index>0&&/^\s*:END:\s*$/i.test(line));
+      lines.splice(drawerEnd>=0?drawerEnd+1:1,0,":LOGBOOK:",entry,":END:");return lines.join("\n")
+    }
+    function completeHabitBlock(block,task){
+      const now=currentCompletionParts(),next=nextHabitDate(task,now.date);
+      if(!next)throw new Error("习惯缺少有效的 SCHEDULED 重复规则，无法续期。");
+      let result=updateBatchPlanning(block,"CLOSED","","");
+      result=result.replace(/\bSCHEDULED:\s*<[^>\n]*>/i,
+        `SCHEDULED: ${formatOrgTimestamp(next,task.scheduledTime,false,task.habitRepeat)}`);
+      let drawer=extractPropertyDrawer(result);drawer=updateDrawerValue(drawer,"LAST_REPEAT",formatOrgTimestamp(now.date,now.time,true));
+      result=replaceOrInsertPropertyDrawer(result,drawer);
+      const fromStatus=task.status&&task.status!=="NONE"?task.status:"TODO";
+      result=addHabitLogEntry(result,fromStatus,formatOrgTimestamp(now.date,now.time,true));
+      return {block:result,next}
+    }
     function setBlockCompletion(block,task,complete){
       let lines=String(block||"").replace(/\r\n?/g,"\n").split("\n");
       lines[0]=replaceHeadingStatus(lines[0],task,complete?"DONE":"TODO");
@@ -2943,14 +3505,18 @@ print("hello")
     function toggleTaskCompletion(uid){
       const task=state.tasks.find(item=>item.uid===uid),source=task&&state.sources.find(item=>item.id===task.fileId);
       if(!task||!source){setNotice("无法找到要修改的条目。");return false}
-      const complete=!isDone(task),lines=source.text.replace(/\r\n?/g,"\n").split("\n");
-      const block=setBlockCompletion(lines.slice(task.startIndex,task.endIndex).join("\n"),task,complete).split("\n");
+      const complete=!isDone(task),lines=source.text.replace(/\r\n?/g,"\n").split("\n"),original=lines.slice(task.startIndex,task.endIndex).join("\n");
+      let renewed=null,block;
+      try{renewed=task.isHabit&&complete?completeHabitBlock(original,task):null;
+        block=(renewed?.block||setBlockCompletion(original,task,complete)).split("\n")
+      }catch(error){setNotice(error?.message||"习惯续期失败。");return false}
       lines.splice(task.startIndex,task.endIndex-task.startIndex,...block);
       source.text=lines.join(source.eol||"\n");source.dirty=true;
       if(!state.batchSources.includes(source.id))state.batchSources.push(source.id);
       state.batchMode=true;state.batchSelected=[];
       rebuildFromSources({fileId:source.id,startIndex:task.startIndex,line:task.line});render();
-      setNotice(complete?`已把“${task.title}”改为 DONE 并添加 CLOSED 完成时间，尚未写回原文件。`:
+      setNotice(renewed?`已记录习惯“${task.title}”本次完成，下一次计划为 ${renewed.next}，尚未写回原文件。`:
+        complete?`已把“${task.title}”改为 DONE 并添加 CLOSED 完成时间，尚未写回原文件。`:
         `已把“${task.title}”重新改为 TODO 并移除 CLOSED，尚未写回原文件。`);
       return true
     }
@@ -2976,8 +3542,14 @@ print("hello")
         tasks.sort((a,b)=>b.startIndex-a.startIndex).forEach(task=>{
           const original=lines.slice(task.startIndex,task.endIndex).join("\n");
           let block=original.split("\n");
-          block[0]=replaceHeadingStatus(block[0],task,nextStatus,{priority,tagMode,tags});
+          const renewHabit=task.isHabit&&nextStatus!=="KEEP"&&DONE.has(nextStatus);
+          block[0]=replaceHeadingStatus(block[0],task,renewHabit?"KEEP":nextStatus,{priority,tagMode,tags});
           let changed=updateBatchPlanning(block.join("\n"),dateField,date,time);
+          if(renewHabit){
+            const habitTask={...task,scheduled:dateField==="SCHEDULED"?date:task.scheduled,
+              scheduledTime:dateField==="SCHEDULED"?time:task.scheduledTime};
+            changed=completeHabitBlock(changed,habitTask).block;lines.splice(task.startIndex,task.endIndex-task.startIndex,...changed.split("\n"));return
+          }
           const effectiveStatus=nextStatus==="KEEP"?task.status:nextStatus;
           if(nextStatus!=="KEEP"&&!DONE.has(effectiveStatus)&&dateField!=="CLOSED")
             changed=updateBatchPlanning(changed,"CLOSED","","");
@@ -3196,12 +3768,13 @@ print("hello")
       $("listHost").innerHTML=`<div class="quadrantIntro"><span><b>重要</b>＝${esc(importantText)}；<b>紧急</b>＝${esc(urgentText)}。日期规则优先读取 DEADLINE，没有则读取 SCHEDULED。</span><span>筛选条件与顶部搜索会继续叠加</span></div><div class="quadrantGrid">${sections}</div>`;
       bindTaskCards($("listHost"),renderQuadrant)
     }
-    function calendarDateValues(task){
-      if(state.calendarDateRule==="PRIMARY")return [task.deadline||task.scheduled].filter(Boolean);
+    function calendarDateValues(task,year=state.calendarCursor?.getFullYear?.()||new Date().getFullYear()){
+      const lunar=task.lunarMonth?lunarOccurrenceForYear(year,task.lunarMonth,task.lunarDay):"";
+      if(state.calendarDateRule==="PRIMARY")return [task.deadline||task.scheduled||lunar].filter(Boolean);
       if(state.calendarDateRule==="DEADLINE")return [task.deadline].filter(Boolean);
       if(state.calendarDateRule==="SCHEDULED")return [task.scheduled].filter(Boolean);
-      if(state.calendarDateRule==="ANY")return [...new Set([task.scheduled,task.deadline,task.orgDate,task.closed].filter(Boolean))];
-      return [...new Set([task.scheduled,task.deadline].filter(Boolean))]
+      if(state.calendarDateRule==="ANY")return [...new Set([task.scheduled,task.deadline,task.orgDate,task.closed,lunar].filter(Boolean))];
+      return [...new Set([task.scheduled,task.deadline,lunar].filter(Boolean))]
     }
     function calendarTaskTime(task,date){
       if(task.deadline===date&&task.deadlineTime)return task.deadlineTime;
@@ -3253,13 +3826,22 @@ print("hello")
         state.calendarCursor=button.dataset.weekStart;state.calendarMode="week";persistCalendarSettings();render()
       })
     }
+    function calendarMonthFestivals(year,month){
+      const last=new Date(year,month,0).getDate(),items=[];
+      for(let day=1;day<=last;day++){
+        const date=new Date(year,month-1,day,12),meta=calendarDateMeta(date);
+        meta.festivals.forEach(name=>items.push({day,name}))
+      }
+      return items
+    }
     function renderCalendarYear(map,cursor){
       const year=cursor.getFullYear(),months=Array.from({length:12},(_,index)=>{
         const prefix=`${year}-${String(index+1).padStart(2,"0")}`,dates=[...map.keys()].filter(date=>date.startsWith(prefix));
         const total=dates.reduce((sum,date)=>sum+map.get(date).length,0);
-        const chips=dates.sort().slice(0,8).map(date=>`<span>${Number(date.slice(-2))}日 · ${map.get(date).length}</span>`).join("");
+        const chips=dates.sort().slice(0,8).map(date=>`<span>${Number(date.slice(-2))}日 · ${map.get(date).length}</span>`).join(""),
+          festivals=calendarMonthFestivals(year,index+1).slice(0,5).map(item=>`<span>${item.day}日 ${esc(item.name)}</span>`).join("");
         return `<button class="yearMonth" data-year-month="${prefix}"><span class="yearMonthHead"><strong>${index+1}月</strong><span>${total} 项</span></span>
-          <span class="yearMonthDates">${chips||"<span>暂无任务</span>"}</span></button>`
+          <span class="yearMonthDates">${chips||"<span>暂无任务</span>"}</span><span class="yearMonthFestivals">${festivals}</span></button>`
       }).join("");
       return `<div class="calendarTitleRow"><h2>${year} 年</h2><span>点击月份进入月历</span></div><div class="yearGrid">${months}</div>`
     }
@@ -3267,12 +3849,14 @@ print("hello")
       const year=cursor.getFullYear(),month=cursor.getMonth(),first=new Date(year,month,1,12),start=startOfWeek(first);
       const weekdays=["一","二","三","四","五","六","日"].map(day=>`<span>周${day}</span>`).join("");
       const cells=Array.from({length:42},(_,index)=>{
-        const date=new Date(start);date.setDate(start.getDate()+index);const iso=todayFrom(date),items=map.get(iso)||[];
+        const date=new Date(start);date.setDate(start.getDate()+index);const iso=todayFrom(date),items=map.get(iso)||[],meta=calendarDateMeta(date),
+          festival=meta.festivals.join(" · ");
         return `<button class="calendarDay ${date.getMonth()===month?"":"outside"} ${iso===today()?"todayCell":""}" data-calendar-date="${iso}">
           <span class="dayTop"><span class="dayNumber">${date.getDate()}</span>${calendarCountMarkup(items)}</span>
+          <span class="dayMeta"><span class="dayLunar">${esc(meta.shortLunar)}</span>${festival?`<span class="dayFestival" title="${esc(festival)}">${esc(festival)}</span>`:""}</span>
           <span class="dayTasks">${items.slice(0,3).map(task=>`<span class="dayTask ${statusToneClass(task.status)}" style="color:var(--statusTone);background:var(--statusToneSoft)">${esc(task.title)}</span>`).join("")}${items.length>3?`<span class="dayTask">还有 ${items.length-3} 项…</span>`:""}</span></button>`
       }).join("");
-      return `<div class="calendarTitleRow"><h2>${year} 年 ${month+1} 月</h2><span>日期角标＝小号未完成数／<b>橙色总数</b></span></div>
+      return `<div class="calendarTitleRow"><h2>${year} 年 ${month+1} 月</h2><span>附农历与节日 · 日期角标＝未完成数／<b>总数</b></span></div>
         <div class="calendarMonthScroll"><div class="monthWeekdays">${weekdays}</div><div class="monthGrid">${cells}</div></div>`
     }
     function renderWeekPicker(map,cursor){
@@ -3291,15 +3875,16 @@ print("hello")
     function renderCalendarWeek(map,cursor){
       const start=startOfWeek(cursor),end=new Date(start);end.setDate(start.getDate()+6);
       const days=Array.from({length:7},(_,index)=>{
-        const date=new Date(start);date.setDate(start.getDate()+index);const iso=todayFrom(date),items=map.get(iso)||[];
+        const date=new Date(start);date.setDate(start.getDate()+index);const iso=todayFrom(date),items=map.get(iso)||[],meta=calendarDateMeta(date),
+          festival=meta.festivals.join(" · ");
         return `<section class="weekDay ${iso===today()?"todayCell":""}"><div class="weekDayHead">${["周一","周二","周三","周四","周五","周六","周日"][index]}
-          <span>${date.getMonth()+1}月${date.getDate()}日 · ${items.length} 项</span></div><div class="weekItems">${items.length?items.map(task=>calendarTaskButton(task,iso)).join(""):'<span class="quadrantEmpty">无任务</span>'}</div></section>`
+          <span>${date.getMonth()+1}月${date.getDate()}日 · ${esc(meta.fullLunar)} · ${items.length} 项${festival?`<b class="weekFestival">${esc(festival)}</b>`:""}</span></div><div class="weekItems">${items.length?items.map(task=>calendarTaskButton(task,iso)).join(""):'<span class="quadrantEmpty">无任务</span>'}</div></section>`
       }).join("");
       return `<div class="calendarTitleRow"><h2>${start.getMonth()+1}月${start.getDate()}日—${end.getMonth()+1}月${end.getDate()}日</h2><span>周视图 · 每行两个日期</span></div>
         <div class="weekGrid">${renderWeekPicker(map,cursor)}${days}</div>`
     }
     function renderCalendarDay(map,cursor){
-      const iso=todayFrom(cursor),items=map.get(iso)||[],timed=new Map(),untimed=[];
+      const iso=todayFrom(cursor),items=map.get(iso)||[],timed=new Map(),untimed=[],meta=calendarDateMeta(cursor),festival=meta.festivals.join(" · ");
       items.forEach(task=>{const time=calendarTaskTime(task,iso),hour=time?Number(time.slice(0,2)):null;
         if(time&&hour>=state.dayStart&&hour<state.dayEnd){if(!timed.has(hour))timed.set(hour,[]);timed.get(hour).push(task)}
         else untimed.push(task)
@@ -3309,7 +3894,7 @@ print("hello")
         const hour=state.dayStart+index,slot=timed.get(hour)||[];
         return `<div class="hourRow"><div class="hourLabel">${String(hour).padStart(2,"0")}:00</div><div class="hourItems">${slot.map(task=>calendarTaskButton(task,iso)).join("")}</div></div>`
       }).join("");
-      return `<div class="calendarTitleRow"><h2>${cursor.getFullYear()} 年 ${cursor.getMonth()+1} 月 ${cursor.getDate()} 日</h2><span>${items.length} 项 · 日时间线</span></div>${allDay}<div class="timeline">${rows}</div>`
+      return `<div class="calendarTitleRow"><h2>${cursor.getFullYear()} 年 ${cursor.getMonth()+1} 月 ${cursor.getDate()} 日</h2><span>${esc(meta.fullLunar)}${festival?` · <b>${esc(festival)}</b>`:""} · ${items.length} 项</span></div>${allDay}<div class="timeline">${rows}</div>`
     }
     function renderCalendar(){
       $("viewTitle").textContent="日历";
@@ -3357,17 +3942,19 @@ print("hello")
       if(!t){state.detailOpen=false;$("detail").classList.remove("open");$("detail").innerHTML='<div class="detailEmpty"><div class="circle"></div><h2>选择一个条目</h2><p>查看正文、Org 属性、标签和来源位置。</p></div>';return}
       const done=isDone(t),props=Object.entries(t.properties);
       $("detail").innerHTML=`<div class="detailHead"><div><strong>条目详情</strong></div><div class="detailActions"><button class="editButton" id="moveTask">移动条目</button><button class="deleteButton" id="deleteTask">删除条目</button><button class="editButton" id="visualEditTask">可视化编辑</button><button class="editButton" id="editTask">编辑原文</button><button class="iconBtn" id="closeDetail">×</button></div></div>
-        <div class="detailScroll"><div class="detailTitle"><button class="check ${done?"done":t.status.toLowerCase()}" id="detailCheck" title="${done?"取消完成并改为 TODO":"标记为 DONE 并写入 CLOSED 完成时间"}"></button><h2>${esc(t.title)}</h2></div>
+        <div class="detailScroll"><div class="detailTitle"><button class="check ${done?"done":t.status.toLowerCase()}" id="detailCheck" title="${t.isHabit&&!done?"完成本次习惯、记录历史并推进下一次计划":done?"取消完成并改为 TODO":"标记为 DONE 并写入 CLOSED 完成时间"}"></button><h2>${esc(t.title)}</h2></div>
         <div class="fields"><div><span>状态</span><b>${esc(STATUS_LABEL[t.status]||t.status)}</b></div>
         <div><span>优先级</span><b>${esc(t.priority||"无")}</b></div>
         <div><span>SCHEDULED</span><b>${esc(t.scheduled||"未设置")}</b></div>
         <div><span>DEADLINE</span><b>${esc(t.deadline||"未设置")}</b></div>
-        <div><span>CLOSED</span><b>${esc(t.closed||"未设置")}</b></div></div>
+        <div><span>CLOSED</span><b>${esc(t.closed||"未设置")}</b></div>
+        ${t.isHabit?`<div><span>习惯重复</span><b>${esc(t.habitRepeat||"未设置")}</b></div>`:""}
+        ${t.lunarMonth?`<div><span>农历周年</span><b>${t.lunarMonth} 月 ${t.lunarDay} 日 · 下次 ${esc(t.lunarNext||"超出支持范围")}</b></div>`:""}</div>
         ${t.tags.length?`<section class="section"><h3>标签</h3><div class="tagCloud">${t.tags.map(x=>`<button data-tag="${esc(x)}">#${esc(x)}</button>`).join("")}</div></section>`:""}
         ${t.body?`<section class="section"><h3>正文与备注</h3><pre>${esc(t.body)}</pre></section>`:""}
         ${props.length?`<section class="section"><h3>Org 属性</h3><dl>${props.map(([k,v])=>`<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl></section>`:""}
         <section class="section sourceInfo"><h3>来源</h3><p>${esc(t.filePath)}</p><small>第 ${t.line} 行 · ${t.level} 级标题</small></section></div>
-        <div class="detailNote">DONE、CNCL、自定义完成状态或 CLOSED 完成时间都会让条目显示为已完成。点击圆圈会把 Org 状态改为 DONE，并写入当前 CLOSED 时间。</div>`;
+        <div class="detailNote">普通条目点击圆圈会改为 DONE 并写入 CLOSED；习惯条目会记录本次完成、更新 LAST_REPEAT 和 LOGBOOK，并自动推进下一次 SCHEDULED。</div>`;
       $("detail").classList.toggle("open",state.detailOpen);$("closeDetail").onclick=()=>{state.detailOpen=false;$("detail").classList.remove("open")};
       $("deleteTask").onclick=()=>openDeleteModal(t.uid);
       $("moveTask").onclick=()=>openMoveModal(t.uid);
@@ -3865,7 +4452,10 @@ print("hello")
         tags:$("visualTags").value,scheduledDate:$("visualScheduledDate").value,
         scheduledTime:$("visualScheduledTime").value,deadlineDate:$("visualDeadlineDate").value,
         deadlineTime:$("visualDeadlineTime").value,closedDate:$("visualClosedDate").value,
-        closedTime:$("visualClosedTime").value,body:$("visualBody").value})
+        closedTime:$("visualClosedTime").value,scheduledAlarm:$("visualScheduledAlarm").checked,
+        deadlineAlarm:$("visualDeadlineAlarm").checked,habit:$("visualHabit").checked,
+        habitRepeat:$("visualHabitRepeat").value,lunar:$("visualLunar").checked,
+        lunarMonth:$("visualLunarMonth").value,lunarDay:$("visualLunarDay").value,body:$("visualBody").value})
     }
     function syncVisualClosedForStatus(clearWhenOpen=false){
       if(DONE.has($("visualStatus").value)){
@@ -3882,7 +4472,23 @@ print("hello")
       $("visualScheduledDate").value=task?.scheduled||"";$("visualScheduledTime").value=task?.scheduledTime||"";
       $("visualDeadlineDate").value=task?.deadline||"";$("visualDeadlineTime").value=task?.deadlineTime||"";
       $("visualClosedDate").value=task?.closed||"";$("visualClosedTime").value=task?.closedTime||"";
-      $("visualBody").value=task?.body||""
+      $("visualBody").value=task?.body||"";
+      $("visualHabit").checked=!!task?.isHabit;$("visualHabitRepeat").value=task?.habitRepeat||".+1d";
+      $("visualLunar").checked=!!task?.lunarMonth;$("visualLunarMonth").value=task?.lunarMonth||"";
+      $("visualLunarDay").value=task?.lunarDay||"";
+      const propertyNames=alarmPropertyNames(),legacyValue=firstTaskProperty(task,[propertyNames.legacy,"ALARM"]),
+        legacyAlarm=legacyValue===undefined?false:orgBooleanProperty(legacyValue),
+        scheduledValue=firstTaskProperty(task,[propertyNames.scheduled,"SCHEDULED_ALARM"]),
+        deadlineValue=firstTaskProperty(task,[propertyNames.deadline,"DEADLINE_ALARM"]);
+      $("visualScheduledAlarm").checked=!!task&&(scheduledValue===undefined?legacyAlarm:orgBooleanProperty(scheduledValue));
+      $("visualDeadlineAlarm").checked=!!task&&(deadlineValue===undefined?legacyAlarm:orgBooleanProperty(deadlineValue));
+      syncSpecialScheduleFields()
+    }
+    function syncSpecialScheduleFields(changed=""){
+      if(changed==="habit"&&$("visualHabit").checked)$("visualLunar").checked=false;
+      if(changed==="lunar"&&$("visualLunar").checked)$("visualHabit").checked=false;
+      $("visualHabitRepeat").disabled=!$("visualHabit").checked;
+      $("visualLunarMonth").disabled=!$("visualLunar").checked;$("visualLunarDay").disabled=!$("visualLunar").checked
     }
     function updateVisualParents(selectedUid=""){
       const fileId=$("visualFile").value;
@@ -3937,7 +4543,8 @@ print("hello")
     }
     function bulkDefaults(){
       return {status:$("bulkDefaultStatus").value,priority:$("bulkDefaultPriority").value,
-        tags:$("bulkDefaultTags").value}
+        tags:$("bulkDefaultTags").value,scheduledAlarm:$("bulkScheduledAlarm").checked,
+        deadlineAlarm:$("bulkDeadlineAlarm").checked}
     }
     function currentBulkTasks(){
       return parseBulkTaskLines($("bulkItems").value,bulkDefaults())
@@ -3991,6 +4598,27 @@ print("hello")
     function closeVisualEditor(){
       state.visualEditing=null;$("visualModal").classList.remove("show")
     }
+    function lastAddParentUid(preferredFile){
+      if(!state.lastAddParent||state.lastAddParent.fileId!==preferredFile)return "";
+      if(!state.lastAddParent.parentUid)return "";
+      return state.tasks.some(task=>task.uid===state.lastAddParent.parentUid&&task.fileId===preferredFile)?
+        state.lastAddParent.parentUid:""
+    }
+    function defaultAddParentUid(preferredFile){
+      const mode=state.addDefaults?.position||"auto";
+      if(mode==="top")return "";
+      if(mode==="selected"){
+        const current=state.tasks.find(task=>task.uid===state.selected&&task.fileId===preferredFile);
+        return current?current.uid:""
+      }
+      if(mode==="last-parent")return lastAddParentUid(preferredFile);
+      if(state.mode==="hierarchy"){
+        if(state.hierParent&&state.tasks.some(task=>task.uid===state.hierParent&&task.fileId===preferredFile))return state.hierParent;
+        const current=state.tasks.find(task=>task.uid===state.selected&&task.fileId===preferredFile);
+        return current?.parentUid||""
+      }
+      return lastAddParentUid(preferredFile)
+    }
     function openVisualEditor(mode="add",uid=null){
       if(!state.sources.length){setNotice("请先打开 Org 文件夹或选择 Org 文件，再新增条目。");return}
       syncStatusSelects();
@@ -4003,15 +4631,20 @@ print("hello")
       document.querySelectorAll(".visualAddOnly").forEach(element=>element.classList.toggle("formHidden",!!editTask));
       $("visualFile").innerHTML=state.sources.map(source=>`<option value="${esc(source.id)}">${esc(source.path)}</option>`).join("");
       const current=state.tasks.find(task=>task.uid===state.selected);
-      const preferredFile=editTask?.fileId||(state.file!=="all"&&state.sources.some(source=>source.id===state.file)?state.file:
-        current?.fileId||state.sources[0].id);
+      const hierParentTask=state.mode==="hierarchy"?state.tasks.find(task=>task.uid===state.hierParent):null;
+      const preferredFile=editTask?.fileId||hierParentTask?.fileId||
+        (state.file!=="all"&&state.sources.some(source=>source.id===state.file)?state.file:
+          current?.fileId||state.sources[0].id);
       $("visualFile").value=preferredFile;
-      const selectedUid=!editTask&&current?.fileId===preferredFile?current.uid:"";
-      updateVisualParents(selectedUid);updateVisualAnchors(selectedUid);
+      const anchorUid=!editTask&&current?.fileId===preferredFile?current.uid:"";
+      const defaultParentUid=!editTask?defaultAddParentUid(preferredFile):"";
+      updateVisualParents(defaultParentUid);updateVisualAnchors(anchorUid);
       $("visualPosition").value="parent-end";fillVisualForm(editTask);syncVisualClosedForStatus(false);
       if(!editTask){
         $("bulkItems").value="";$("bulkDefaultStatus").value="TODO";$("bulkDefaultPriority").value="";
-        $("bulkDefaultTags").value="";state.visualAddMode="single"
+        $("bulkDefaultTags").value="";$("bulkScheduledAlarm").checked=false;$("bulkDeadlineAlarm").checked=false;
+        $("visualScheduledAlarm").checked=false;$("visualDeadlineAlarm").checked=false;
+        state.visualAddMode="single"
       }
       $("applyVisual").textContent=editTask?"应用到当前页面":"新增到当前页面";
       $("writeVisual").textContent=editTask?"只写回当前条目":"写回整个文件";
@@ -4041,6 +4674,7 @@ print("hello")
         const inserted=insertOrgBlock(source.text,blocks.join("\n\n"),context.insertAt,source.eol);
         source.text=inserted.text;source.dirty=true;
         rebuildFromSources({fileId:source.id,startIndex:inserted.startIndex,line:inserted.startIndex+1});
+        state.lastAddParent={fileId:source.id,parentUid:context.parent?.uid||""};
         render();updateVisualSource();
         setNotice(`已在${context.label}新增 ${blocks.length} 条到 ${source.name}，尚未写回磁盘。`);return source
       }catch(error){setNotice(error?.message||"无法生成 Org 条目。");return null}
@@ -4152,6 +4786,80 @@ print("hello")
       setNotice(`已把“${task.title}”移动到 ${target.name} 的${context.label}；涉及文件尚未写回。`);
       return true
     }
+    function batchMoveRoots(selectedUids=state.batchSelected){
+      const selected=new Set(selectedUids||[]),tasks=state.tasks.filter(task=>selected.has(task.uid));
+      return tasks.filter(task=>{
+        let parent=task.parentUid;
+        while(parent){if(selected.has(parent))return false;parent=state.tasks.find(item=>item.uid===parent)?.parentUid||null}
+        return true
+      }).sort((a,b)=>state.sources.findIndex(source=>source.id===a.fileId)-state.sources.findIndex(source=>source.id===b.fileId)||
+        a.startIndex-b.startIndex)
+    }
+    function batchMoveCandidates(fileId,roots=batchMoveRoots()){
+      const ranges=roots.map(taskSubtreeRange).filter(Boolean);
+      return state.tasks.filter(task=>task.fileId===fileId&&!ranges.some((range,index)=>
+        roots[index]?.fileId===fileId&&task.startIndex>=range.startIndex&&task.startIndex<range.endIndex))
+    }
+    function updateBatchMoveOptions(){
+      const roots=batchMoveRoots(),fileId=$("batchMoveFile").value,candidates=batchMoveCandidates(fileId,roots),
+        previous=$("batchMoveParent").value;
+      $("batchMoveParent").innerHTML=candidates.length?candidates.map(item=>
+        `<option value="${esc(item.uid)}">${esc(`${"　".repeat(Math.max(0,item.level-1))}H${item.level} · ${item.title}`)}</option>`).join(""):
+        '<option value="">没有可作为父项的条目</option>';
+      $("batchMoveParent").value=candidates.some(item=>item.uid===previous)?previous:(candidates[0]?.uid||"");
+      const parent=candidates.find(item=>item.uid===$("batchMoveParent").value);
+      $("batchMoveDestination").textContent=parent?`${parent.filePath} · “${parent.title}”的子项末尾 · 新条目层级 H${parent.level+1}`:
+        "请选择包含可用父项的目标文件";
+      $("applyBatchMove").disabled=!parent
+    }
+    function openBatchMoveModal(){
+      const roots=batchMoveRoots();if(!roots.length){setNotice("请先选择至少一个要移动的条目。");return}
+      const descendantCount=roots.reduce((sum,task)=>sum+(taskSubtreeRange(task)?.descendants.length||0),0);
+      state.batchMoving=true;
+      $("batchMoveSummary").innerHTML=`已选择 <strong>${state.batchSelected.length}</strong> 个条目；实际移动 ${roots.length} 棵独立子树${
+        descendantCount?`，连同 ${descendantCount} 个子标题`:""}。`;
+      $("batchMoveFile").innerHTML=state.sources.map(source=>`<option value="${esc(source.id)}">${esc(source.path)}</option>`).join("");
+      $("batchMoveFile").value=roots[0].fileId;$("batchMoveParent").innerHTML="";updateBatchMoveOptions();
+      $("batchMoveModal").classList.add("show")
+    }
+    function closeBatchMoveModal(){
+      state.batchMoving=false;$("batchMoveModal").classList.remove("show")
+    }
+    function moveSelectedAsChildren(parentUid,options={}){
+      const roots=batchMoveRoots(),parent=state.tasks.find(task=>task.uid===parentUid);
+      if(!roots.length)throw new Error("没有可移动的所选条目。");
+      if(!parent)throw new Error("目标父项已经不存在。");
+      const ranges=roots.map(task=>({task,...taskSubtreeRange(task)}));
+      if(ranges.some(range=>range.source?.id===parent.fileId&&parent.startIndex>=range.startIndex&&parent.startIndex<range.endIndex))
+        throw new Error("目标父项不能是所选条目自身或它的子标题。");
+      const parentRange=taskSubtreeRange(parent);if(!parentRange)throw new Error("无法读取目标父项位置。");
+      const lineMaps=new Map(state.sources.map(source=>[source.id,source.text.replace(/\r\n?/g,"\n").split("\n")]));
+      const moved=ranges.map(range=>adjustedSubtreeLines(
+        lineMaps.get(range.source.id).slice(range.startIndex,range.endIndex),parent.level+1-range.task.level));
+      let insertAt=parentRange.endIndex;
+      ranges.filter(range=>range.source.id===parent.fileId&&range.startIndex<insertAt).forEach(range=>insertAt-=range.endIndex-range.startIndex);
+      const grouped=new Map();ranges.forEach(range=>{if(!grouped.has(range.source.id))grouped.set(range.source.id,[]);grouped.get(range.source.id).push(range)});
+      grouped.forEach((items,fileId)=>items.sort((a,b)=>b.startIndex-a.startIndex).forEach(range=>
+        lineMaps.get(fileId).splice(range.startIndex,range.endIndex-range.startIndex)));
+      const payload=[];moved.forEach(block=>{
+        if(payload.length&&payload.at(-1)?.trim()!==""&&block[0]?.trim()!=="")payload.push("");payload.push(...block)
+      });
+      const targetLines=lineMaps.get(parent.fileId);insertAt=Math.max(0,Math.min(targetLines.length,insertAt));
+      const prefix=insertAt>0&&targetLines[insertAt-1]?.trim()!==""?1:0;
+      if(prefix)payload.unshift("");if(insertAt<targetLines.length&&targetLines[insertAt]?.trim()!=="")payload.push("");
+      targetLines.splice(insertAt,0,...payload);
+      const affected=[...new Set([...ranges.map(range=>range.source.id),parent.fileId])];
+      affected.forEach(fileId=>{const source=state.sources.find(item=>item.id===fileId);source.text=lineMaps.get(fileId).join(source.eol||"\n");source.dirty=true});
+      state.batchSources=[...new Set([...state.batchSources,...affected])];state.batchSelected=[];state.batchMode=true;state.file=parent.fileId;
+      if(options.rebuild!==false)rebuildFromSources({fileId:parent.fileId,startIndex:insertAt+prefix,line:insertAt+prefix+1});
+      return {count:roots.length,parentTitle:parent.title,targetFile:parent.filePath,insertAt:insertAt+prefix,affected}
+    }
+    function applyBatchMove(){
+      try{
+        const result=moveSelectedAsChildren($("batchMoveParent").value);closeBatchMoveModal();render();
+        setNotice(`已把 ${result.count} 个所选条目移动为“${result.parentTitle}”的子项；涉及文件尚未写回。`);return true
+      }catch(error){setNotice(error?.message||"批量移动失败。");return false}
+    }
     function closeDeleteModal(){
       state.deleting=null;$("deleteModal").classList.remove("show")
     }
@@ -4231,6 +4939,7 @@ print("hello")
       const source=state.sources.find(item=>item.id===state.file)||(state.sources.length===1?state.sources[0]:null);
       if(source)writeSourceToOriginal(source);else setNotice("请先在左侧选择一个具体文件。")
     };
+    $("refreshReminderTop").onclick=()=>syncReminderNow(true);
     $("batchToggle").onclick=()=>setBatchMode(!state.batchMode);
     $("applyBatchStatus").onclick=applyBatchStatus;$("deleteBatch").onclick=deleteBatchTasks;
     $("writeBatch").onclick=()=>writeBatchSources();$("clearBatch").onclick=()=>setBatchMode(false);
@@ -4241,7 +4950,22 @@ print("hello")
     $("settingsContent").onscroll=syncSettingsNavFromScroll;
     $("saveSettings").onclick=saveSettingsForm;$("testWebdav").onclick=()=>testWebdavConnection();
     $("saveReminder").onclick=saveReminderSettings;$("testReminder").onclick=testReminderNotification;
-    $("refreshReminder").onclick=refreshReminderStatus;
+    document.querySelectorAll("[data-reminder-section]").forEach(button=>button.onclick=()=>setReminderSubsection(button.dataset.reminderSection));
+    $("testAlarm").onclick=testAlarmNotification;
+    $("syncReminderNow").onclick=syncReminderNow;
+    $("clearReminder").onclick=()=>toggleReminderClearPanel($("reminderClearPanel").hidden);
+    $("confirmClearReminder").onclick=confirmClearReminder;
+    $("clearAllReminder").onclick=clearAllReminder;
+    $("cancelClearReminder").onclick=()=>toggleReminderClearPanel(false);
+    $("confirmClearReminderNow").onclick=confirmClearReminderNow;
+    $("cancelClearReminderPreview").onclick=cancelClearReminderPreview;
+    $("editReminderState").onclick=openStateEditor;
+    $("closeStateEditor").onclick=closeStateEditor;
+    $("cancelStateEditor").onclick=closeStateEditor;
+    $("saveStateEditor").onclick=saveStateEditor;
+    $("stateEditorModal").onclick=event=>{if(event.target===$("stateEditorModal"))closeStateEditor()};
+    $("chooseAlarmSound").onclick=()=>window.AndroidReminder?.openRingtonePicker?.();
+    $("clearAlarmSound").onclick=()=>{$("alarmSoundUri").value=""};
     $("exactAlarmPermission").onclick=()=>window.AndroidReminder?.openExactAlarmSettings?.();
     $("reminderSourceType").onchange=syncReminderSourceFields;
     $("applyDefaultFiltersNow").onclick=applyDefaultFiltersNow;
@@ -4341,6 +5065,8 @@ print("hello")
     $("bulkItems").oninput=renderBulkPreview;$("bulkDefaultTags").oninput=renderBulkPreview;
     $("bulkDefaultStatus").onchange=renderBulkPreview;$("bulkDefaultPriority").onchange=renderBulkPreview;
     $("visualStatus").onchange=()=>syncVisualClosedForStatus(true);
+    $("visualHabit").onchange=()=>syncSpecialScheduleFields("habit");
+    $("visualLunar").onchange=()=>syncSpecialScheduleFields("lunar");
     $("applyVisual").onclick=()=>{if(commitVisualChanges())closeVisualEditor()};
     $("writeVisual").onclick=()=>writeVisualSource();
     $("downloadVisual").onclick=downloadVisualSource;
@@ -4350,6 +5076,11 @@ print("hello")
     $("moveParent").onchange=updateMoveOptions;$("moveAnchor").onchange=updateMoveOptions;
     $("applyMove").onclick=moveTaskFromPage;
     $("moveModal").onclick=event=>{if(event.target===$("moveModal"))closeMoveModal()};
+    $("moveBatchAsChild").onclick=openBatchMoveModal;
+    $("batchMoveFile").onchange=updateBatchMoveOptions;$("batchMoveParent").onchange=updateBatchMoveOptions;
+    $("closeBatchMove").onclick=$("cancelBatchMove").onclick=closeBatchMoveModal;
+    $("applyBatchMove").onclick=applyBatchMove;
+    $("batchMoveModal").onclick=event=>{if(event.target===$("batchMoveModal"))closeBatchMoveModal()};
     $("closeDelete").onclick=$("cancelDelete").onclick=closeDeleteModal;
     $("applyDelete").onclick=()=>{if(deleteTaskFromPage())closeDeleteModal()};
     $("writeDelete").onclick=()=>writeDeletedTask();$("downloadDelete").onclick=downloadDeletedTask;

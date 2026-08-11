@@ -3,6 +3,7 @@ from __future__ import annotations
 import http.client
 import json
 import os
+import re
 import secrets
 import socket
 import subprocess
@@ -12,6 +13,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import webbrowser
+from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Dict, Optional, Tuple
@@ -39,7 +41,16 @@ REMINDER_DEFAULTS = {
     "dailySummaryTimes": ["09:00"],
     "missedSummaryPolicy": "latest",
     "groupNotifications": True,
+    "scheduledAdvanceMinutes": 0,
     "deadlineAdvanceMinutes": 15,
+    # Kept true for helpers that were started before the redundant global switch was removed.
+    "alarmEnabled": True,
+    "alarmRepeat": 3,
+    "alarmIntervalSeconds": 2,
+    "alarmSoundPath": "",
+    "scheduledAlarmProperty": "SCHEDULED_ALARM",
+    "deadlineAlarmProperty": "DEADLINE_ALARM",
+    "legacyAlarmProperty": "ALARM",
     "doneStatuses": ["DONE", "CNCL"],
 }
 
@@ -64,6 +75,9 @@ def validate_reminder_config(value: object) -> dict:
     try:
         interval = max(1, min(1440, int(value.get("intervalMinutes", 10))))
         advance = max(0, min(10080, int(value.get("deadlineAdvanceMinutes", 15))))
+        scheduled_advance = max(0, min(10080, int(value.get("scheduledAdvanceMinutes", 0))))
+        repeat = max(1, min(20, int(value.get("alarmRepeat", 3))))
+        interval_seconds = max(0, min(60, int(value.get("alarmIntervalSeconds", 2))))
     except (TypeError, ValueError) as error:
         raise ValueError("检查间隔或提前提醒时间无效。") from error
     raw_times = value.get("dailySummaryTimes", [value.get("dailySummaryTime", "09:00")])
@@ -86,6 +100,18 @@ def validate_reminder_config(value: object) -> dict:
     done_statuses = value.get("doneStatuses", ["DONE", "CNCL"])
     if not isinstance(done_statuses, list):
         done_statuses = ["DONE", "CNCL"]
+    property_names = []
+    for field, fallback in (
+        ("scheduledAlarmProperty", "SCHEDULED_ALARM"),
+        ("deadlineAlarmProperty", "DEADLINE_ALARM"),
+        ("legacyAlarmProperty", "ALARM"),
+    ):
+        name = str(value.get(field, fallback)).strip().upper()
+        if not re.fullmatch(r"[A-Z0-9_-]+", name):
+            raise ValueError("闹钟属性名只能包含字母、数字、下划线或连字符。")
+        property_names.append(name)
+    if len(set(property_names)) != 3:
+        raise ValueError("三个闹钟属性名不能重复。")
     return {
         "enabled": bool(value.get("enabled", False)),
         "sourceType": source_type,
@@ -100,7 +126,15 @@ def validate_reminder_config(value: object) -> dict:
         "dailySummaryTimes": summary_times,
         "missedSummaryPolicy": "skip" if value.get("missedSummaryPolicy") == "skip" else "latest",
         "groupNotifications": bool(value.get("groupNotifications", True)),
+        "scheduledAdvanceMinutes": scheduled_advance,
         "deadlineAdvanceMinutes": advance,
+        "alarmEnabled": True,
+        "alarmRepeat": repeat,
+        "alarmIntervalSeconds": interval_seconds,
+        "alarmSoundPath": str(value.get("alarmSoundPath", "")).strip(),
+        "scheduledAlarmProperty": property_names[0],
+        "deadlineAlarmProperty": property_names[1],
+        "legacyAlarmProperty": property_names[2],
         "doneStatuses": [str(item).upper() for item in done_statuses if str(item).strip()],
     }
 
@@ -109,6 +143,105 @@ def save_reminder_config(value: dict) -> None:
     temporary = REMINDER_CONFIG_PATH.with_suffix(".json.tmp")
     temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2), encoding="utf-8")
     temporary.replace(REMINDER_CONFIG_PATH)
+
+
+def save_json_file(path: Path, value: object) -> None:
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2), encoding="utf-8")
+    temporary.replace(path)
+
+
+def _parse_clear_bound(text: str, end_of_day: bool = False) -> Optional[datetime]:
+    text = str(text or "").strip()
+    if not text:
+        return None
+    match = re.fullmatch(
+        r"(20\d{2}-\d{2}-\d{2})(?:[T ](\d{1,2}):(\d{2})(?::(\d{2}))?)?",
+        text,
+    )
+    if not match:
+        raise ValueError("时间格式无效，请使用 YYYY-MM-DD 或 YYYY-MM-DD HH:MM。")
+    date_text = match.group(1)
+    hour_text, minute_text, second_text = match.group(2), match.group(3), match.group(4)
+    try:
+        parsed = datetime.strptime(date_text, "%Y-%m-%d")
+    except ValueError as error:
+        raise ValueError("日期无效。") from error
+    if hour_text is None:
+        if end_of_day:
+            return parsed.replace(hour=23, minute=59, second=59)
+        return parsed.replace(hour=0, minute=0, second=0)
+    hour, minute, second = int(hour_text), int(minute_text), int(second_text or 0)
+    if not 0 <= hour <= 23 or not 0 <= minute <= 59 or not 0 <= second <= 59:
+        raise ValueError("时间无效。")
+    if end_of_day:
+        second = 59
+    return parsed.replace(hour=hour, minute=minute, second=second)
+
+
+def _record_datetime(key: object) -> Optional[datetime]:
+    match = re.search(
+        r"(20\d{2}-\d{2}-\d{2})[T :](\d{1,2}):(\d{2})",
+        str(key),
+    )
+    if not match:
+        return None
+    try:
+        parsed = datetime.strptime(match.group(1), "%Y-%m-%d")
+        return parsed.replace(hour=int(match.group(2)), minute=int(match.group(3)), second=0)
+    except ValueError:
+        return None
+
+
+def reminder_record_label(key: object) -> str:
+    text = str(key)
+    digest = re.fullmatch(r"digest:(\d{4}-\d{2}-\d{2}):(\d{2}:\d{2})", text)
+    if digest:
+        return f"每日汇总 {digest.group(1)} {digest.group(2)}"
+    parts = text.split(":", 3)
+    if len(parts) == 4 and parts[0] in {"scheduled", "deadline"}:
+        time_text = parts[3].replace("T", " ")[:16]
+        return f"{parts[0].upper()} · {parts[1]} · 行 {parts[2]} · {time_text}"
+    return text
+
+
+def reminded_clear_result(from_time: str = "", to_time: str = "") -> tuple[list[str], list[str]]:
+    """返回 (全部已提醒记录键, 将按时间范围移除的记录键)，不修改状态文件。"""
+    state = read_json_file(REMINDER_STATE_PATH, {})
+    sent = state.get("sent") if isinstance(state, dict) and isinstance(state.get("sent"), dict) else {}
+    from_dt = _parse_clear_bound(from_time, end_of_day=False)
+    to_dt = _parse_clear_bound(to_time, end_of_day=True)
+    if from_dt and to_dt and from_dt > to_dt:
+        raise ValueError("结束时间不能早于开始时间。")
+
+    def in_range(key: object) -> bool:
+        record = _record_datetime(key)
+        if record is None:
+            return False
+        if from_dt and record < from_dt:
+            return False
+        if to_dt and record > to_dt:
+            return False
+        return True
+
+    removed_keys = [key for key in sent if in_range(key)] if (from_dt or to_dt) else list(sent.keys())
+    return list(sent.keys()), removed_keys
+
+
+def clear_reminded_records(from_time: str = "", to_time: str = "") -> int:
+    """按计划提醒时间清除已提醒记录；不填时间则全部清除。"""
+    all_keys, removed_keys = reminded_clear_result(from_time, to_time)
+    if not removed_keys:
+        return 0
+    state = read_json_file(REMINDER_STATE_PATH, {})
+    if isinstance(state, dict) and isinstance(state.get("sent"), dict):
+        removed_set = set(removed_keys)
+        state["sent"] = {key: value for key, value in state["sent"].items() if key not in removed_set}
+        try:
+            save_json_file(REMINDER_STATE_PATH, state)
+        except OSError as error:
+            raise OSError(f"无法写入提醒状态文件：{error}") from error
+    return len(removed_keys)
 
 
 class OrgWebDavHandler(BaseHTTPRequestHandler):
@@ -130,6 +263,11 @@ class OrgWebDavHandler(BaseHTTPRequestHandler):
                 state = read_json_file(REMINDER_STATE_PATH, {})
                 self._send_json(200, {"state": state, "scriptAvailable": REMINDER_SCRIPT_PATH.exists()})
             return
+        if parsed.path == "/reminder-state-file":
+            if self._authorized():
+                text = read_json_file(REMINDER_STATE_PATH, {})
+                self._send_json(200, {"text": json.dumps(text, ensure_ascii=False, indent=2)})
+            return
         if self.path.startswith("/webdav-proxy?"):
             self._proxy()
             return
@@ -137,10 +275,50 @@ class OrgWebDavHandler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:
         parsed = urllib.parse.urlparse(self.path)
-        if parsed.path not in {"/reminder-config", "/reminder-test"}:
+        if parsed.path not in {"/reminder-config", "/reminder-test", "/reminder-test-alarm", "/reminder-sync-now",
+                               "/reminder-clear", "/reminder-state-file"}:
             self._send_text(404, "未知的本地桥接操作。")
             return
         if not self._authorized():
+            return
+        if parsed.path == "/reminder-state-file":
+            try:
+                body = self._read_json_body()
+                text = str(body.get("text", "") or "")
+                parsed_state = json.loads(text)
+                if not isinstance(parsed_state, dict) or not isinstance(parsed_state.get("sent", {}), dict):
+                    raise ValueError("已提醒记录必须是包含 sent 对象的 JSON。")
+                save_json_file(REMINDER_STATE_PATH, parsed_state)
+                self._send_json(200, {"ok": True})
+            except (OSError, ValueError) as error:
+                self._send_json(400, {"ok": False, "error": str(error)})
+            return
+        if parsed.path == "/reminder-clear":
+            try:
+                body = self._read_json_body()
+                from_date = str(body.get("from", "") or "").strip()
+                to_date = str(body.get("to", "") or "").strip()
+                if body.get("preview"):
+                    all_keys, removed_keys = reminded_clear_result(from_date, to_date)
+                    removed_set = set(removed_keys)
+                    self._send_json(200, {
+                        "ok": True,
+                        "preview": True,
+                        "removed": len(removed_keys),
+                        "beforeCount": len(all_keys),
+                        "afterCount": len(all_keys) - len(removed_keys),
+                        "beforeRecords": [
+                            {"key": key, "label": reminder_record_label(key)} for key in all_keys
+                        ],
+                        "removedRecords": [
+                            {"key": key, "label": reminder_record_label(key)} for key in removed_keys
+                        ],
+                    })
+                else:
+                    removed = clear_reminded_records(from_date, to_date)
+                    self._send_json(200, {"ok": True, "removed": removed})
+            except (OSError, ValueError) as error:
+                self._send_json(400, {"ok": False, "error": str(error)})
             return
         if parsed.path == "/reminder-config":
             try:
@@ -150,16 +328,36 @@ class OrgWebDavHandler(BaseHTTPRequestHandler):
             except (OSError, ValueError) as error:
                 self._send_json(400, {"ok": False, "error": str(error)})
             return
+        if parsed.path == "/reminder-sync-now":
+            if not REMINDER_SCRIPT_PATH.exists():
+                self._send_json(404, {"ok": False, "error": "没有找到 Windows 提醒助手。"})
+                return
+            try:
+                flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+                result = subprocess.run(
+                    [sys.executable, str(REMINDER_SCRIPT_PATH), "--once"],
+                    capture_output=True,
+                    text=True,
+                    timeout=120,
+                    creationflags=flags,
+                )
+                if result.returncode:
+                    raise RuntimeError((result.stderr or result.stdout or "提醒刷新失败").strip())
+                self._send_json(200, {"ok": True, "state": read_json_file(REMINDER_STATE_PATH, {})})
+            except Exception as error:
+                self._send_json(500, {"ok": False, "error": str(error)})
+            return
         if not REMINDER_SCRIPT_PATH.exists():
             self._send_json(404, {"ok": False, "error": "没有找到 Windows 提醒助手。"})
             return
         try:
             flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+            arguments = ["--test-alarm"] if parsed.path == "/reminder-test-alarm" else ["--test-notification"]
             result = subprocess.run(
-                [sys.executable, str(REMINDER_SCRIPT_PATH), "--test-notification"],
+                [sys.executable, str(REMINDER_SCRIPT_PATH), *arguments],
                 capture_output=True,
                 text=True,
-                timeout=20,
+                timeout=40,
                 creationflags=flags,
             )
             if result.returncode:

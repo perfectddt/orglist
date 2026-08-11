@@ -14,6 +14,11 @@ echo Registering the Orglist notification identity...
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%REGISTER_SCRIPT%" -BaseDir "%BASE_DIR%"
 if errorlevel 1 goto register_failed
 
+if not exist "%~dp0orglist-reminder.pid" goto start_reminder
+set /p REMINDER_PID=<"%~dp0orglist-reminder.pid"
+taskkill /PID %REMINDER_PID% /F >nul 2>nul
+if not errorlevel 1 del /Q "%~dp0orglist-reminder.pid" >nul 2>nul
+:start_reminder
 wscript.exe "%REMINDER_VBS%"
 
 echo.
