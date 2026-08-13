@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import http.client
+import hashlib
 import json
 import os
 import re
@@ -9,6 +10,8 @@ import socket
 import subprocess
 import sys
 import threading
+import tempfile
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -24,6 +27,9 @@ HTML_NAME = "Orglist.html"
 BASE_DIR = Path(__file__).resolve().parent
 HTML_PATH = BASE_DIR / HTML_NAME
 MAX_BODY = 25 * 1024 * 1024
+EXTERNAL_EDITOR_DIR = Path(tempfile.gettempdir()) / "OrglistExternalEditor"
+EXTERNAL_EDITOR_SESSIONS: Dict[str, Path] = {}
+EXTERNAL_EDITOR_LOCK = threading.Lock()
 REMINDER_CONFIG_PATH = BASE_DIR / "orglist-reminder-config.json"
 REMINDER_STATE_PATH = BASE_DIR / "orglist-reminder-state.json"
 REMINDER_SCRIPT_PATH = BASE_DIR / "orglist-reminder.py"
@@ -53,6 +59,92 @@ REMINDER_DEFAULTS = {
     "legacyAlarmProperty": "ALARM",
     "doneStatuses": ["DONE", "CNCL"],
 }
+
+
+def external_editor_revision(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def safe_external_editor_name(value: object) -> str:
+    name = Path(str(value or "Orglist.org")).name
+    name = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "_", name).strip(" .") or "Orglist.org"
+    if not name.lower().endswith(".org"):
+        name += ".org"
+    return name[:180]
+
+
+def launch_external_editor(path: Path) -> None:
+    if os.name != "nt" or not hasattr(os, "startfile"):
+        raise OSError("此功能仅支持 Windows 本地桥接。")
+    flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+    try:
+        subprocess.Popen(
+            ["rundll32.exe", "shell32.dll,OpenAs_RunDLL", str(path)],
+            creationflags=flags,
+        )
+    except OSError:
+        os.startfile(str(path))
+
+
+def open_external_editor(name: object, text: object) -> dict:
+    data = str(text or "").encode("utf-8")
+    if len(data) > MAX_BODY:
+        raise ValueError("外部编辑内容超过 25 MB。")
+    EXTERNAL_EDITOR_DIR.mkdir(parents=True, exist_ok=True)
+    session = secrets.token_urlsafe(24)
+    session_dir = EXTERNAL_EDITOR_DIR / session
+    session_dir.mkdir()
+    path = session_dir / safe_external_editor_name(name)
+    path.write_bytes(data)
+    with EXTERNAL_EDITOR_LOCK:
+        EXTERNAL_EDITOR_SESSIONS[session] = path
+    try:
+        launch_external_editor(path)
+    except Exception:
+        with EXTERNAL_EDITOR_LOCK:
+            EXTERNAL_EDITOR_SESSIONS.pop(session, None)
+        try:
+            path.unlink()
+            session_dir.rmdir()
+        except OSError:
+            pass
+        raise
+    return {"ok": True, "session": session, "revision": external_editor_revision(data), "name": path.name}
+
+
+def read_external_editor(session: str) -> dict:
+    with EXTERNAL_EDITOR_LOCK:
+        path = EXTERNAL_EDITOR_SESSIONS.get(session)
+    if not path:
+        raise FileNotFoundError("外部编辑会话不存在或已经结束。")
+    data = path.read_bytes()
+    if len(data) > MAX_BODY:
+        raise ValueError("外部编辑文件超过 25 MB。")
+    return {
+        "ok": True,
+        "text": data.decode("utf-8-sig", errors="replace"),
+        "revision": external_editor_revision(data),
+        "name": path.name,
+    }
+
+
+def cleanup_external_editor_files(max_age_seconds: int = 7 * 24 * 60 * 60) -> None:
+    try:
+        if not EXTERNAL_EDITOR_DIR.exists():
+            return
+        cutoff = time.time() - max_age_seconds
+        for path in EXTERNAL_EDITOR_DIR.rglob("*.org"):
+            try:
+                if path.stat().st_mtime < cutoff:
+                    path.unlink()
+                    try:
+                        path.parent.rmdir()
+                    except OSError:
+                        pass
+            except OSError:
+                pass
+    except OSError:
+        pass
 
 
 def read_json_file(path: Path, fallback: object) -> object:
@@ -253,6 +345,15 @@ class OrgWebDavHandler(BaseHTTPRequestHandler):
 
     def do_GET(self) -> None:
         parsed = urllib.parse.urlparse(self.path)
+        if parsed.path == "/external-editor":
+            if not self._external_editor_allowed():
+                return
+            try:
+                session = urllib.parse.parse_qs(parsed.query).get("session", [""])[0]
+                self._send_json(200, read_external_editor(session))
+            except (OSError, ValueError) as error:
+                self._send_json(404 if isinstance(error, FileNotFoundError) else 400, {"ok": False, "error": str(error)})
+            return
         if parsed.path == "/reminder-config":
             if self._authorized():
                 value = read_json_file(REMINDER_CONFIG_PATH, dict(REMINDER_DEFAULTS))
@@ -275,6 +376,17 @@ class OrgWebDavHandler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:
         parsed = urllib.parse.urlparse(self.path)
+        if parsed.path == "/external-editor/open":
+            if not self._external_editor_allowed():
+                return
+            try:
+                body = self._read_json_body(MAX_BODY)
+                if not isinstance(body, dict):
+                    raise ValueError("外部编辑请求格式无效。")
+                self._send_json(200, open_external_editor(body.get("name"), body.get("text")))
+            except (OSError, ValueError) as error:
+                self._send_json(400, {"ok": False, "error": str(error)})
+            return
         if parsed.path not in {"/reminder-config", "/reminder-test", "/reminder-test-alarm", "/reminder-sync-now",
                                "/reminder-clear", "/reminder-state-file"}:
             self._send_text(404, "未知的本地桥接操作。")
@@ -386,6 +498,25 @@ class OrgWebDavHandler(BaseHTTPRequestHandler):
         if path == "/favicon.ico":
             self.send_response(204)
             self.end_headers()
+            return
+        if path.startswith("/plugins/"):
+            plugin_path = (BASE_DIR / path.lstrip("/")).resolve()
+            plugins_dir = (BASE_DIR / "plugins").resolve()
+            if plugin_path.parent != plugins_dir or plugin_path.suffix.lower() != ".js":
+                self._send_text(404, "插件文件不存在。")
+                return
+            try:
+                body = plugin_path.read_bytes()
+            except OSError:
+                self._send_text(404, "插件文件不存在。")
+                return
+            self.send_response(200)
+            self.send_header("Content-Type", "text/javascript; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.end_headers()
+            self.wfile.write(body)
             return
         if path not in {"/", f"/{HTML_NAME}"}:
             self._send_text(404, "本地桥接只提供 Org 清单页面。")
@@ -504,17 +635,35 @@ class OrgWebDavHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-    def _read_json_body(self) -> object:
+    def _read_json_body(self, maximum: int = 128 * 1024) -> object:
         try:
             length = int(self.headers.get("Content-Length", "0") or "0")
         except ValueError as error:
             raise ValueError("请求长度无效。") from error
-        if length <= 0 or length > 128 * 1024:
-            raise ValueError("提醒配置内容为空或过大。")
+        if length <= 0 or length > maximum:
+            raise ValueError("请求内容为空或过大。")
         try:
             return json.loads(self.rfile.read(length).decode("utf-8"))
         except (UnicodeDecodeError, ValueError) as error:
-            raise ValueError("提醒配置不是有效 JSON。") from error
+            raise ValueError("请求内容不是有效 JSON。") from error
+
+    def _external_editor_allowed(self) -> bool:
+        if not self._authorized():
+            return False
+        if not getattr(self.server, "allow_external_editor", True):
+            self._send_json(403, {"ok": False, "error": "局域网桥接禁止调用 Windows 外部应用。"})
+            return False
+        if self.client_address[0] not in {"127.0.0.1", "::1"}:
+            self._send_json(403, {"ok": False, "error": "外部编辑只允许本机访问。"})
+            return False
+        origin = self.headers.get("Origin", "")
+        if origin:
+            parsed = urllib.parse.urlparse(origin)
+            expected_port = self.server.server_address[1]
+            if parsed.scheme != "http" or parsed.hostname not in {"127.0.0.1", "localhost", "::1"} or parsed.port != expected_port:
+                self._send_json(403, {"ok": False, "error": "外部编辑请求来源无效。"})
+                return False
+        return True
 
     def _authorized(self) -> bool:
         expected = getattr(self.server, "access_token", "")
@@ -560,6 +709,10 @@ def main() -> None:
     server, port = create_server(bind_host)
     access_token = secrets.token_urlsafe(18) if lan_mode else ""
     server.access_token = access_token
+    # LAN mode still permits the Windows page opened on 127.0.0.1; remote phone clients
+    # are rejected by _external_editor_allowed() because their client address is not loopback.
+    server.allow_external_editor = True
+    cleanup_external_editor_files()
     query = f"?bridge=1&token={urllib.parse.quote(access_token)}" if lan_mode else ""
     local_url = f"http://127.0.0.1:{port}/{query}"
     print("Org 清单 WebDAV 本地桥接已启动。")

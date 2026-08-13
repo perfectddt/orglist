@@ -209,9 +209,20 @@
     .batchSelect{display:none;place-items:center;position:absolute;z-index:2;top:9px;left:8px;
       width:22px;height:22px;color:var(--muted);background:var(--panel);border:1px solid var(--line);
       border-radius:50%;font-size:11px;font-weight:900}
+    .batchDragHandle{display:none;place-items:center;position:absolute;z-index:3;top:8px;left:38px;width:25px;height:24px;
+      padding:0;color:var(--accent);background:var(--panel);border:1px solid var(--accent);border-radius:7px;
+      font-size:13px;font-weight:900;line-height:1;cursor:grab;touch-action:none;user-select:none}
+    .batchDragHandle:active{cursor:grabbing}.batchMode .taskSwipe.batchSelected .batchDragHandle{display:grid}
     .batchMode .batchSelect{display:grid}.taskSwipe.batchSelected .batchSelect{color:#fff;
       background:var(--accent);border-color:var(--accent)}.taskSwipe.batchSelected .task{background:var(--accentSoft)}
-    .batchMode .task,.batchMode .hierCard{padding-left:44px}
+    .batchMode .task,.batchMode .hierCard{padding-left:44px}.batchMode .taskSwipe.batchSelected .task,
+    .batchMode .taskSwipe.batchSelected .hierCard{padding-left:74px}
+    .taskSwipe.batchDragSource{opacity:.46}.taskSwipe.batchDropTarget>.task,
+    .taskSwipe.batchDropTarget>.hierCard{outline:2px solid var(--accent);outline-offset:-2px;background:var(--accentSoft)!important}
+    .batchDragGhost{position:fixed;z-index:1000;max-width:min(340px,80vw);padding:9px 12px;color:#fff;
+      background:rgba(47,45,40,.92);border:1px solid rgba(255,255,255,.18);border-radius:9px;
+      box-shadow:0 10px 28px rgba(0,0,0,.22);font-size:9px;font-weight:750;line-height:1.45;pointer-events:none}
+    body.batchDragging{cursor:grabbing;user-select:none}
     .swipeActions{position:absolute;z-index:0;top:0;right:0;bottom:0;display:flex;width:248px}
     .swipeActions button{flex:1;border:0;color:#fff;font-size:11px;font-weight:850}
     .swipeEdit{background:var(--blue)}.swipeMove{background:#8a6bb4}.swipeDate{background:var(--yellow)}.swipeDelete{background:var(--red)}
@@ -472,6 +483,10 @@
       background:transparent;border:0;border-radius:6px;font-size:9px;font-weight:750}.editorModes button.active{
       color:#fff;background:var(--accent)}
     .editorTools{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
+    .editorPluginControl{display:flex;align-items:center;gap:5px;padding:3px 7px;color:var(--muted);
+      background:var(--soft);border:1px solid var(--line);border-radius:8px;font-size:9px;font-weight:800}
+    .editorPluginControl select{max-width:138px;padding:4px 22px 4px 5px;color:var(--text);background:var(--panel);
+      border:0;border-radius:5px;font-size:9px;outline:0}.editorPluginStatus{color:var(--muted2);font-size:8px}
     .orgHelpButton{padding:7px 9px;color:var(--blue);background:var(--blueSoft);
       border:0;border-radius:7px;font-size:9px;font-weight:800}.orgHelpButton:hover{color:#fff;background:var(--blue)}
     .editorZoom{display:flex;align-items:center;gap:3px;padding:3px;background:var(--soft);
@@ -495,6 +510,10 @@
       border-radius:0 10px 10px 0;overflow:hidden}.editorWrap:focus-within{border-color:var(--accent)}
     .editorCode.hideLineNumbers{grid-template-columns:minmax(0,1fr)}.editorCode.hideLineNumbers .lineNumbers{display:none}
     .editorCode.hideLineNumbers .editorWrap{border-radius:10px}
+    .editorCode.pluginEditorActive{grid-template-columns:minmax(0,1fr)}.editorCode.pluginEditorActive>.lineNumbers{display:none}
+    .editorCode.pluginEditorActive .editorWrap{border-radius:10px}.editorCode.pluginEditorActive .editArea,
+    .editorCode.pluginEditorActive .highlightLayer{display:none!important}.orglistAdvancedVimMount{position:absolute;z-index:4;
+      inset:0;width:100%;height:100%;background:var(--soft)}
     .editArea,.highlightLayer{position:absolute;inset:0;width:100%;height:100%;min-height:0;margin:0;padding:15px;white-space:pre;
       overflow-wrap:normal;word-break:normal;font:11px/1.65 ui-monospace,"Cascadia Code","Microsoft YaHei",monospace;
       tab-size:2}.editArea{z-index:2;display:block;resize:none;color:var(--text);
@@ -597,6 +616,17 @@
     .settingsSection+.settingsSection{padding-top:20px;border-top:1px solid var(--line)}
     .settingsSection h3{margin:0 0 6px;font-size:12px}.settingsHint{margin:0 0 13px;color:var(--muted);
       font-size:9px;line-height:1.65}.settingsGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+    .pluginWarning{margin:0 0 12px;padding:11px 12px;color:var(--red);background:var(--redSoft);
+      border:1px solid rgba(201,75,65,.18);border-radius:9px;font-size:9px;line-height:1.65}
+    .pluginActions{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px}.pluginList{display:grid;gap:8px}
+    .pluginItem{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:11px 12px;
+      background:var(--soft);border:1px solid var(--line);border-radius:9px}.pluginInfo{min-width:0}
+    .pluginInfo strong{display:block;margin-bottom:4px;font-size:10px}.pluginInfo small{display:block;color:var(--muted);
+      font-size:8px;line-height:1.55;overflow-wrap:anywhere}.pluginButtons{display:flex;align-items:center;gap:6px}
+    .pluginButtons button{padding:6px 9px;color:var(--muted);background:var(--panel);border:1px solid var(--line);
+      border-radius:7px;font-size:8px;font-weight:750}.pluginButtons button:hover{color:var(--accent);border-color:var(--accent)}
+    .pluginButtons .pluginDelete:hover{color:var(--red);border-color:var(--red)}.pluginType{display:inline-block;
+      margin-right:5px;padding:2px 5px;color:var(--accent);background:var(--accentSoft);border-radius:5px;font-size:7px;font-weight:800}
     .settingsGrid .full{grid-column:1/-1}.settingsCheck{display:flex;align-items:flex-start;gap:9px;
       padding:10px 11px;background:var(--soft);border:1px solid var(--line);border-radius:8px;
       color:var(--muted);font-size:9px;line-height:1.55}.settingsCheck input{margin-top:2px;accent-color:var(--accent)}
@@ -717,7 +747,8 @@
       .modeSwitch{flex:1}
       .modeSwitch button{flex:1}.hierCard{grid-template-columns:38px minmax(0,1fr)}.hierTail{grid-column:2}
       .task{grid-template-columns:23px minmax(0,1fr)}.tail{grid-column:2;align-items:center;flex-direction:row;min-width:0}
-      .batchMode .task,.batchMode .hierCard{padding-left:38px}.batchBar.show{position:fixed;right:12px;bottom:12px;left:12px;
+      .batchMode .task,.batchMode .hierCard{padding-left:38px}.batchMode .taskSwipe.batchSelected .task,
+      .batchMode .taskSwipe.batchSelected .hierCard{padding-left:68px}.batchBar.show{position:fixed;right:12px;bottom:12px;left:12px;
         max-height:42vh;overflow:auto}.batchMode .main{padding-bottom:120px}
       .taskDetailHint{display:inline-flex;order:99}
       .list.columns2,.hierList.columns2,.quadrantControls{grid-template-columns:1fr}
@@ -758,29 +789,33 @@
   <input id="configImport" class="hidden" type="file" accept=".json,application/json">
   <div class="app">
     <aside class="sidebar" id="sidebar">
-      <div class="brand">
+      <div class="brand" id="brandRegion">
         <div class="logo"></div>
         <div><strong>Org 清单</strong><small>本地任务工作台</small></div>
         <button class="iconBtn closeSide" id="closeSide" aria-label="关闭侧栏">×</button>
       </div>
-      <button class="btn primary full" id="openFolder">打开 Org 文件夹</button>
-      <button class="btn secondary full mt8" id="openFiles">选择一个或多个文件</button>
+      <div id="openActions">
+        <button class="btn primary full" id="openFolder">打开 Org 文件夹</button>
+        <button class="btn secondary full mt8" id="openFiles">选择一个或多个文件</button>
+      </div>
       <div class="sideSections" id="sideSections">
-        <section class="sideSection" data-side-section="smart">
+        <section class="sideSection" id="sideSmart" data-side-section="smart">
           <div class="label labelRow"><span class="sideHeading">智能清单</span><button class="smartSettings" id="smartSettings">显示设置</button></div>
           <nav id="nav"></nav>
         </section>
-        <section class="sideSection" data-side-section="custom">
+        <section class="sideSection" id="sideCustom" data-side-section="custom">
           <div class="label labelRow"><span class="sideHeading">自定义清单</span><button class="saveList" id="saveCustom">＋ 保存当前</button></div>
           <div class="customLists" id="customLists"></div>
         </section>
-        <section class="sideSection" data-side-section="files">
+        <section class="sideSection" id="sideFiles" data-side-section="files">
           <div class="label labelRow"><span class="sideHeading">文件</span><span id="fileTotal">0</span></div>
           <div class="files" id="files"></div>
         </section>
       </div>
-      <div class="label labelRow"><span class="sideHeading">最近打开</span><button class="clearHistory" id="clearHistory">清除</button></div>
-      <div class="history" id="history"></div>
+      <div id="recentRegion">
+        <div class="label labelRow"><span class="sideHeading">最近打开</span><button class="clearHistory" id="clearHistory">清除</button></div>
+        <div class="history" id="history"></div>
+      </div>
       <button class="sideSettingsButton" id="settings"><span aria-hidden="true">⚙</span><span>设置</span></button>
     </aside>
     <button class="scrim" id="scrim" aria-label="关闭侧栏"></button>
@@ -804,7 +839,7 @@
       </header>
       <div class="content">
         <main class="main">
-          <div class="heading">
+          <div class="heading" id="viewHeaderRegion">
             <div><div class="eyebrow" id="scope">尚未选择文件</div><h1 id="viewTitle">待办</h1><p id="summary">0 个条目</p></div>
             <div class="headingActions">
               <button class="fileEditButton" id="editCurrentFile">编辑整个文件</button>
@@ -816,8 +851,9 @@
               </div>
             </div>
           </div>
-          <button class="filterToggle" id="filterToggle" aria-expanded="true"><span id="filterToggleText">筛选条件</span><span class="filterArrow">⌃</span></button>
-          <div class="filters withToggle" id="filters">
+          <div id="filterRegion">
+            <button class="filterToggle" id="filterToggle" aria-expanded="true"><span id="filterToggleText">筛选条件</span><span class="filterArrow">⌃</span></button>
+            <div class="filters withToggle" id="filters">
             <label><span>状态</span><select id="statusFilter">
               <option value="ALL">全部状态</option><option value="OPEN">未完成</option>
               <option value="NEXT">NEXT</option><option value="TODO">TODO</option>
@@ -843,7 +879,9 @@
             <label><span>列表布局</span><select id="columnFilter">
               <option value="1">一列</option><option value="2">两列</option>
             </select></label>
+            </div>
           </div>
+          <div id="viewAuxRegion">
           <div class="quadrantControls" id="quadrantControls">
             <label><span>“重要”的定义</span><select id="importantRule">
               <option value="A">仅优先级 A</option>
@@ -905,6 +943,7 @@
             <button class="batchDanger" id="deleteBatch">删除</button>
             <button id="clearBatch">取消</button>
           </div>
+          </div>
           <div id="listHost"></div>
         </main>
         <aside class="detail" id="detail"><div class="detailEmpty">
@@ -932,6 +971,8 @@
           <div class="syntaxCode">/教师|事业单位/i</div><div>正则表达式；支持 i、m、s、u 标志</div>
           <div class="syntaxCode">grep:/CLOSED:.*2026-07/i</div><div>对标题、正文、属性和日期组成的完整文本执行正则</div>
           <div class="syntaxCode">title:考试 tag:工作</div><div>字段搜索，可用 title、body、tag、file、path</div>
+          <div class="syntaxCode">file:inbox.org,nextactions.org</div><div>限定在多个文件中搜索；逗号分隔，命中任一文件即可</div>
+          <div class="syntaxCode">file:all</div><div>搜索所有文件；不写 file: 时默认也是所有文件，也可写成 file:*</div>
           <div class="syntaxCode">status:TODO priority:A</div><div>按 Org 状态与优先级搜索</div>
           <div class="syntaxCode">prop:ORG_GTD=Calendar</div><div>按 Org 属性搜索</div>
           <div class="syntaxCode">level:1..3</div><div>只匹配 H1 到 H3</div>
@@ -943,6 +984,7 @@
         <div class="syntaxExamples"><h3>组合示例</h3>
           <code>status:TODO deadline:2026-07-01..2026-07-31 -tag:归档</code>
           <code>file:org-gtd-tasks.org grep:/面试|笔试/i</code>
+          <code>file:inbox.org,nextactions.org 报名 -宁波</code>
           <code>closed:&gt;=2026-07-01 closed:&lt;=2026-07-31</code>
         </div>
       </div>
@@ -957,6 +999,11 @@
           <button id="highlightEditMode" data-editor-mode="highlight">彩色高亮</button></div>
           <div class="editorTools"><button class="orgHelpButton" id="orgFormatHelp">Org 格式说明</button>
             <button class="orgHelpButton" id="vimHelp" type="button">Vim 说明</button>
+            <label class="editorPluginControl">编辑器<select id="editorPluginSelect" aria-label="编辑器插件">
+              <option value="builtin">内置轻量编辑器</option></select></label>
+            <label class="editorPluginControl">格式<select id="editorFormatSelect" aria-label="编辑格式插件">
+              <option value="builtin-org">内置 Org 格式</option></select></label>
+            <span class="editorPluginStatus" id="editorPluginStatus">内置</span>
             <button class="vimToggle" id="vimToggle" type="button">Vim 关</button><span class="vimStatus" id="vimStatus">普通编辑</span>
             <div class="editorZoom" aria-label="编辑器字体缩放"><button id="editorZoomOut" aria-label="缩小全部字体">A−</button>
               <span id="editorZoomValue">100%</span><button id="editorZoomIn" aria-label="放大全部字体">A＋</button></div></div></div>
@@ -976,6 +1023,7 @@
         <p class="editWarning" id="editWarning">这里编辑的是当前标题及其正文，不包含子标题。请保留首行的星号层级。点击“应用到当前页面”只更新内存；点击“写回原文件”才会覆盖磁盘文件。</p>
         <div class="modalActions">
           <button class="btn secondary" id="cancelEdit">取消</button>
+          <button class="btn secondary" id="openExternalEdit" type="button" hidden>用其他应用打开</button>
           <button class="btn secondary" id="downloadEdit">下载修改后的文件</button>
           <button class="btn secondary" id="writeEdit">写回原文件</button>
           <button class="btn primary" id="applyEdit">应用到当前页面</button>
@@ -1114,19 +1162,20 @@
   </div>
   <div class="modalBackdrop" id="batchMoveModal" role="dialog" aria-modal="true" aria-labelledby="batchMoveTitle">
     <div class="modal" style="width:min(680px,96vw)">
-      <div class="modalHead"><h2 id="batchMoveTitle">批量移为子项</h2><button class="iconBtn" id="closeBatchMove" aria-label="关闭">×</button></div>
+      <div class="modalHead"><h2 id="batchMoveTitle">将所选条目移为子项</h2><button class="iconBtn" id="closeBatchMove" aria-label="关闭">×</button></div>
       <div class="modalBody">
         <div class="deleteSummary" id="batchMoveSummary"></div>
         <div class="visualForm">
-          <label class="visualField"><span>目标文件</span><select id="batchMoveFile"></select></label>
+          <label class="visualField"><span>目标文件</span><select id="batchMoveFile"></select>
+            <small>可以选择与来源不同的 Org 文件。</small></label>
           <label class="visualField"><span>目标父项</span><select id="batchMoveParent"></select>
-            <small>所选条目会依次放到该条目的子项末尾，并自动调整标题星号层级。</small></label>
+            <small>所选条目会追加到该父项的子树末尾，并自动调整整棵子树的标题层级。</small></label>
           <div class="visualSource" id="batchMoveDestination"></div>
         </div>
-        <p class="editWarning">移动包含每个所选标题的完整子树。若同时选中父项和它的子项，只移动父项一次；操作先应用到当前页面，之后仍需写回涉及的文件。</p>
+        <p class="editWarning">将移动每个所选根条目的完整子树；若同时选中了父项与其子项，只移动父项一次。操作先应用到当前页面，涉及的来源文件和目标文件都会标记为未写回。</p>
         <div class="modalActions">
           <button class="btn secondary" id="cancelBatchMove">取消</button>
-          <button class="btn primary" id="applyBatchMove">移到目标父项下</button>
+          <button class="btn primary" id="applyBatchMove">移为所选父项的子项</button>
         </div>
       </div>
     </div>
@@ -1189,9 +1238,9 @@ print("hello")
   </div>
   <div class="modalBackdrop" id="vimHelpModal" role="dialog" aria-modal="true" aria-labelledby="vimHelpTitle">
     <div class="modal" style="width:min(680px,96vw)">
-      <div class="modalHead"><h2 id="vimHelpTitle">基础 Vim 操作说明</h2><button class="iconBtn" id="closeVimHelp" aria-label="关闭">×</button></div>
+      <div class="modalHead"><h2 id="vimHelpTitle">Vim 操作说明</h2><button class="iconBtn" id="closeVimHelp" aria-label="关闭">×</button></div>
       <div class="modalBody">
-        <p class="modalIntro">这是为 Org 编辑器准备的轻量 Vim 模式，不是完整 Vim。开启后默认进入普通模式，按 <code>i</code> 进入插入模式，按 <code>Esc</code> 返回普通模式。</p>
+        <p class="modalIntro" id="vimHelpIntro">内置轻量 Vim 开启后默认进入普通模式，按 <code>i</code> 进入插入模式，按 <code>Esc</code> 返回普通模式。你也可以在“设置 → 插件”导入兼容的高级 Vim 编辑器插件。</p>
         <div class="vimHelpGrid">
           <div>h / j / k / l</div><div>左、下、上、右移动；连续按 j/k 时编辑器滚动条会跟随光标。</div>
           <div>v</div><div>进入字符选择模式；继续用 h/j/k/l、w/b、0/$、gg/G 扩展选择，按 d 或 x 删除，按 c 删除后进入插入模式，再按 v 或 Esc 退出。</div>
@@ -1232,6 +1281,7 @@ print("hello")
           <button class="settingsNavSub" data-settings-target="settings-reminder-rules">提醒规则</button>
           <button class="settingsNavSub" data-settings-target="settings-reminder-alarm">闹钟与维护</button>
           <button data-settings-target="settings-webdav">WebDAV</button>
+          <button data-settings-target="settings-plugins">插件</button>
           <button data-settings-target="settings-about">关于</button>
         </nav>
         <div class="modalBody settingsContent" id="settingsContent">
@@ -1446,11 +1496,21 @@ print("hello")
           <div class="webdavStatus info" id="webdavStatus"></div>
           <div class="profileList" id="webdavProfiles"></div>
         </section>
+        <section class="settingsSection" id="settings-plugins">
+          <h3>外部插件</h3>
+          <p class="settingsHint">导入本地 <code>.js</code> 插件或 <code>.css</code> 页面样式。插件保存在当前应用的 IndexedDB；不会随 Org 文件同步。</p>
+          <p class="pluginWarning"><strong>只安装你信任的插件。</strong> JavaScript 插件与主程序拥有相同页面权限，可以读取当前打开的 Org 内容、本地设置，并调用当前平台已提供的桥接接口。Android 与 Windows 使用同一插件格式，但 Windows 桌面桥接功能不会自动出现在 Android。</p>
+          <div class="pluginActions"><button class="btn primary" id="importPlugin" type="button">导入插件文件</button>
+            <button class="btn secondary" id="openPluginDocs" type="button">开发说明</button>
+            <input id="pluginFileInput" type="file" accept=".js,.css,text/javascript,application/javascript,text/css" multiple hidden>
+            <span class="settingsHint" id="pluginStatus" style="margin:0"></span></div>
+          <div class="pluginList" id="pluginList"><div class="settingsHint" style="margin:0">正在读取插件…</div></div>
+        </section>
         <section class="settingsSection" id="settings-about">
           <h3>关于</h3>
           <div class="aboutCard"><strong>Orglist</strong>
             <p>面向 Org 文件的本地任务清单与浏览工具。数据默认保存在本地，只有在你主动使用写回或 WebDAV 时才会与文件交互。</p>
-            <dl><div><dt>当前版本</dt><dd>1.6.0</dd></div>
+            <dl><div><dt>当前版本</dt><dd>1.8.0</dd></div>
               <div><dt>项目地址</dt><dd><a href="https://github.com/perfectddt/orglist" target="_blank" rel="noopener noreferrer">github.com/perfectddt/orglist</a></dd></div>
               <div><dt>使用方式</dt><dd>支持本地 HTML、Android APK 与 WebDAV。</dd></div>
             </dl>
@@ -1495,9 +1555,10 @@ print("hello")
       searchHistory:[],custom:[],customActive:null,smartVisible:[],calendarMode:"month",
       calendarCursor:"",calendarDateRule:"ACTION",dayStart:7,dayEnd:22,
       sideOrder:["smart","custom","files"],smartOrder:[],fileOrder:["all"],editMode:"plain",editorScale:100,
+      editorPlugin:"builtin",editorFormat:"builtin-org",installedPlugins:[],externalEditorSession:"",externalEditorRevision:"",externalEditorBaseText:"",
       filterPreference:"auto",filtersCollapsed:false,filterTouched:false,detailBehavior:"desktop",detailOpen:false,
       webdavProfiles:[],webdavBusy:false,editing:null,visualMode:"edit",visualAddMode:"single",
-      visualEditing:null,deleting:null,moving:null,batchMoving:false,searchError:"",navHistory:[],editingScope:"task",editingFileId:null,
+      visualEditing:null,deleting:null,moving:null,searchError:"",navHistory:[],editingScope:"task",editingFileId:null,
       customOpenStatuses:[],customDoneStatuses:[],defaultFilters:{view:"open",status:"ALL",priority:"ALL",
         sort:"date",dateField:"date",columns:"2"},addDefaults:{position:"auto"},lastAddParent:null,
       batchMode:false,batchSelected:[],batchSources:[],
@@ -1513,9 +1574,256 @@ print("hello")
       SIDE_ORDER_KEY="org-task-sidebar-order-v1",SMART_ORDER_KEY="org-task-smart-order-v1",
       FILE_ORDER_KEY="org-task-file-order-v1",DISPLAY_KEY="org-task-display-settings-v1",ADD_KEY="org-task-add-defaults-v1",
       WEBDAV_KEY="org-task-webdav-profiles-v1",STATUS_KEY="org-task-custom-status-v1",
-      STARTUP_KEY="org-task-startup-page-v1",VIM_KEY="org-task-vim-mode-v1";
-    let searchHistoryTimer=null;
+      STARTUP_KEY="org-task-startup-page-v1",VIM_KEY="org-task-vim-mode-v1",
+      EDITOR_PLUGIN_KEY="org-task-editor-plugin-v1",EDITOR_FORMAT_KEY="org-task-editor-format-v1";
+    const PLUGIN_DB="orglist-plugin-storage-v1",PLUGIN_STORE="plugins",PLUGIN_HOST_API=2;
+    let searchHistoryTimer=null,externalEditorTimer=null,activeEditorPlugin=null,activeFormatPlugin=null,currentPluginRegistration="";
     const $ = id => document.getElementById(id);
+    const pluginRegistry=new Map(),pluginRuntime=new Map(),layoutSubscribers=new Set(),layoutRegionOwners=new Map();
+    function registerOrglistPlugin(plugin){
+      const manifest=plugin?.manifest,id=String(manifest?.id||"");
+      if(!/^[a-z0-9][a-z0-9._-]{1,63}$/.test(id)||!["editor","format","theme","layout"].includes(manifest?.type)||
+        Number(manifest?.hostApi)!==PLUGIN_HOST_API||typeof plugin.activate!=="function")
+        throw new Error("插件清单无效或宿主版本不兼容");
+      if(currentPluginRegistration&&currentPluginRegistration!==id)throw new Error("插件注册的 ID 与导入清单不一致");
+      pluginRegistry.set(id,plugin);return true
+    }
+    window.OrglistPluginHost=Object.freeze({apiVersion:PLUGIN_HOST_API,register:registerOrglistPlugin});
+    function openPluginDb(){
+      return new Promise((resolve,reject)=>{
+        if(!window.indexedDB){reject(new Error("当前环境不支持 IndexedDB"));return}
+        const request=indexedDB.open(PLUGIN_DB,1);
+        request.onupgradeneeded=()=>{if(!request.result.objectStoreNames.contains(PLUGIN_STORE))
+          request.result.createObjectStore(PLUGIN_STORE,{keyPath:"id"})};
+        request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)
+      })
+    }
+    async function readPluginRecords(){
+      const db=await openPluginDb();try{return await new Promise((resolve,reject)=>{
+        const request=db.transaction(PLUGIN_STORE,"readonly").objectStore(PLUGIN_STORE).getAll();
+        request.onsuccess=()=>resolve(Array.isArray(request.result)?request.result:[]);request.onerror=()=>reject(request.error)
+      })}finally{db.close()}
+    }
+    async function savePluginRecord(record){
+      const db=await openPluginDb();try{await new Promise((resolve,reject)=>{
+        const tx=db.transaction(PLUGIN_STORE,"readwrite");tx.objectStore(PLUGIN_STORE).put(record);
+        tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)
+      })}finally{db.close()}
+    }
+    async function removePluginRecord(id){
+      const db=await openPluginDb();try{await new Promise((resolve,reject)=>{
+        const tx=db.transaction(PLUGIN_STORE,"readwrite");tx.objectStore(PLUGIN_STORE).delete(id);
+        tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)
+      })}finally{db.close()}
+    }
+    function pluginTypeLabel(type){return ({editor:"编辑器",format:"编辑格式",theme:"页面样式",layout:"工作台布局"})[type]||type}
+    function parsePluginManifest(source){
+      const match=String(source||"").match(/\/\*\s*@orglist-plugin\s+({[\s\S]*?})\s*\*\//i);
+      if(!match)throw new Error("JavaScript 文件缺少 /* @orglist-plugin {...} */ 清单");
+      let manifest;try{manifest=JSON.parse(match[1])}catch(_){throw new Error("插件清单不是有效 JSON")}
+      const id=String(manifest?.id||"");
+      if(!/^[a-z0-9][a-z0-9._-]{1,63}$/.test(id))throw new Error("插件 ID 只能使用小写字母、数字、点、下划线和连字符");
+      if(!["editor","format","theme","layout"].includes(manifest?.type))throw new Error("插件 type 必须是 editor、format、theme 或 layout");
+      if(Number(manifest?.hostApi)!==PLUGIN_HOST_API)throw new Error(`插件要求的宿主 API 不兼容（当前为 ${PLUGIN_HOST_API}）`);
+      if(!String(manifest?.name||"").trim()||!String(manifest?.version||"").trim())throw new Error("插件清单缺少 name 或 version");
+      return {id,name:String(manifest.name),version:String(manifest.version),type:manifest.type,hostApi:PLUGIN_HOST_API}
+    }
+    function cssPluginManifest(file){
+      const base=String(file.name||"style").replace(/\.css$/i,"").toLowerCase().replace(/[^a-z0-9._-]+/g,"-")
+        .replace(/^[^a-z0-9]+/,"").slice(0,48)||"style";
+      return {id:`css.${base}`,name:String(file.name||"页面样式"),version:"1.0.0",type:"theme",hostApi:PLUGIN_HOST_API}
+    }
+    function createThemePluginApi(id){
+      const styles=[];return Object.freeze({apiVersion:PLUGIN_HOST_API,platform:androidPlatform()?"android":"windows",
+        addStyle(css){const style=document.createElement("style");style.dataset.orglistPlugin=id;style.textContent=String(css||"");
+          document.head.appendChild(style);styles.push(style);return ()=>style.remove()},removeStyles(){styles.splice(0).forEach(style=>style.remove())}})
+    }
+    function createFormatPluginApi(){
+      return Object.freeze({apiVersion:PLUGIN_HOST_API,platform:androidPlatform()?"android":"windows",escapeHtml:esc,
+        token:(className,text)=>`<span class="${esc(className)}">${esc(text)}</span>`,builtinOrgHighlight:highlightOrg})
+    }
+    function layoutRegion(name){
+      const selectors={app:".app",navigation:"#sidebar",sidebar:"#sidebar",workspace:".workspace",toolbar:".topbar",
+        search:".search",content:".content",main:".main",list:"#listHost",detail:"#detail",filters:"#filters",
+        openActions:"#openActions",smartLists:"#sideSmart",customLists:"#sideCustom",fileLists:"#sideFiles",
+        recentFiles:"#recentRegion",filterControls:"#filterRegion",brand:"#brandRegion",viewHeader:"#viewHeaderRegion",
+        viewAux:"#viewAuxRegion",mainList:"#listHost",settingsButton:"#settings",addButton:"#addItem",
+        themeButton:"#theme",batchButton:"#batchToggle",searchHelpButton:"#searchHelp",menuButton:"#menu",backButton:"#backView"};
+      const selector=selectors[String(name||"")];return selector?document.querySelector(selector):null
+    }
+    function layoutTaskSnapshot(task){
+      return Object.freeze({uid:task.uid,title:task.title,status:task.status,priority:task.priority||"",tags:[...task.tags],
+        level:task.level,fileId:task.fileId,fileName:task.fileName,filePath:task.filePath,parentPath:[...task.parentPath],
+        scheduled:task.scheduled||"",deadline:task.deadline||"",closed:task.closed||"",orgDate:task.orgDate||"",
+        calendarDates:[...new Set(calendarDateValues(task))],time:task.time||"",
+        done:isDone(task),overdue:taskOverdue(task),habit:!!task.isHabit,body:String(task.body||"")})
+    }
+    function queryLayoutTasks(options={}){
+      const view=String(options.view||"all"),now=today(),search=compileSearch(String(options.query||""));
+      const statuses=Array.isArray(options.status)?options.status.map(String):options.status?[String(options.status)]:[];
+      const priorities=Array.isArray(options.priority)?options.priority.map(String):options.priority?[String(options.priority)]:[];
+      const tags=Array.isArray(options.tags)?options.tags.map(String):options.tag?[String(options.tag)]:[];
+      let tasks=state.tasks.filter(task=>!task.isGroup).filter(task=>{
+        const done=isDone(task);
+        if(view==="open"&&done)return false;
+        if(view==="today"&&(done||!hasActionDate(task,now)))return false;
+        if(view==="upcoming"&&(done||!dateValues(task,"date").some(date=>date>now)))return false;
+        if(view==="overdue"&&!taskOverdue(task))return false;
+        if(view==="completed"&&!done)return false;
+        if(view==="no-date"&&(done||dateValues(task,"date").length))return false;
+        if(view==="habits"&&!task.isHabit)return false;
+        if(options.completed===true&&!done||options.completed===false&&done)return false;
+        if(statuses.length&&!statuses.includes(task.status))return false;
+        if(priorities.length&&!priorities.includes(task.priority||"NONE"))return false;
+        if(tags.length&&!tags.every(tag=>task.tags.includes(tag)))return false;
+        if(options.fileId&&options.fileId!=="all"&&task.fileId!==options.fileId)return false;
+        return search.predicate(task)
+      });
+      const priority=value=>value==="A"?0:value==="B"?1:value==="C"?2:3;
+      const date=task=>[task.deadline,task.scheduled,task.orgDate].filter(Boolean).sort()[0]||"9999";
+      tasks.sort(options.sort==="priority"?(a,b)=>priority(a.priority)-priority(b.priority)||date(a).localeCompare(date(b)):
+        options.sort==="source"?(a,b)=>a.sourceIndex-b.sourceIndex:(a,b)=>date(a).localeCompare(date(b))||priority(a.priority)-priority(b.priority));
+      return tasks.slice(0,Math.max(1,Math.min(200,Number(options.limit)||50))).map(layoutTaskSnapshot)
+    }
+    function notifyLayoutPlugins(){
+      const summary=Object.freeze({taskCount:state.tasks.filter(task=>!task.isGroup).length,fileCount:state.files.length,
+        selected:state.selected||"",detailOpen:!!state.detailOpen,view:state.view,theme:document.documentElement.dataset.theme||"light"});
+      layoutSubscribers.forEach(listener=>{try{listener(summary)}catch(error){console.warn("布局插件更新失败",error)}})
+    }
+    function createLayoutPluginApi(id){
+      const styles=[],mounts=[],moved=new Map(),subscriptions=[];
+      const getRegion=name=>layoutRegion(name);
+      const restoreRegion=name=>{
+        const entry=moved.get(String(name));if(!entry)return false;
+        if(entry.next&&entry.next.parentNode===entry.parent)entry.parent.insertBefore(entry.element,entry.next);
+        else entry.parent.appendChild(entry.element);moved.delete(String(name));
+        if(layoutRegionOwners.get(String(name))===id)layoutRegionOwners.delete(String(name));return true
+      };
+      const cleanup=()=>{
+        [...moved.keys()].reverse().forEach(restoreRegion);subscriptions.splice(0).forEach(unsubscribe=>unsubscribe());
+        mounts.splice(0).forEach(element=>element.remove());styles.splice(0).forEach(style=>style.remove())
+      };
+      return Object.freeze({apiVersion:PLUGIN_HOST_API,platform:androidPlatform()?"android":"windows",escapeHtml:esc,today,
+        getRegion,queryTasks:queryLayoutTasks,
+        addStyle(css){const style=document.createElement("style");style.dataset.orglistPlugin=id;style.textContent=String(css||"");
+          document.head.appendChild(style);styles.push(style);return ()=>{style.remove();const index=styles.indexOf(style);if(index>=0)styles.splice(index,1)}},
+        createMount(className,parent="main",before=null){const target=typeof parent==="string"?getRegion(parent):parent;
+          if(!target)throw new Error(`找不到布局挂载区域：${parent}`);const mount=document.createElement("div");mount.className=String(className||"");
+          const anchor=typeof before==="string"?getRegion(before):before;
+          if(anchor?.parentNode===target)target.insertBefore(mount,anchor);else target.appendChild(mount);mounts.push(mount);return mount},
+        moveRegion(name,target,position="append"){
+          const key=String(name),element=getRegion(key),parent=typeof target==="string"?getRegion(target):target;
+          if(!element||!parent)throw new Error(`无法移动布局区域：${key}`);
+          if(!moved.has(key)){const owner=layoutRegionOwners.get(key);
+            if(owner&&owner!==id)throw new Error(`布局区域“${key}”已由插件 ${owner} 移动`);
+            moved.set(key,{element,parent:element.parentNode,next:element.nextSibling});layoutRegionOwners.set(key,id)}
+          if(position==="prepend")parent.prepend(element);else parent.appendChild(element);return element
+        },restoreRegion,
+        onUpdate(listener){if(typeof listener!=="function")throw new Error("布局更新监听器必须是函数");layoutSubscribers.add(listener);
+          const unsubscribe=()=>layoutSubscribers.delete(listener);subscriptions.push(unsubscribe);return unsubscribe},
+        openTask(uid){const task=state.tasks.find(item=>item.uid===uid);if(!task)return false;
+          state.selected=uid;state.detailOpen=true;render();getRegion("detail")?.scrollIntoView?.({block:"nearest"});return true},
+        setDetailOpen(open){state.detailOpen=!!open;renderDetail();notifyLayoutPlugins();return state.detailOpen},
+        getSetting(key,fallback=null){try{const value=localStorage.getItem(`orglist-layout-plugin:${id}:${key}`);return value===null?fallback:JSON.parse(value)}catch(_){return fallback}},
+        setSetting(key,value){try{localStorage.setItem(`orglist-layout-plugin:${id}:${key}`,JSON.stringify(value));return true}catch(_){return false}},
+        setNotice:message=>setNotice(String(message||"")),cleanup
+      })
+    }
+    function executePluginSource(record){
+      pluginRegistry.delete(record.id);currentPluginRegistration=record.id;
+      try{new Function(`${record.source}\n//# sourceURL=orglist-plugin://${record.id}`)()}
+      finally{currentPluginRegistration=""}
+      const definition=pluginRegistry.get(record.id);
+      if(!definition)throw new Error("插件文件执行后没有调用 OrglistPluginHost.register");
+      if(definition.manifest.type!==record.type)throw new Error("注册类型与导入清单不一致");return definition
+    }
+    async function startInstalledPlugin(record){
+      if(!record.enabled)return;
+      if(record.kind==="css"){
+        const style=document.createElement("style");style.dataset.orglistPlugin=record.id;style.textContent=record.source;
+        document.head.appendChild(style);pluginRuntime.set(record.id,{record,instance:{deactivate:()=>style.remove()}});return
+      }
+      const definition=executePluginSource(record);
+      if(record.type==="editor"){pluginRuntime.set(record.id,{record,definition});return}
+      const api=record.type==="theme"?createThemePluginApi(record.id):record.type==="layout"?createLayoutPluginApi(record.id):createFormatPluginApi();
+      let instance;try{instance=await definition.activate(api)||{}}catch(error){api.cleanup?.();throw error}
+      if(record.type==="theme"&&typeof instance.css==="string")api.addStyle(instance.css);
+      pluginRuntime.set(record.id,{record,definition,instance,api})
+    }
+    function stopInstalledPlugin(id){
+      const runtime=pluginRuntime.get(id);try{runtime?.instance?.deactivate?.();runtime?.api?.removeStyles?.();runtime?.api?.cleanup?.()}catch(error){console.warn(error)}
+      pluginRuntime.delete(id);
+      if(activeEditorPlugin?.id===id){state.editorPlugin="builtin";try{localStorage.setItem(EDITOR_PLUGIN_KEY,"builtin")}catch(_){}restoreBuiltinEditor()}
+      if(state.editorFormat===id){state.editorFormat="builtin-org";activeFormatPlugin=null;
+        try{localStorage.setItem(EDITOR_FORMAT_KEY,"builtin-org")}catch(_){}activeEditorPlugin?.instance?.setFormatPlugin?.()}
+    }
+    function refreshPluginSelectors(){
+      const editorValue=state.editorPlugin,formatValue=state.editorFormat;
+      $("editorPluginSelect").innerHTML='<option value="builtin">内置轻量编辑器</option>'+state.installedPlugins
+        .filter(item=>item.enabled&&item.type==="editor"&&pluginRuntime.has(item.id))
+        .map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
+      $("editorFormatSelect").innerHTML='<option value="builtin-org">内置 Org 格式</option>'+state.installedPlugins
+        .filter(item=>item.enabled&&item.type==="format"&&pluginRuntime.has(item.id))
+        .map(item=>`<option value="${esc(item.id)}">${esc(item.name)}</option>`).join("");
+      state.editorPlugin=[...$("editorPluginSelect").options].some(option=>option.value===editorValue)?editorValue:"builtin";
+      state.editorFormat=[...$("editorFormatSelect").options].some(option=>option.value===formatValue)?formatValue:"builtin-org";
+      if(state.editorPlugin!==editorValue)try{localStorage.setItem(EDITOR_PLUGIN_KEY,state.editorPlugin)}catch(_){}
+      if(state.editorFormat!==formatValue)try{localStorage.setItem(EDITOR_FORMAT_KEY,state.editorFormat)}catch(_){}
+      $("editorPluginSelect").value=state.editorPlugin;$("editorFormatSelect").value=state.editorFormat;
+      activeFormatPlugin=state.editorFormat==="builtin-org"?null:pluginRuntime.get(state.editorFormat)||null;
+      activeEditorPlugin?.instance?.setFormatPlugin?.()
+    }
+    function renderPluginList(){
+      if(!$("pluginList"))return;
+      $("pluginList").innerHTML=state.installedPlugins.length?state.installedPlugins.map(item=>
+        `<div class="pluginItem"><div class="pluginInfo"><strong><span class="pluginType">${esc(pluginTypeLabel(item.type))}</span>${esc(item.name)} ${esc(item.version)}</strong>
+          <small>${esc(item.fileName)} · ${esc(item.id)} · ${Math.max(1,Math.round(Number(item.size||0)/1024))} KB${item.error?`<br>错误：${esc(item.error)}`:""}</small></div>
+          <div class="pluginButtons"><button data-plugin-toggle="${esc(item.id)}">${item.enabled?"停用":"启用"}</button>
+            <button class="pluginDelete" data-plugin-delete="${esc(item.id)}">删除</button></div></div>`).join(""):
+        '<div class="settingsHint" style="margin:0">尚未安装插件。可导入 .js 功能插件或 .css 页面样式。</div>';
+      $("pluginList").querySelectorAll("[data-plugin-toggle]").forEach(button=>button.onclick=()=>toggleInstalledPlugin(button.dataset.pluginToggle));
+      $("pluginList").querySelectorAll("[data-plugin-delete]").forEach(button=>button.onclick=()=>deleteInstalledPlugin(button.dataset.pluginDelete))
+    }
+    async function toggleInstalledPlugin(id){
+      const record=state.installedPlugins.find(item=>item.id===id);if(!record)return;
+      stopInstalledPlugin(id);record.enabled=!record.enabled;record.error="";
+      try{if(record.enabled)await startInstalledPlugin(record)}catch(error){record.enabled=false;record.error=String(error?.message||error)}
+      await savePluginRecord(record);refreshPluginSelectors();renderPluginList();renderEditHighlight();
+      $("pluginStatus").textContent=record.enabled?`已启用：${record.name}`:record.error?`启用失败：${record.error}`:`已停用：${record.name}`
+    }
+    async function deleteInstalledPlugin(id){
+      const record=state.installedPlugins.find(item=>item.id===id);if(!record||!confirm(`删除插件“${record.name}”？\n\n插件代码、启用状态和该插件保存的布局设置将从本机删除。`))return;
+      stopInstalledPlugin(id);pluginRegistry.delete(id);await removePluginRecord(id);
+      const prefix=`orglist-layout-plugin:${id}:`;
+      try{Object.keys(localStorage).filter(key=>key.startsWith(prefix)).forEach(key=>localStorage.removeItem(key))}catch(_){}
+      state.installedPlugins=state.installedPlugins.filter(item=>item.id!==id);refreshPluginSelectors();renderPluginList();renderEditHighlight();
+      $("pluginStatus").textContent=`已删除：${record.name}`
+    }
+    async function importPluginFiles(files){
+      for(const file of Array.from(files||[])){
+        try{
+          const source=await file.text(),kind=/\.css$/i.test(file.name)?"css":"js",manifest=kind==="css"?cssPluginManifest(file):parsePluginManifest(source);
+          const existing=state.installedPlugins.find(item=>item.id===manifest.id);
+          const warning=`${existing?"替换":"安装"}插件“${manifest.name}” ${manifest.version}？\n\n类型：${pluginTypeLabel(manifest.type)}\n文件：${file.name}\n\nJavaScript 插件可以读取当前页面中的 Org 内容和本地设置。请只安装你信任的文件。`;
+          if(!confirm(warning))continue;
+          if(existing)stopInstalledPlugin(existing.id);
+          const record={...manifest,fileName:file.name,source,kind,size:file.size,enabled:true,importedAt:new Date().toISOString(),error:""};
+          try{await startInstalledPlugin(record)}catch(error){record.enabled=false;record.error=String(error?.message||error)}
+          await savePluginRecord(record);state.installedPlugins=[...state.installedPlugins.filter(item=>item.id!==record.id),record];
+          $("pluginStatus").textContent=record.enabled?`已安装并启用：${record.name}`:`已保存但未启用：${record.error}`
+        }catch(error){$("pluginStatus").textContent=`导入 ${file.name} 失败：${error?.message||error}`}
+      }
+      refreshPluginSelectors();renderPluginList();renderEditHighlight()
+    }
+    async function initializeInstalledPlugins(){
+      try{
+        state.installedPlugins=(await readPluginRecords()).sort((a,b)=>String(a.importedAt).localeCompare(String(b.importedAt)));
+        for(const record of state.installedPlugins.filter(item=>item.enabled))try{await startInstalledPlugin(record)}
+          catch(error){record.enabled=false;record.error=String(error?.message||error);await savePluginRecord(record)}
+        refreshPluginSelectors();renderPluginList()
+      }catch(error){state.installedPlugins=[];refreshPluginSelectors();renderPluginList();if($("pluginStatus"))
+        $("pluginStatus").textContent=`插件存储不可用：${error?.message||error}`}
+    }
     const today = () => {
       const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
     };
@@ -1723,7 +2031,7 @@ print("hello")
       let field="grep",value=token;const colon=token.indexOf(":");
       if(colon>0){field=token.slice(0,colon).toLocaleLowerCase();value=token.slice(colon+1)}
       const aliases={re:"grep",regex:"grep","标题":"title","正文":"body","标签":"tag","状态":"status",
-        "优先级":"priority","文件":"file","路径":"path","层级":"level","计划":"scheduled","截止":"deadline","完成":"closed"};
+        "优先级":"priority","文件":"file","files":"file","路径":"path","层级":"level","计划":"scheduled","截止":"deadline","完成":"closed"};
       field=aliases[field]||field;if(!value)throw new Error(`搜索条件缺少内容：${raw}`);
       let test;
       if(["scheduled","deadline","closed","orgdate","date","anydate"].includes(field)){
@@ -1743,11 +2051,17 @@ print("hello")
         const match=valueMatcher(equal>=0?value.slice(equal+1):"");
         test=task=>Object.prototype.hasOwnProperty.call(task.properties,key)&&(equal<0||match(task.properties[key]))
       }else{
-        const match=valueMatcher(value),getters={title:task=>task.title,body:task=>task.body,
+        const getters={title:task=>task.title,body:task=>task.body,
           tag:task=>task.tags.join(" "),status:task=>task.status,priority:task=>task.priority,
           file:task=>task.fileName,path:task=>task.filePath,grep:task=>taskSearchText(task)};
         if(!getters[field])throw new Error(`未知搜索字段：${field}`);
-        test=task=>match(getters[field](task))
+        const parts=value.startsWith("/")?[value]:value.split(/[,，;]/).map(part=>part.trim()).filter(Boolean);
+        if(!parts.length)throw new Error(`搜索条件缺少内容：${raw}`);
+        if(parts.some(part=>part.toLocaleLowerCase()==="all"||part==="*"))test=()=>true;
+        else{
+        const matchers=parts.map(valueMatcher);
+        test=task=>matchers.some(match=>match(getters[field](task)))
+        }
       }
       return negative?task=>!test(task):test
     }
@@ -2153,6 +2467,10 @@ print("hello")
         state.startupPage=startup&&typeof startup==="object"?startup:null
       }catch(_){state.startupPage=null}
       try{state.vimMode=localStorage.getItem(VIM_KEY)==="1"}catch(_){state.vimMode=false}
+      try{state.editorPlugin=localStorage.getItem(EDITOR_PLUGIN_KEY)||"builtin"}
+      catch(_){state.editorPlugin="builtin"}
+      try{state.editorFormat=localStorage.getItem(EDITOR_FORMAT_KEY)||"builtin-org"}
+      catch(_){state.editorFormat="builtin-org"}
       try{const profiles=JSON.parse(localStorage.getItem(WEBDAV_KEY)||"[]");
         state.webdavProfiles=Array.isArray(profiles)?profiles.filter(profile=>profile&&typeof profile.url==="string")
           .slice(0,8).map(profile=>({...profile,password:profile.rememberPassword?String(profile.password||""):""})):[]
@@ -2196,7 +2514,7 @@ print("hello")
       return !detailOverlayScreen()
     }
     function selectTask(uid,explicit=false){
-      state.selected=uid;state.detailOpen=explicit||shouldAutoOpenDetail();renderDetail()
+      state.selected=uid;state.detailOpen=explicit||shouldAutoOpenDetail();renderDetail();notifyLayoutPlugins()
     }
     function saveDisplaySettings(){
       try{localStorage.setItem(DISPLAY_KEY,JSON.stringify({filterPreference:state.filterPreference,
@@ -2373,7 +2691,7 @@ print("hello")
       $("customOpenStatuses").value=state.customOpenStatuses.join(" ");
       $("customDoneStatuses").value=state.customDoneStatuses.join(" ");
       renderStartupSummary();
-      setWebdavStatus("");updateWebdavMode();renderWebdavProfiles();renderSettingsOrdering();syncReminderPlatformUI();loadReminderSettings();
+      setWebdavStatus("");updateWebdavMode();renderWebdavProfiles();renderSettingsOrdering();renderPluginList();syncReminderPlatformUI();loadReminderSettings();
       if(state.webdavProfiles.length)fillWebdavProfile(state.webdavProfiles[0]);
       $("settingsModal").classList.add("show");requestAnimationFrame(()=>navigateSettings("settings-display","auto"))
     }
@@ -3310,6 +3628,7 @@ print("hello")
       const done=isDone(task),batchSelected=state.batchSelected.includes(task.uid);
       return `<div class="taskSwipe ${batchSelected?"batchSelected":""}" data-swipe-row="${task.uid}">
         <button class="batchSelect" data-batch-select="${task.uid}" aria-label="${batchSelected?"取消选择":"选择"} ${esc(task.title)}">✓</button>
+        <button class="batchDragHandle" data-batch-drag="${task.uid}" aria-label="拖动所选条目，让它成为另一个条目的子项" title="拖到另一个条目上，松开后成为它的子项">⋮⋮</button>
         <div class="swipeActions"><button class="swipeEdit" data-swipe-edit="${task.uid}">编辑</button>
           <button class="swipeMove" data-swipe-move="${task.uid}">移动</button>
           <button class="swipeDate" data-swipe-date="${task.uid}">日期</button>
@@ -3336,7 +3655,7 @@ print("hello")
       $("batchBar").classList.toggle("show",state.batchMode);$("batchCount").textContent=state.batchSelected.length;
       document.body.classList.toggle("batchMode",state.batchMode);
       $("batchToggle").classList.toggle("active",state.batchMode);
-      $("writeBatch").disabled=!state.batchSources.length
+      $("moveBatchAsChild").disabled=!batchMoveRoots().length;$("writeBatch").disabled=!state.batchSources.length
     }
     function applyRowSwipe(host,row,dx,dy){
       if(Math.abs(dx)<46||Math.abs(dx)<Math.abs(dy)*1.25)return;
@@ -3346,6 +3665,44 @@ print("hello")
         host.querySelectorAll(".taskSwipe.swipedLeft").forEach(item=>{if(item!==row)item.classList.remove("swipedLeft")});
         row.classList.add("swipedLeft")
       }else toggleBatchSelection(row.dataset.swipeRow)
+    }
+    function bindBatchDrag(host){
+      host.querySelectorAll("[data-batch-drag]").forEach(handle=>handle.addEventListener("pointerdown",event=>{
+        const draggedUid=handle.dataset.batchDrag;if(!state.batchMode||!state.batchSelected.includes(draggedUid)||event.button>0)return;
+        event.preventDefault();event.stopPropagation();
+        const roots=batchMoveRoots(),candidateUids=new Set(state.sources.flatMap(source=>
+          batchMoveCandidates(source.id,roots).map(task=>task.uid))),sourceRow=handle.closest("[data-swipe-row]");
+        let targetRow=null,targetUid="",finished=false;
+        const ghost=document.createElement("div");ghost.className="batchDragGhost";
+        ghost.textContent=`正在移动 ${roots.length} 个条目 · 拖到目标条目上`;
+        document.body.appendChild(ghost);document.body.classList.add("batchDragging");sourceRow?.classList.add("batchDragSource");
+        const moveGhost=(x,y)=>{ghost.style.left=`${Math.min(window.innerWidth-ghost.offsetWidth-8,x+14)}px`;
+          ghost.style.top=`${Math.min(window.innerHeight-ghost.offsetHeight-8,y+14)}px`};
+        moveGhost(event.clientX,event.clientY);
+        const clearTarget=()=>{targetRow?.classList.remove("batchDropTarget");targetRow=null;targetUid=""};
+        const cleanup=()=>{clearTarget();sourceRow?.classList.remove("batchDragSource");document.body.classList.remove("batchDragging");
+          ghost.remove();window.removeEventListener("pointermove",onMove,true);window.removeEventListener("pointerup",onEnd,true);
+          window.removeEventListener("pointercancel",onCancel,true)};
+        const onMove=moveEvent=>{
+          moveEvent.preventDefault();moveGhost(moveEvent.clientX,moveEvent.clientY);
+          const row=document.elementFromPoint(moveEvent.clientX,moveEvent.clientY)?.closest?.("[data-swipe-row]"),uid=row?.dataset.swipeRow||"";
+          if(row===targetRow)return;clearTarget();
+          if(uid&&candidateUids.has(uid)){targetRow=row;targetUid=uid;row.classList.add("batchDropTarget");
+            const parent=state.tasks.find(task=>task.uid===uid);ghost.textContent=`松开：成为“${parent?.title||"目标条目"}”的子项`}
+          else ghost.textContent=`正在移动 ${roots.length} 个条目 · 拖到目标条目上`
+        };
+        const onEnd=endEvent=>{
+          if(finished)return;finished=true;endEvent.preventDefault();const parentUid=targetUid;cleanup();
+          state.suppressTaskClickUntil=Date.now()+700;
+          if(!parentUid)return;
+          try{const result=moveSelectedAsChildren(parentUid);render();
+            setNotice(`已把 ${result.count} 个所选条目拖到“${result.parentTitle}”下并成为子项；涉及文件尚未写回。`)}
+          catch(error){setNotice(error?.message||"拖动移动失败。")}
+        };
+        const onCancel=()=>{if(finished)return;finished=true;cleanup()};
+        window.addEventListener("pointermove",onMove,{capture:true,passive:false});
+        window.addEventListener("pointerup",onEnd,{capture:true,passive:false});window.addEventListener("pointercancel",onCancel,true)
+      }));
     }
     function bindMobileSwipe(host){
       host.querySelectorAll("[data-swipe-row]").forEach(row=>{
@@ -3361,7 +3718,7 @@ print("hello")
           if(event.pointerType!=="mouse"||event.button!==0)return;
           applyRowSwipe(host,row,event.clientX-startX,event.clientY-startY)
         })
-      })
+      });bindBatchDrag(host)
     }
     function openTaskDateEditor(uid){
       openVisualEditor("edit",uid);
@@ -3644,6 +4001,7 @@ print("hello")
         (task.body.split("\n").find(Boolean)||task.parentPath.slice(-1)[0]||task.fileName);
       return `<div class="taskSwipe hierarchySwipe ${batchSelected?"batchSelected":""}" data-swipe-row="${task.uid}">
         <button class="batchSelect" data-batch-select="${task.uid}" aria-label="${batchSelected?"取消选择":"选择"} ${esc(task.title)}">✓</button>
+        <button class="batchDragHandle" data-batch-drag="${task.uid}" aria-label="拖动所选条目，让它成为另一个条目的子项" title="拖到另一个条目上，松开后成为它的子项">⋮⋮</button>
         <div class="swipeActions"><button class="swipeEdit" data-swipe-edit="${task.uid}">编辑</button>
           <button class="swipeMove" data-swipe-move="${task.uid}">移动</button>
           <button class="swipeDate" data-swipe-date="${task.uid}">日期</button>
@@ -4016,9 +4374,12 @@ print("hello")
       syncEditorScroll();updateVimCursorStatus(input)
     }
     function renderEditHighlight(){
-      $("editHighlight").innerHTML=highlightOrg($("editText").value)+"\n";
+      const text=$("editText").value;let markup="";
+      try{markup=activeFormatPlugin?.instance?.highlight?String(activeFormatPlugin.instance.highlight(text,{scope:state.editingScope})??""):highlightOrg(text)}
+      catch(error){markup=highlightOrg(text);$("editorPluginStatus").textContent=`格式插件错误：${error?.message||error}`}
+      $("editHighlight").innerHTML=markup+"\n";
       $("editLineNumbers").textContent=Array.from({length:Math.max(1,$("editText").value.split("\n").length)},(_,index)=>index+1).join("\n");
-      syncEditorScroll();updateVimCursorStatus()
+      syncEditorScroll();if(!activeEditorPlugin)updateVimCursorStatus()
     }
     function applyEditorScale(delta=0,persist=true){
       state.editorScale=Math.max(70,Math.min(180,state.editorScale+delta));
@@ -4047,8 +4408,114 @@ print("hello")
       $("plainEditMode").classList.toggle("active",state.editMode==="plain");
       $("highlightEditMode").classList.toggle("active",state.editMode==="highlight");
       if(persist)try{localStorage.setItem(EDITOR_KEY,state.editMode)}catch(_){}
+      activeEditorPlugin?.instance?.setEditorMode?.(state.editMode);
       applyEditorScale(0,false);
       requestAnimationFrame(lockEditorLayers)
+    }
+    function androidPlatform(){
+      return androidWebdavActive()||androidReminderActive()||/Android/i.test(typeof navigator!=="undefined"?navigator.userAgent||"":"")
+    }
+    function windowsPlatform(){
+      return !androidPlatform()&&/Win/i.test(typeof navigator!=="undefined"?navigator.userAgent||navigator.platform||"":"")
+    }
+    function createEditorPluginApi(){
+      return Object.freeze({
+        apiVersion:PLUGIN_HOST_API,platform:androidPlatform()?"android":"windows",getText:()=>$("editText").value,
+        setText:text=>{$("editText").value=String(text??"")},
+        getEditorMode:()=>state.editMode,
+        getFormatPresentation:text=>{
+          const presenter=activeFormatPlugin?.instance?.presentation;
+          if(typeof presenter!=="function")return null;
+          try{return presenter(String(text??""),{scope:state.editingScope})}catch(error){console.warn("格式插件呈现模型失败",error);return null}
+        },
+        createMount(className){const mount=document.createElement("div");mount.className=className;$("editorWrap").appendChild(mount);return mount},
+        hideNativeEditor(){$("editorCode").classList.add("pluginEditorActive")},
+        showNativeEditor(){$("editorCode").classList.remove("pluginEditorActive")},
+        setMode(label,mode="normal"){$("vimStatus").textContent=label;$("vimCommandMode").textContent=label;
+          $("vimCommandBar").classList.add("vimEnabled");state.vimState=mode},
+        setMessage(message){$("vimCommandEntry").classList.remove("show");$("vimCommandMessage").style.display="";
+          $("vimCommandMessage").textContent=message},
+        setCursor(position){$("vimCursorPosition").textContent=position},
+        write:closeAfter=>writeEditedSource(!!closeAfter),close:closeEditor,
+        showHelp:()=>$("vimHelpModal").classList.add("show")
+      })
+    }
+    function deactivateEditorPlugin(){
+      if(activeEditorPlugin?.instance?.deactivate)activeEditorPlugin.instance.deactivate();
+      activeEditorPlugin=null;$("editorCode").classList.remove("pluginEditorActive")
+    }
+    function restoreBuiltinEditor(){
+      deactivateEditorPlugin();$("editorPluginStatus").textContent="内置";$("vimToggle").disabled=false;
+      $("vimEscButton").hidden=!state.vimMode;setEditorMode(state.editMode,false);setVimState(state.vimMode?"normal":"insert")
+    }
+    async function activateEditorPlugin(id=state.editorPlugin){
+      $("editorPluginSelect").value=id;
+      if(id==="builtin"){restoreBuiltinEditor();return null}
+      const text=$("editText").value;
+      if(activeEditorPlugin?.id===id){activeEditorPlugin.instance.setText?.(text);
+        activeEditorPlugin.instance.setEditorMode?.(state.editMode);return activeEditorPlugin.instance}
+      deactivateEditorPlugin();$("editorPluginStatus").textContent="加载中…";
+      try{
+        const plugin=pluginRuntime.get(id)?.definition;if(!plugin)throw new Error("插件未安装、未启用或加载失败");
+        const instance=await plugin.activate(createEditorPluginApi());
+        activeEditorPlugin={id,plugin,instance};instance.setText?.(text);instance.setEditorMode?.(state.editMode);
+        instance.setFormatPlugin?.();
+        $("editorPluginStatus").textContent=`${plugin.manifest.name} ${plugin.manifest.version}`;
+        $("vimToggle").disabled=true;$("vimToggle").textContent=plugin.manifest.name;$("vimToggle").classList.add("active");
+        $("vimEscButton").hidden=true;return instance
+      }catch(error){
+        state.editorPlugin="builtin";try{localStorage.setItem(EDITOR_PLUGIN_KEY,"builtin")}catch(_){}
+        $("editorPluginSelect").value="builtin";restoreBuiltinEditor();setNotice(`编辑器插件加载失败：${error?.message||error}`);return null
+      }
+    }
+    async function selectEditorPlugin(id){
+      state.editorPlugin=[...$("editorPluginSelect").options].some(option=>option.value===id)?id:"builtin";
+      try{localStorage.setItem(EDITOR_PLUGIN_KEY,state.editorPlugin)}catch(_){}
+      const instance=await activateEditorPlugin(state.editorPlugin);(instance?.focus||(()=>$("editText").focus()))()
+    }
+    function selectEditorFormat(id){
+      state.editorFormat=[...$("editorFormatSelect").options].some(option=>option.value===id)?id:"builtin-org";
+      try{localStorage.setItem(EDITOR_FORMAT_KEY,state.editorFormat)}catch(_){}
+      activeFormatPlugin=state.editorFormat==="builtin-org"?null:pluginRuntime.get(state.editorFormat)||null;
+      activeEditorPlugin?.instance?.setFormatPlugin?.();
+      if(state.editorFormat!=="builtin-org"&&state.editMode!=="highlight")setEditorMode("highlight");
+      else renderEditHighlight();focusEditor()
+    }
+    async function prepareEditorSurface(){
+      if(state.editorFormat!=="builtin-org"&&state.editMode!=="highlight")setEditorMode("highlight");
+      $("editorPluginSelect").value=state.editorPlugin;const instance=await activateEditorPlugin(state.editorPlugin);
+      if(instance?.focus)instance.focus();else $("editText").focus()
+    }
+    function editorText(){return activeEditorPlugin?.instance?.getText?.()??$("editText").value}
+    function formattedEditorText(){
+      let text=String(editorText()??"");const formatter=activeFormatPlugin?.instance;if(!formatter)return text;
+      try{
+        if(typeof formatter.normalize==="function")text=String(formatter.normalize(text,{scope:state.editingScope})??text);
+        if(typeof formatter.validate==="function"){
+          const result=formatter.validate(text,{scope:state.editingScope});
+          if(result===false||typeof result==="string"||result?.ok===false){
+            setNotice(typeof result==="string"?result:result?.message||"编辑格式插件拒绝了当前内容。");return null
+          }
+        }
+        return text
+      }catch(error){setNotice(`编辑格式插件处理失败：${error?.message||error}`);return null}
+    }
+    function setEditorText(text){
+      $("editText").value=String(text??"");activeEditorPlugin?.instance?.setText?.($("editText").value);renderEditHighlight()
+    }
+    function editorSelection(){
+      return activeEditorPlugin?.instance?.getSelection?.()||{start:$("editText").selectionStart,end:$("editText").selectionEnd}
+    }
+    function setEditorSelection(start,end=start){
+      if(activeEditorPlugin?.instance?.setSelection)return activeEditorPlugin.instance.setSelection(start,end);
+      $("editText").setSelectionRange(start,end)
+    }
+    function replaceEditorRange(text,start,end=start){
+      if(activeEditorPlugin?.instance?.replaceRange)return activeEditorPlugin.instance.replaceRange(text,start,end);
+      $("editText").setRangeText(text,start,end,"end")
+    }
+    function focusEditor(){
+      if(activeEditorPlugin?.instance?.focus){activeEditorPlugin.instance.focus();return}$("editText").focus()
     }
     function editorMatchPositions(text,wanted){
       const positions=[];let index=0;
@@ -4059,29 +4526,31 @@ print("hello")
       return positions
     }
     function findEditorText(direction=1){
-      const input=$("editText"),needle=$("editFind").value;if(!needle){$("editFindStatus").textContent="请输入搜索内容";return false}
-      const text=input.value.toLocaleLowerCase(),wanted=needle.toLocaleLowerCase();
-      let index=direction<0?text.lastIndexOf(wanted,Math.max(0,input.selectionStart-1)):
-        text.indexOf(wanted,input.selectionEnd);
+      const value=editorText(),selection=editorSelection(),needle=$("editFind").value;
+      if(!needle){$("editFindStatus").textContent="请输入搜索内容";return false}
+      const text=value.toLocaleLowerCase(),wanted=needle.toLocaleLowerCase();
+      let index=direction<0?text.lastIndexOf(wanted,Math.max(0,selection.start-1)):
+        text.indexOf(wanted,selection.end);
       if(index<0)index=direction<0?text.lastIndexOf(wanted):text.indexOf(wanted);
       if(index<0){$("editFindStatus").textContent="未找到";return false}
-      input.focus();input.setSelectionRange(index,index+needle.length);ensureEditorCaretVisible(input);
+      focusEditor();setEditorSelection(index,index+needle.length);
+      if(!activeEditorPlugin)ensureEditorCaretVisible($("editText"));
       const positions=editorMatchPositions(text,wanted),matchNumber=positions.indexOf(index)+1,
-        lineNumber=input.value.slice(0,index).split("\n").length;
+        lineNumber=value.slice(0,index).split("\n").length;
       $("editFindStatus").textContent=`第 ${matchNumber}/${positions.length} 个匹配 · 第 ${lineNumber} 行`;return true
     }
     function replaceEditorSelection(){
-      const input=$("editText"),needle=$("editFind").value;
+      const needle=$("editFind").value;
       if(!needle)return findEditorText(1);
-      const selected=input.value.slice(input.selectionStart,input.selectionEnd);
+      let selection=editorSelection(),selected=editorText().slice(selection.start,selection.end);
       if(selected.toLocaleLowerCase()!==needle.toLocaleLowerCase()&&!findEditorText(1))return false;
-      input.setRangeText($("editReplace").value,input.selectionStart,input.selectionEnd,"end");
+      selection=editorSelection();replaceEditorRange($("editReplace").value,selection.start,selection.end);
       renderEditHighlight();findEditorText(1);return true
     }
     function replaceAllEditorText(){
-      const input=$("editText"),needle=$("editFind").value;if(!needle){$("editFindStatus").textContent="请输入搜索内容";return}
+      const needle=$("editFind").value;if(!needle){$("editFindStatus").textContent="请输入搜索内容";return}
       const escaped=needle.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),regex=new RegExp(escaped,"gi");
-      let count=0;input.value=input.value.replace(regex,()=>{count++;return $("editReplace").value});
+      let count=0;setEditorText(editorText().replace(regex,()=>{count++;return $("editReplace").value}));
       renderEditHighlight();$("editFindStatus").textContent=`已替换 ${count} 处`
     }
     function setVimState(mode){
@@ -4112,21 +4581,21 @@ print("hello")
     }
     function closeVimCommandLine(refocus=true){
       $("vimCommandEntry").classList.remove("show");$("vimCommandMessage").style.display="";
-      if(refocus)$("editText").focus()
+      if(refocus)focusEditor()
     }
     function jumpEditorLine(lineNumber){
-      const input=$("editText"),lines=input.value.split("\n");
+      const value=editorText(),lines=value.split("\n");
       const target=Math.max(1,Math.min(lines.length,Number(lineNumber)||1));
       let position=0;for(let index=0;index<target-1;index++)position+=lines[index].length+1;
-      input.focus();input.setSelectionRange(position,position);ensureEditorCaretVisible(input);
+      focusEditor();setEditorSelection(position,position);if(!activeEditorPlugin)ensureEditorCaretVisible($("editText"));
       setVimCommandMessage(`已跳转到第 ${target} 行`);return target
     }
     async function executeVimCommand(){
       const raw=$("vimCommand").value.trim();closeVimCommandLine(false);
-      if(!raw){$("editText").focus();return}
+      if(!raw){focusEditor();return}
       const lineJump=raw.match(/^(?:goto\s+)?(\d+)$/i);
       if(lineJump){jumpEditorLine(lineJump[1]);return}
-      if(raw==="$"){jumpEditorLine($("editText").value.split("\n").length);return}
+      if(raw==="$"){jumpEditorLine(editorText().split("\n").length);return}
       if(raw==="w"||raw==="write"){
         const written=await writeEditedSource(false);if($("editModal").classList.contains("show")){
           setVimCommandMessage(written?"已写回文件":"写回未完成");$("editText").focus()
@@ -4269,8 +4738,59 @@ print("hello")
       }
       renderEditHighlight()
     }
+    function stopExternalEditorPolling(){
+      if(externalEditorTimer)clearInterval(externalEditorTimer);externalEditorTimer=null;
+      state.externalEditorSession="";state.externalEditorRevision="";state.externalEditorBaseText=""
+    }
+    function externalEditorEndpoint(path,parameters={}){
+      if(!webdavBridgeActive())return "";const url=new URL(path,window.location.origin),token=webdavBridgeToken();
+      if(token)url.searchParams.set("token",token);Object.entries(parameters).forEach(([key,value])=>url.searchParams.set(key,value));return url.href
+    }
+    function configureExternalEditorButton(){
+      const button=$("openExternalEdit"),wholeFile=state.editingScope==="file";
+      button.hidden=!windowsPlatform()||!wholeFile;button.disabled=false;button.textContent=state.externalEditorSession?"外部应用已打开":"用其他应用打开";
+      button.title=webdavBridgeActive()?"在 Windows 默认或自选文本编辑器中打开可同步副本":
+        "请先通过 OrglistWebDAV.cmd 打开 Windows 本地桥接页面"
+    }
+    async function pollExternalEditor(){
+      const session=state.externalEditorSession;if(!session)return;
+      try{
+        const response=await fetch(externalEditorEndpoint("/external-editor",{session}),{cache:"no-store",credentials:"omit"});
+        const value=await response.json();if(!response.ok)throw new Error(value.error||`本地桥接返回 ${response.status}`);
+        if(value.revision===state.externalEditorRevision)return;
+        const current=editorText(),base=state.externalEditorBaseText,next=String(value.text??"");
+        state.externalEditorRevision=value.revision;
+        if(current!==base&&next!==base&&current!==next){
+          if(externalEditorTimer)clearInterval(externalEditorTimer);externalEditorTimer=null;
+          setNotice("外部应用和 Orglist 编辑器都发生了修改，已暂停自动同步以避免覆盖；请保留需要的版本后重新打开外部编辑。")
+          return
+        }
+        setEditorText(next);state.externalEditorBaseText=next;
+        setNotice("已从 Windows 外部应用同步修改；请点击“应用整个文件”或“写回整个文件”完成保存。")
+      }catch(error){
+        if(externalEditorTimer)clearInterval(externalEditorTimer);externalEditorTimer=null;
+        setNotice(`外部编辑同步已停止：${error?.message||error}`)
+      }
+    }
+    async function openInExternalEditor(){
+      if(!windowsPlatform()||state.editingScope!=="file")return;
+      if(!webdavBridgeActive()){
+        setNotice("浏览器无法直接把文件句柄交给其他应用。请先关闭本页，双击 OrglistWebDAV.cmd，再从自动打开的 Windows 页面使用此功能。");return
+      }
+      const source=state.sources.find(item=>item.id===state.editingFileId);if(!source)return;
+      stopExternalEditorPolling();$("openExternalEdit").disabled=true;$("openExternalEdit").textContent="正在打开…";
+      try{
+        const response=await fetch(externalEditorEndpoint("/external-editor/open"),{method:"POST",cache:"no-store",credentials:"omit",
+          headers:{"Content-Type":"application/json"},body:JSON.stringify({name:source.name||"Orglist.org",text:editorText()})});
+        const value=await response.json();if(!response.ok)throw new Error(value.error||`本地桥接返回 ${response.status}`);
+        state.externalEditorSession=value.session;state.externalEditorRevision=value.revision;
+        state.externalEditorBaseText=editorText();externalEditorTimer=setInterval(pollExternalEditor,1200);
+        setNotice("已在 Windows 外部应用中打开可同步副本。外部修改会回到本编辑器，最终写回仍由 Orglist 确认。")
+      }catch(error){setNotice(`无法用其他应用打开：${error?.message||error}`)}
+      finally{configureExternalEditorButton()}
+    }
     function closeEditor(){
-      state.editing=null;state.editingFileId=null;state.editingScope="task";closeVimCommandLine(false);
+      stopExternalEditorPolling();state.editing=null;state.editingFileId=null;state.editingScope="task";closeVimCommandLine(false);
       $("editModal").classList.remove("show")
     }
     function sourceCanWrite(source){
@@ -4282,7 +4802,7 @@ print("hello")
       if(!task||!source){setNotice("无法找到这个条目的原始文件。");return}
       state.editingScope="task";state.editingFileId=source.id;state.editing=uid;$("editTitle").textContent="编辑 Org 条目";
       $("editSource").textContent=`${task.filePath} · 第 ${task.line} 行`;
-      $("editText").value=task.rawBlock;
+      setEditorText(task.rawBlock);
       $("editWarning").textContent="这里编辑的是当前标题及其正文，不包含子标题。点击“只写回当前条目”时，会先读取磁盘或 WebDAV 最新文件，再只合并这一条；页面中其他未写回修改不会被一并覆盖。";
       $("writeEdit").textContent="只写回当前条目";$("applyEdit").textContent="应用到当前页面";
       $("editFind").value="";$("editReplace").value="";$("editFindStatus").textContent="";
@@ -4292,7 +4812,7 @@ print("hello")
       const canWrite=sourceCanWrite(source);
       $("writeEdit").disabled=!canWrite;$("writeEdit").title=canWrite?
         (source.webdavUrl?"写回 WebDAV 远程文件":"覆盖写回当前 Org 文件"):"当前打开方式没有写权限，请使用“下载修改后的文件”";
-      $("editModal").classList.add("show");$("editText").focus()
+      configureExternalEditorButton();$("editModal").classList.add("show");prepareEditorSurface()
     }
     function openFileEditor(sourceId=""){
       const source=state.sources.find(item=>item.id===(sourceId||state.file))||
@@ -4300,7 +4820,7 @@ print("hello")
       if(!source){setNotice("请先在左侧“文件”中选择一个具体 Org 文件，再编辑整个文件。");return}
       state.editingScope="file";state.editingFileId=source.id;state.editing=null;
       $("editTitle").textContent="编辑整个 Org 文件";$("editSource").textContent=`${source.path} · 完整文件`;
-      $("editText").value=source.text;
+      setEditorText(source.text);
       $("editWarning").textContent="这里编辑的是整个文件，包含全部标题、正文和属性。应用后只更新当前页面；“写回整个文件”会用此编辑器中的完整内容覆盖磁盘或 WebDAV 文件。";
       $("writeEdit").textContent="写回整个文件";$("applyEdit").textContent="应用整个文件";
       $("editFind").value="";$("editReplace").value="";$("editFindStatus").textContent="";
@@ -4310,7 +4830,7 @@ print("hello")
       const canWrite=sourceCanWrite(source);$("writeEdit").disabled=!canWrite;
       $("writeEdit").title=canWrite?(source.webdavUrl?"写回 WebDAV 远程文件":"覆盖写回当前 Org 文件"):
         "当前打开方式没有写权限，请使用“下载修改后的文件”";
-      $("editModal").classList.add("show");$("editText").focus()
+      configureExternalEditorButton();$("editModal").classList.add("show");prepareEditorSurface()
     }
     function replaceTaskBlock(task,replacement){
       const source=task&&state.sources.find(item=>item.id===task.fileId);
@@ -4420,14 +4940,16 @@ print("hello")
       setNotice(`已生成下载文件：${source.name}`)
     }
     function applyEditorText(){
+      const edited=formattedEditorText();if(edited===null)return null;
+      if(edited!==editorText())setEditorText(edited);
       if(state.editingScope==="file"){
         const source=state.sources.find(item=>item.id===state.editingFileId);if(!source){setNotice("无法找到要编辑的文件。");return null}
-        source.text=String($("editText").value||"").replace(/\r\n?/g,"\n").split("\n").join(source.eol||"\n");
+        source.text=edited.replace(/\r\n?/g,"\n").split("\n").join(source.eol||"\n");
         source.dirty=true;rebuildFromSources();state.selected=null;render();
         setNotice(`整个文件“${source.name}”已应用到当前页面，尚未写回磁盘。`);return source
       }
       const task=state.tasks.find(item=>item.uid===state.editing);
-      const source=replaceTaskBlock(task,$("editText").value);if(!source)return null;
+      const source=replaceTaskBlock(task,edited);if(!source)return null;
       state.editing=state.selected;setNotice("修改已应用到当前页面，尚未写回磁盘。");return source
     }
     async function writeEditedSource(closeAfter=true){
@@ -4435,7 +4957,8 @@ print("hello")
         const source=applyEditorText();if(!source)return false;
         const written=await writeSourceToOriginal(source);if(written&&closeAfter)closeEditor();return written
       }
-      const task=state.tasks.find(item=>item.uid===state.editing),replacement=$("editText").value;
+      const task=state.tasks.find(item=>item.uid===state.editing),replacement=formattedEditorText();
+      if(replacement===null)return false;
       if(!task){setNotice("无法找到要写回的条目。");return false}
       const pending=state.sources.find(item=>item.id===task.fileId)?.dirty===true;
       const source=replaceTaskBlock(task,replacement);
@@ -4801,29 +5324,35 @@ print("hello")
         roots[index]?.fileId===fileId&&task.startIndex>=range.startIndex&&task.startIndex<range.endIndex))
     }
     function updateBatchMoveOptions(){
-      const roots=batchMoveRoots(),fileId=$("batchMoveFile").value,candidates=batchMoveCandidates(fileId,roots),
-        previous=$("batchMoveParent").value;
-      $("batchMoveParent").innerHTML=candidates.length?candidates.map(item=>
-        `<option value="${esc(item.uid)}">${esc(`${"　".repeat(Math.max(0,item.level-1))}H${item.level} · ${item.title}`)}</option>`).join(""):
-        '<option value="">没有可作为父项的条目</option>';
-      $("batchMoveParent").value=candidates.some(item=>item.uid===previous)?previous:(candidates[0]?.uid||"");
-      const parent=candidates.find(item=>item.uid===$("batchMoveParent").value);
-      $("batchMoveDestination").textContent=parent?`${parent.filePath} · “${parent.title}”的子项末尾 · 新条目层级 H${parent.level+1}`:
-        "请选择包含可用父项的目标文件";
+      const roots=batchMoveRoots(),fileId=$("batchMoveFile").value,candidates=batchMoveCandidates(fileId,roots);
+      const previous=$("batchMoveParent").value;
+      $("batchMoveParent").innerHTML=candidates.length?candidates.map(task=>
+        `<option value="${esc(task.uid)}">${esc(`${"　".repeat(Math.max(0,task.level-1))}H${task.level} · ${task.title}`)}</option>`).join(""):
+        '<option value="">该文件没有可作为父项的条目</option>';
+      $("batchMoveParent").value=candidates.some(task=>task.uid===previous)?previous:(candidates[0]?.uid||"");
+      const parent=candidates.find(task=>task.uid===$("batchMoveParent").value),source=state.sources.find(item=>item.id===fileId);
+      $("batchMoveDestination").textContent=parent?`${source?.path||parent.filePath} · ${parent.title} · 新子项层级 H${parent.level+1}`:
+        "请选择包含有效目标父项的文件";
       $("applyBatchMove").disabled=!parent
     }
     function openBatchMoveModal(){
       const roots=batchMoveRoots();if(!roots.length){setNotice("请先选择至少一个要移动的条目。");return}
-      const descendantCount=roots.reduce((sum,task)=>sum+(taskSubtreeRange(task)?.descendants.length||0),0);
-      state.batchMoving=true;
-      $("batchMoveSummary").innerHTML=`已选择 <strong>${state.batchSelected.length}</strong> 个条目；实际移动 ${roots.length} 棵独立子树${
-        descendantCount?`，连同 ${descendantCount} 个子标题`:""}。`;
-      $("batchMoveFile").innerHTML=state.sources.map(source=>`<option value="${esc(source.id)}">${esc(source.path)}</option>`).join("");
-      $("batchMoveFile").value=roots[0].fileId;$("batchMoveParent").innerHTML="";updateBatchMoveOptions();
+      const files=state.sources.map(source=>({source,count:batchMoveCandidates(source.id,roots).length})).filter(item=>item.count);
+      if(!files.length){setNotice("当前没有可作为目标父项的其他条目。");return}
+      const sourceNames=[...new Set(roots.map(task=>task.filePath))];
+      $("batchMoveSummary").innerHTML=`已选择 <strong>${state.batchSelected.length}</strong> 个条目，将移动其中 <strong>${roots.length}</strong> 棵完整子树。<br>来源：${esc(sourceNames.join("、"))}`;
+      $("batchMoveFile").innerHTML=files.map(({source,count})=>
+        `<option value="${esc(source.id)}">${esc(source.path)}（${count} 个可选父项）</option>`).join("");
+      const preferred=files.some(item=>item.source.id===state.file)?state.file:files[0].source.id;
+      $("batchMoveFile").value=preferred;$("batchMoveParent").innerHTML="";updateBatchMoveOptions();
       $("batchMoveModal").classList.add("show")
     }
-    function closeBatchMoveModal(){
-      state.batchMoving=false;$("batchMoveModal").classList.remove("show")
+    function closeBatchMoveModal(){$("batchMoveModal").classList.remove("show")}
+    function applyBatchMove(){
+      const parentUid=$("batchMoveParent").value;
+      try{const result=moveSelectedAsChildren(parentUid);closeBatchMoveModal();render();
+        setNotice(`已把 ${result.count} 棵所选子树移动到“${result.parentTitle}”下；涉及文件尚未写回。`)}
+      catch(error){setNotice(error?.message||"批量移动失败。");updateBatchMoveOptions()}
     }
     function moveSelectedAsChildren(parentUid,options={}){
       const roots=batchMoveRoots(),parent=state.tasks.find(task=>task.uid===parentUid);
@@ -4853,12 +5382,6 @@ print("hello")
       state.batchSources=[...new Set([...state.batchSources,...affected])];state.batchSelected=[];state.batchMode=true;state.file=parent.fileId;
       if(options.rebuild!==false)rebuildFromSources({fileId:parent.fileId,startIndex:insertAt+prefix,line:insertAt+prefix+1});
       return {count:roots.length,parentTitle:parent.title,targetFile:parent.filePath,insertAt:insertAt+prefix,affected}
-    }
-    function applyBatchMove(){
-      try{
-        const result=moveSelectedAsChildren($("batchMoveParent").value);closeBatchMoveModal();render();
-        setNotice(`已把 ${result.count} 个所选条目移动为“${result.parentTitle}”的子项；涉及文件尚未写回。`);return true
-      }catch(error){setNotice(error?.message||"批量移动失败。");return false}
     }
     function closeDeleteModal(){
       state.deleting=null;$("deleteModal").classList.remove("show")
@@ -4924,7 +5447,7 @@ print("hello")
       const snapshot=state.navHistory.pop();if(!snapshot){updateBackButton();return}
       restoreNavigation(snapshot)
     }
-    function render(){renderNav();renderCustomLists();renderFiles();renderHistory();renderContent();renderDetail();renderBatchBar();updateBackButton()}
+    function render(){renderNav();renderCustomLists();renderFiles();renderHistory();renderContent();renderDetail();renderBatchBar();updateBackButton();notifyLayoutPlugins()}
     function closeSidebar(){$("sidebar").classList.remove("open");$("scrim").classList.remove("show")}
     function setSearchQuery(value){
       state.query=value;$("search").value=value;state.visible=100;state.customActive=null
@@ -4942,6 +5465,7 @@ print("hello")
     $("refreshReminderTop").onclick=()=>syncReminderNow(true);
     $("batchToggle").onclick=()=>setBatchMode(!state.batchMode);
     $("applyBatchStatus").onclick=applyBatchStatus;$("deleteBatch").onclick=deleteBatchTasks;
+    $("moveBatchAsChild").onclick=openBatchMoveModal;
     $("writeBatch").onclick=()=>writeBatchSources();$("clearBatch").onclick=()=>setBatchMode(false);
     $("filterToggle").onclick=()=>{state.filtersCollapsed=!state.filtersCollapsed;state.filterTouched=true;updateFilterToggle()};
     $("settings").onclick=openSettings;$("closeSettings").onclick=$("cancelSettings").onclick=closeSettings;
@@ -4972,6 +5496,9 @@ print("hello")
     $("setStartupCurrent").onclick=saveCurrentAsStartup;$("clearStartup").onclick=clearStartupPage;
     $("exportConfig").onclick=exportConfiguration;$("importConfig").onclick=()=>$("configImport").click();
     $("configImport").onchange=async event=>{await importConfigurationFile(event.target.files?.[0]);event.target.value=""};
+    $("importPlugin").onclick=()=>$("pluginFileInput").click();
+    $("pluginFileInput").onchange=async event=>{await importPluginFiles(event.target.files);event.target.value=""};
+    $("openPluginDocs").onclick=()=>window.open("README-Plugins.md","_blank","noopener");
     $("openWebdav").onclick=()=>openWebdavFolder();
     $("settingsModal").onclick=event=>{if(event.target===$("settingsModal"))closeSettings()};
     $("folderInput").onchange=e=>{
@@ -5030,11 +5557,14 @@ print("hello")
     $("applyEdit").onclick=()=>{if(applyEditorText())closeEditor()};
     $("writeEdit").onclick=()=>writeEditedSource();
     $("downloadEdit").onclick=downloadEditedSource;
+    $("openExternalEdit").onclick=openInExternalEditor;
     $("editModal").onclick=event=>{if(event.target===$("editModal"))closeEditor()};
     $("plainEditMode").onclick=()=>setEditorMode("plain");
     $("highlightEditMode").onclick=()=>setEditorMode("highlight");
     $("editorZoomOut").onclick=()=>applyEditorScale(-10);
     $("editorZoomIn").onclick=()=>applyEditorScale(10);
+    $("editorPluginSelect").onchange=event=>selectEditorPlugin(event.target.value);
+    $("editorFormatSelect").onchange=event=>selectEditorFormat(event.target.value);
     $("vimToggle").onclick=toggleVimMode;
     $("vimEscButton").onclick=()=>{const input=$("editText");
       if(state.vimState==="visual")exitVimVisual(input);else setVimState("normal");input.focus()};
@@ -5076,9 +5606,8 @@ print("hello")
     $("moveParent").onchange=updateMoveOptions;$("moveAnchor").onchange=updateMoveOptions;
     $("applyMove").onclick=moveTaskFromPage;
     $("moveModal").onclick=event=>{if(event.target===$("moveModal"))closeMoveModal()};
-    $("moveBatchAsChild").onclick=openBatchMoveModal;
-    $("batchMoveFile").onchange=updateBatchMoveOptions;$("batchMoveParent").onchange=updateBatchMoveOptions;
     $("closeBatchMove").onclick=$("cancelBatchMove").onclick=closeBatchMoveModal;
+    $("batchMoveFile").onchange=updateBatchMoveOptions;$("batchMoveParent").onchange=updateBatchMoveOptions;
     $("applyBatchMove").onclick=applyBatchMove;
     $("batchMoveModal").onclick=event=>{if(event.target===$("batchMoveModal"))closeBatchMoveModal()};
     $("closeDelete").onclick=$("cancelDelete").onclick=closeDeleteModal;
@@ -5127,7 +5656,7 @@ print("hello")
     window.addEventListener("resize",()=>syncFilterCollapse());
     document.body.ondragover=e=>e.preventDefault();
     document.body.ondrop=e=>{e.preventDefault();if(e.dataTransfer.files.length)load(e.dataTransfer.files)};
-    loadRecent();loadPreferences();render();autoOpenDefaultRecent();
+    loadRecent();loadPreferences();render();initializeInstalledPlugins();autoOpenDefaultRecent();
   })();
   </script>
 </body>

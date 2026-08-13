@@ -1,0 +1,15 @@
+:root {
+  --accent: #a4512c;
+  --accentSoft: rgba(164, 81, 44, 0.12);
+  --bg: #eee5d4;
+  --panel: #fffaf0;
+  --soft: #f7efdf;
+  --line: #d9c8ad;
+  --text: #3a2b20;
+  --muted: #766250;
+}
+
+body {
+  background-image: linear-gradient(rgba(164, 81, 44, 0.025) 1px, transparent 1px);
+  background-size: 100% 24px;
+}
