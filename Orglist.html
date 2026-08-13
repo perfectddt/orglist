@@ -259,6 +259,10 @@
     .date.scheduled{color:var(--blue)}.date.deadline{color:var(--accent)}
     .date.deadline.overdue{color:var(--red)}.date.closed{color:var(--green)}
     .date.orgdate{color:var(--yellow)}
+    .date.countdown{padding:4px 7px;color:var(--blue);background:var(--blueSoft);border:1px solid color-mix(in srgb,var(--blue) 28%,var(--line));border-radius:6px;font-weight:850}
+    .date.countdown.soon{color:#9a5700;background:#fff3d8;border-color:#f0ce8b}.date.countdown.urgent,
+    .date.countdown.expired{color:var(--red);background:var(--redSoft);border-color:color-mix(in srgb,var(--red) 30%,var(--line))}
+    .date.countdown.today{color:#fff;background:var(--accent);border-color:var(--accent)}
     .source{display:block;max-width:130px;overflow:hidden;color:var(--muted2);
       font-size:9px;text-overflow:ellipsis;white-space:nowrap}
     .more{width:100%;padding:14px;color:var(--accent);background:var(--soft);
@@ -271,6 +275,34 @@
     .list.columns2 .task:hover,.list.columns2 .task.selected{background:var(--soft)}
     .list.columns2 .tail{grid-column:2;align-items:center;flex-direction:row;flex-wrap:wrap;min-width:0}
     .list.columns2 .more{grid-column:1/-1;border:1px solid var(--line);border-radius:10px}
+    .countdownList .task{min-height:72px}.countdownList .date.countdown{font-size:11px;padding:6px 9px}
+    .countdownList.compact .task{min-height:52px}.countdownList.compact .meta,.countdownList.compact .source,
+    .countdownList.compact .taskDetailHint{display:none}.countdownList.compact .tail{min-width:96px}
+    .statsControls{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px;padding:10px 12px;
+      background:var(--panel);border:1px solid var(--line);border-radius:11px}.statsControls label{display:flex;align-items:center;gap:7px;
+      color:var(--muted);font-size:9px;font-weight:800}.statsControls select{min-width:110px;padding:7px 9px;color:var(--text);
+      background:var(--soft);border:1px solid var(--line);border-radius:7px}.statsGrid{display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:12px}.statCard{min-width:0;padding:14px;
+      background:var(--panel);border:1px solid var(--line);border-radius:11px;box-shadow:var(--shadow)}
+    .statCard h3{margin:0 0 4px;color:var(--muted);font-size:9px;font-weight:800}.statValue{font-size:25px;font-weight:900;
+      letter-spacing:-1px}.statSub{margin-top:4px;color:var(--muted2);font-size:8px;line-height:1.5}.statsPanels{display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.statsPanel{min-width:0;padding:15px;background:var(--panel);
+      border:1px solid var(--line);border-radius:11px;box-shadow:var(--shadow)}.statsPanel.full{grid-column:1/-1}
+    .statsPanelHead{display:flex;align-items:center;justify-content:space-between;gap:9px;margin-bottom:12px}.statsPanelHead h2{margin:0;font-size:12px}
+    .statsPanelHead select{padding:6px 8px;color:var(--text);background:var(--soft);border:1px solid var(--line);border-radius:7px;font-size:9px}
+    .trendChart{display:flex;align-items:flex-end;gap:5px;height:170px;padding-top:10px;overflow-x:auto}.trendColumn{display:flex;
+      flex:1 0 20px;min-width:20px;height:100%;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;border:0;
+      color:var(--muted2);background:transparent}.trendColumn:hover{background:var(--soft)}.trendValue{font-size:7px;font-weight:800}
+    .trendBar{width:min(22px,76%);min-height:2px;background:linear-gradient(180deg,var(--accent),var(--blue));border-radius:5px 5px 2px 2px}
+    .trendLabel{font-size:7px;white-space:nowrap}.categoryRows{display:grid;gap:9px}.categoryRow{display:grid;
+      grid-template-columns:minmax(75px,120px) minmax(80px,1fr) 42px;align-items:center;gap:8px;border:0;background:transparent;
+      color:var(--text);text-align:left}.categoryName{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px}
+    .categoryTrack{height:8px;background:var(--soft);border-radius:99px;overflow:hidden}.categoryFill{height:100%;background:var(--accent);border-radius:99px}
+    .categoryCount{text-align:right;color:var(--muted);font-size:8px}.heatmap{display:grid;grid-template-columns:repeat(53,minmax(7px,1fr));
+      grid-auto-flow:column;grid-template-rows:repeat(7,9px);gap:3px;overflow-x:auto;padding:3px}.heatCell{width:100%;min-width:7px;
+      height:9px;border:0;border-radius:2px;background:var(--soft)}.heatCell.l1{background:color-mix(in srgb,var(--green) 28%,var(--soft))}
+    .heatCell.l2{background:color-mix(in srgb,var(--green) 50%,var(--soft))}.heatCell.l3{background:color-mix(in srgb,var(--green) 72%,var(--soft))}
+    .heatCell.l4{background:var(--green)}.statsEmpty{padding:30px;color:var(--muted);text-align:center}
     .quadrantIntro{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;
       margin:0 0 14px;padding:11px 13px;color:var(--muted);background:var(--panel);
       border:1px solid var(--line);border-radius:10px;font-size:10px;line-height:1.65}
@@ -435,6 +467,22 @@
     pre{max-height:360px;margin:0;padding:14px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;
       color:var(--text);background:var(--soft);border:1px solid var(--line);border-radius:9px;
       font:10px/1.7 ui-monospace,"Cascadia Code","Microsoft YaHei",monospace}
+    .orgBody{display:grid;gap:8px}.orgBodyLine{min-height:1.55em;color:var(--text);font-size:10px;
+      line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}.orgBodyLink{color:var(--blue);text-decoration:underline;
+      text-decoration-thickness:1px;text-underline-offset:2px}.orgImageFigure{display:grid;justify-items:start;gap:6px;margin:2px 0 8px}
+    .orgImageFigure.center{justify-items:center}.orgImageFigure.right{justify-items:end}.orgImageButton{display:block;
+      max-width:100%;padding:0;overflow:hidden;background:var(--soft);border:1px solid var(--line);border-radius:9px;
+      cursor:zoom-in}.orgImageButton:hover{border-color:var(--accent);box-shadow:0 8px 24px rgba(28,26,22,.11)}
+    .orgImage{display:block;width:auto;max-width:100%;max-height:440px;object-fit:contain;background:var(--soft)}
+    .orgImageFigure figcaption{max-width:100%;color:var(--muted);font-size:9px;line-height:1.55;overflow-wrap:anywhere}
+    .orgImagePlaceholder{display:grid;place-items:center;min-width:180px;min-height:96px;padding:12px;color:var(--muted2);
+      background:var(--soft);border:1px dashed var(--line);border-radius:9px;font-size:9px;text-align:center}
+    .orgImageTextLink{position:relative;padding:0;color:var(--blue);background:transparent;border:0;font:inherit;
+      line-height:inherit;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px;cursor:zoom-in}
+    .orgImageHover{position:absolute;z-index:90;left:0;bottom:calc(100% + 7px);display:none;width:220px;padding:6px;
+      background:var(--panel);border:1px solid var(--line);border-radius:9px;box-shadow:0 15px 42px rgba(20,19,17,.24);
+      pointer-events:none}.orgImageHover img{display:block;width:100%;max-height:180px;object-fit:contain;border-radius:5px}
+    @media(hover:hover){.orgImageTextLink:hover .orgImageHover,.orgImageTextLink:focus-visible .orgImageHover{display:block}}
     dl{margin:0;overflow:hidden;border:1px solid var(--line);border-radius:8px}
     dl div{display:grid;grid-template-columns:95px minmax(0,1fr);border-bottom:1px solid var(--line)}
     dl div:last-child{border-bottom:0}dt,dd{margin:0;padding:8px 9px;overflow-wrap:anywhere;font-size:9px;line-height:1.5}
@@ -528,6 +576,21 @@
     .editArea::selection{color:var(--text);background:color-mix(in srgb,var(--blue) 34%,transparent);
       -webkit-text-fill-color:var(--text)}
     .editorWrap .editArea,.editorWrap .highlightLayer{font-size:var(--editor-font-size,11px)}
+    .editorImagePreview{display:none;margin-top:9px;padding:10px;background:var(--soft);border:1px solid var(--line);
+      border-radius:10px}.editorImagePreview.show{display:block}.editorImagePreviewHead{display:flex;align-items:center;
+      justify-content:space-between;gap:10px;margin-bottom:8px;color:var(--muted);font-size:9px;line-height:1.5}
+    .editorImagePreviewHead strong{color:var(--text);font-size:10px}.editorImageGrid{display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}.editorImageCard{min-width:0;padding:7px;
+      background:var(--panel);border:1px solid var(--line);border-radius:8px}.editorImageCard button{display:block;width:100%;
+      height:112px;padding:0;overflow:hidden;background:var(--soft);border:0;border-radius:6px;cursor:zoom-in}
+    .editorImageCard img{display:block;width:100%;height:100%;object-fit:contain}.editorImageCard .orgImagePlaceholder{
+      width:100%;height:112px;min-width:0;min-height:0;border:0}.editorImageMeta{display:flex;gap:6px;margin-top:6px;
+      color:var(--muted2);font-size:8px;line-height:1.45}.editorImageMeta span:first-child{flex:0 0 auto;color:var(--accent)}
+    .editorImageMeta span:last-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .editorImageActions{display:flex;gap:6px;margin-top:7px}.editorImageActions button{width:auto;height:auto;flex:1;
+      padding:5px 6px;border:1px solid var(--line);border-radius:6px;background:var(--soft);color:var(--muted);
+      font-size:8px;cursor:pointer}.editorImageActions button:hover{color:var(--text);border-color:var(--accent)}
+    .editorImageActions .removeImageLink{color:#b95151}.editorImageActions .removeImageLink:hover{color:#d13d3d}
     .vimCommandBar{display:flex;align-items:center;gap:10px;min-height:34px;margin-top:6px;padding:6px 10px;
       color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:8px;
       font:9px ui-monospace,"Cascadia Code",monospace}.vimCommandBar.vimEnabled{border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
@@ -728,7 +791,13 @@
       font-size:10px}.batchBar button{padding:7px 9px;border:1px solid var(--line);border-radius:7px;
       color:var(--muted);background:var(--soft);font-size:9px;font-weight:800}.batchBar button:hover{color:var(--accent)}
     .batchBar .batchDanger{color:var(--red);background:var(--redSoft);border-color:transparent}
-    .scrim{display:none}
+    .scrim{display:none}.imageLightbox{position:fixed;z-index:320;inset:0;display:none;
+      grid-template-rows:auto minmax(0,1fr);padding:14px;background:rgba(13,13,12,.9)}.imageLightbox.show{display:grid}
+    .imageLightboxHead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 0 10px;
+      color:#eee;font-size:10px}.imageLightboxHead span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .imageLightboxHead button{flex:0 0 auto;width:34px;height:34px;color:#fff;background:rgba(255,255,255,.13);
+      border:1px solid rgba(255,255,255,.2);border-radius:9px;font-size:18px}.imageLightboxBody{display:grid;
+      place-items:center;min-height:0;overflow:auto}.imageLightboxBody img{display:block;max-width:100%;max-height:100%;object-fit:contain}
     @media(max-width:1080px){.detail{position:fixed;z-index:30;top:0;right:0;bottom:0;width:min(410px,94vw);
       transform:translateX(105%);box-shadow:-22px 0 55px rgba(24,23,20,.13);transition:transform .2s}
       .detail.open{transform:translateX(0)}}
@@ -751,7 +820,7 @@
       .batchMode .taskSwipe.batchSelected .hierCard{padding-left:68px}.batchBar.show{position:fixed;right:12px;bottom:12px;left:12px;
         max-height:42vh;overflow:auto}.batchMode .main{padding-bottom:120px}
       .taskDetailHint{display:inline-flex;order:99}
-      .list.columns2,.hierList.columns2,.quadrantControls{grid-template-columns:1fr}
+      .list.columns2,.hierList.columns2,.quadrantControls,.statsGrid,.statsPanels{grid-template-columns:1fr}
       .quadrantGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
       .quadrantBody .task{min-height:74px;padding:10px 8px;grid-template-columns:17px minmax(0,1fr);gap:6px}
       .quadrantBody .taskTitle{font-size:11px}.quadrantBody .meta{gap:3px;font-size:7px}
@@ -771,6 +840,7 @@
     @media(max-width:460px){.filters,.settingsGrid{grid-template-columns:1fr}.settingsGrid .full{grid-column:1}
       .fields,.smartChoiceGrid,.visualForm{grid-template-columns:1fr}
       .planningEditorGroup,.specialScheduleGrid,.reminderSyncControls,.reminderTimingGrid,.reminderPropertyGrid{grid-template-columns:1fr}
+      .statsPanel.full{grid-column:1}.statsControls{align-items:stretch;flex-direction:column}.statsControls label{justify-content:space-between}
       .reminderSyncControls .btn{width:100%}
       .editorFindBar{grid-template-columns:repeat(4,1fr)}.editorFindBar input{grid-column:1/-1}
       .visualField.full,.visualSource,.bulkPanel{grid-column:1}.bulkPanel{grid-template-columns:1fr}.bulkPanel .full{grid-column:1}
@@ -784,8 +854,9 @@
   </style>
 </head>
 <body>
-  <input id="folderInput" class="hidden" type="file" accept=".org,text/plain" webkitdirectory directory multiple>
+  <input id="folderInput" class="hidden" type="file" webkitdirectory directory multiple>
   <input id="fileInput" class="hidden" type="file" accept=".org,text/plain" multiple>
+  <input id="imageInsertInput" class="hidden" type="file" accept="image/png,image/jpeg,image/gif,image/webp,image/bmp,image/svg+xml,image/avif" multiple>
   <input id="configImport" class="hidden" type="file" accept=".json,application/json">
   <div class="app">
     <aside class="sidebar" id="sidebar">
@@ -958,6 +1029,10 @@
       <div class="apkSelectOptions" id="apkSelectOptions"></div>
     </div>
   </div>
+  <div class="imageLightbox" id="imageLightbox" role="dialog" aria-modal="true" aria-labelledby="imageLightboxTitle">
+    <div class="imageLightboxHead"><span id="imageLightboxTitle">图片预览</span><button id="closeImageLightbox" aria-label="关闭图片预览">×</button></div>
+    <div class="imageLightboxBody"><img id="imageLightboxImage" alt=""></div>
+  </div>
   <div class="modalBackdrop" id="syntaxModal" role="dialog" aria-modal="true" aria-labelledby="syntaxTitle">
     <div class="modal">
       <div class="modalHead"><h2 id="syntaxTitle">搜索语法</h2><button class="iconBtn" id="closeSyntax" aria-label="关闭">×</button></div>
@@ -980,12 +1055,14 @@
           <div class="syntaxCode">scheduled:&lt;2026-08-01</div><div>日期比较，支持 &gt;、&gt;=、&lt;、&lt;=</div>
           <div class="syntaxCode">closed:today</div><div>支持 today、yesterday、tomorrow</div>
           <div class="syntaxCode">has:deadline overdue:true</div><div>判断是否存在日期或是否逾期</div>
+          <div class="syntaxCode">has:countdown countdown:next30d</div><div>筛选倒计时；支持 today、active、overdue、next7d、next30d、pinned 和日期范围</div>
         </div>
         <div class="syntaxExamples"><h3>组合示例</h3>
           <code>status:TODO deadline:2026-07-01..2026-07-31 -tag:归档</code>
           <code>file:org-gtd-tasks.org grep:/面试|笔试/i</code>
           <code>file:inbox.org,nextactions.org 报名 -宁波</code>
           <code>closed:&gt;=2026-07-01 closed:&lt;=2026-07-31</code>
+          <code>countdown:next30d tag:考试</code>
         </div>
       </div>
     </div>
@@ -997,7 +1074,7 @@
         <p class="editSource" id="editSource"></p>
         <div class="editorToolbar"><div class="editorModes"><button id="plainEditMode" data-editor-mode="plain">原文</button>
           <button id="highlightEditMode" data-editor-mode="highlight">彩色高亮</button></div>
-          <div class="editorTools"><button class="orgHelpButton" id="orgFormatHelp">Org 格式说明</button>
+          <div class="editorTools"><button class="orgHelpButton" id="insertEditorImage" type="button">插入图片</button><button class="orgHelpButton" id="orgFormatHelp">Org 格式说明</button>
             <button class="orgHelpButton" id="vimHelp" type="button">Vim 说明</button>
             <label class="editorPluginControl">编辑器<select id="editorPluginSelect" aria-label="编辑器插件">
               <option value="builtin">内置轻量编辑器</option></select></label>
@@ -1015,6 +1092,7 @@
         <div class="editorCode" id="editorCode"><pre class="lineNumbers" id="editLineNumbers" aria-hidden="true">1</pre>
           <div class="editorWrap" id="editorWrap"><pre class="highlightLayer" id="editHighlight" aria-hidden="true"></pre>
             <textarea class="editArea" id="editText" spellcheck="false" aria-label="Org 原文"></textarea></div></div>
+        <section class="editorImagePreview" id="editImagePreview" aria-live="polite"></section>
         <div class="vimCommandBar" id="vimCommandBar"><span class="vimCommandMode" id="vimCommandMode">普通编辑</span>
           <button class="vimToggle" id="vimEscButton" type="button" hidden>Esc／普通模式</button>
           <span class="vimCommandMessage" id="vimCommandMessage">开启 Vim 后按 : 调出命令行</span>
@@ -1122,9 +1200,17 @@
               <p class="specialScheduleHint">保存为 <code>&lt;%%(diary-chinese-anniversary 月 日)&gt;</code>；农历周年不是 Habit，不会自动写入 <code>:STYLE: habit</code>。</p>
             </div>
           </div>
+          <div class="planningEditorGroup full visualSingleOnly">
+            <div class="planningEditorTitle">COUNTDOWN 倒计时</div>
+            <label class="settingsCheck"><input id="visualCountdownEnabled" type="checkbox"><span>启用倒计时</span><small>进入倒计时智能清单，并在任务旁显示剩余时间。</small></label>
+            <label class="visualField"><span>目标日期</span><input id="visualCountdownDate" type="text" inputmode="numeric" data-picker-type="date" placeholder="YYYY-MM-DD"></label>
+            <label class="visualField"><span>目标时间</span><input id="visualCountdownTime" type="text" inputmode="numeric" data-picker-type="time" placeholder="HH:MM"></label>
+            <label class="visualField"><span>到期后</span><select id="visualCountdownAfter"><option value="elapsed">显示已过去</option><option value="expired">显示已到期</option><option value="hide">隐藏</option></select></label>
+            <label class="settingsCheck"><input id="visualCountdownPinned" type="checkbox"><span>置顶倒计时</span><small>在倒计时清单中优先显示。</small></label>
+          </div>
           <label class="visualField visualSingleOnly"><span>CLOSED 日期</span><input id="visualClosedDate" type="text" inputmode="numeric" data-picker-type="date" placeholder="YYYY-MM-DD"></label>
           <label class="visualField visualSingleOnly"><span>CLOSED 时间</span><input id="visualClosedTime" type="text" inputmode="numeric" data-picker-type="time" placeholder="HH:MM"></label>
-          <label class="visualField full visualSingleOnly"><span>正文与备注</span><textarea id="visualBody" spellcheck="false" placeholder="可输入普通文字、列表、链接等 Org 内容"></textarea></label>
+          <label class="visualField full visualSingleOnly"><span>正文与备注　<button class="orgHelpButton" id="insertVisualImage" type="button">插入图片</button></span><textarea id="visualBody" spellcheck="false" placeholder="可输入普通文字、列表、链接等 Org 内容"></textarea></label>
         </div>
         <p class="editWarning">“应用到当前页面”只修改当前浏览器中的副本；只有“写回原文件”会覆盖磁盘文件。通过普通文件选择器打开时，浏览器可能只允许下载副本。</p>
         <div class="modalActions">
@@ -1275,6 +1361,7 @@ print("hello")
           <button data-settings-target="settings-quadrant">四象限默认定义</button>
           <button data-settings-target="settings-startup">启动页</button>
           <button data-settings-target="settings-statuses">Org 自定义状态</button>
+          <button data-settings-target="settings-statistics">统计与倒计时</button>
           <button data-settings-target="settings-backup">配置备份</button>
           <button id="reminderNavLabel" data-settings-target="settings-reminder">Windows 提醒</button>
           <button class="settingsNavSub" data-settings-target="settings-reminder-source">数据与同步</button>
@@ -1297,6 +1384,10 @@ print("hello")
               <option value="desktop">仅宽屏自动打开（推荐）</option><option value="always">所有屏幕自动打开</option>
               <option value="manual">从不自动打开</option>
             </select><small>窄屏可点击条目右侧“详情”按钮主动打开。</small></label>
+            <label class="visualField full"><span>默认图片文件夹</span><input id="defaultImageFolder" autocomplete="off" placeholder="例如：mainImage">
+              <small>相对当前 Org 文件所在目录。“插入图片”会把图片保存到这里，并生成对应路径；也用于补全 <code>[[file:a.png]]</code>。</small></label>
+            <label class="visualField full"><span>图片回收站文件夹</span><input id="imageTrashFolder" autocomplete="off" placeholder="留空：图片文件夹/.orglist-trash">
+              <small>相对当前 Org 文件所在目录。留空时跟随默认图片文件夹，例如 <code>mainImage/.orglist-trash</code>；也可以填写 <code>trash/images</code>。</small></label>
           </div>
           <div class="offlineInfo" style="margin-top:12px"><span class="lockMark">▣</span><div><strong>本地与隐私</strong>
             文件不会上传；只有你明确点击“写回原文件”时才会修改磁盘或 WebDAV 文件。</div></div>
@@ -1319,7 +1410,7 @@ print("hello")
               <option value="open">待办</option><option value="today">今天</option><option value="habits">习惯</option>
               <option value="upcoming">未来</option>
               <option value="overdue">已逾期</option><option value="no-date">无日期</option>
-              <option value="completed">已完成</option><option value="all">全部条目</option>
+              <option value="completed">已完成</option><option value="countdown">倒计时</option><option value="statistics">统计</option><option value="all">全部条目</option>
             </select></label>
             <label class="visualField"><span>默认状态</span><select id="defaultStatus"></select></label>
             <label class="visualField"><span>默认优先级</span><select id="defaultPriority">
@@ -1496,6 +1587,21 @@ print("hello")
           <div class="webdavStatus info" id="webdavStatus"></div>
           <div class="profileList" id="webdavProfiles"></div>
         </section>
+        <section class="settingsSection" id="settings-statistics">
+          <h3>统计与倒计时</h3>
+          <p class="settingsHint">按需开启统计卡片。当前“计划完成率”以现存任务的 SCHEDULED/DEADLINE 为口径；被改期覆盖的旧计划无法追溯。</p>
+          <div class="settingsGrid">
+            <label class="settingsCheck"><input id="statisticsEnabled" type="checkbox"><span>启用统计中心</span><small>在智能清单中显示统计入口。</small></label>
+            <label class="settingsCheck"><input id="statCompletion" type="checkbox"><span>完成总览</span><small>完成数、计划完成率、按期完成和逾期。</small></label>
+            <label class="settingsCheck"><input id="statTrend" type="checkbox"><span>完成趋势</span><small>按日展示完成数量。</small></label>
+            <label class="settingsCheck"><input id="statCategories" type="checkbox"><span>分类分布</span><small>按文件、标签、优先级和顶级标题统计。</small></label>
+            <label class="settingsCheck"><input id="statHeatmap" type="checkbox"><span>年度热力图</span><small>查看每日完成活跃度。</small></label>
+            <label class="settingsCheck"><input id="statHabits" type="checkbox"><span>习惯统计</span><small>从 Habit LOGBOOK 读取签到次数与趋势。</small></label>
+            <label class="visualField"><span>默认统计周期</span><select id="statDefaultPeriod"><option value="week">本周</option><option value="month">本月</option><option value="year">今年</option></select></label>
+            <label class="visualField"><span>倒计时紧凑模式</span><select id="countdownCompact"><option value="0">标准列表</option><option value="1">适合小窗口的紧凑列表</option></select></label>
+            <label class="visualField"><span>临近提醒阈值</span><select id="countdownSoonDays"><option value="3">3 天</option><option value="7">7 天</option><option value="14">14 天</option><option value="30">30 天</option></select></label>
+          </div>
+        </section>
         <section class="settingsSection" id="settings-plugins">
           <h3>外部插件</h3>
           <p class="settingsHint">导入本地 <code>.js</code> 插件或 <code>.css</code> 页面样式。插件保存在当前应用的 IndexedDB；不会随 Org 文件同步。</p>
@@ -1510,7 +1616,7 @@ print("hello")
           <h3>关于</h3>
           <div class="aboutCard"><strong>Orglist</strong>
             <p>面向 Org 文件的本地任务清单与浏览工具。数据默认保存在本地，只有在你主动使用写回或 WebDAV 时才会与文件交互。</p>
-            <dl><div><dt>当前版本</dt><dd>1.8.0</dd></div>
+            <dl><div><dt>当前版本</dt><dd>2.0.0</dd></div>
               <div><dt>项目地址</dt><dd><a href="https://github.com/perfectddt/orglist" target="_blank" rel="noopener noreferrer">github.com/perfectddt/orglist</a></dd></div>
               <div><dt>使用方式</dt><dd>支持本地 HTML、Android APK 与 WebDAV。</dd></div>
             </dl>
@@ -1546,8 +1652,8 @@ print("hello")
     const STATUS_LABEL = {NONE:"未设状态",TODO:"待办",NEXT:"下一步",DONE:"已完成",CNCL:"已取消"};
     const VIEWS = [
       ["open","○","待办"],["today","日","今天"],["habits","惯","习惯"],["upcoming","→","未来"],["overdue","!","已逾期"],
-      ["no-date","—","无日期"],["completed","✓","已完成"],["quadrant","田","四象限"],
-      ["calendar","历","日历"],["all","层","全部条目"]
+      ["no-date","—","无日期"],["completed","✓","已完成"],["countdown","⌛","倒计时"],["statistics","统","统计"],
+      ["quadrant","田","四象限"],["calendar","历","日历"],["all","层","全部条目"]
     ];
     const state = {tasks:[],files:[],sources:[],mode:"global",view:"open",file:"all",status:"ALL",priority:"ALL",tag:"ALL",
       sort:"date",dateField:"date",dateFrom:"",dateTo:"",query:"",selected:null,hierParent:null,
@@ -1564,7 +1670,9 @@ print("hello")
       batchMode:false,batchSelected:[],batchSources:[],
       suppressTaskClickUntil:0,startupPage:null,vimMode:false,vimState:"insert",vimPending:"",
       vimLastKey:"",vimLastKeyAt:0,vimInputRestore:null,vimInputGuard:null,vimVisualAnchor:null,vimVisualCursor:null,
-      apkSelectTarget:null,apkSelectPending:null,apkSelectScheduled:false};
+      apkSelectTarget:null,apkSelectPending:null,apkSelectScheduled:false,defaultImageFolder:"",imageTrashFolder:"",
+      statistics:{enabled:true,completion:true,trend:true,categories:true,heatmap:true,habits:true,period:"week",category:"file"},
+      countdownCompact:false,countdownSoonDays:7};
     const HISTORY_KEY="org-task-recent-sources-v2",HISTORY_DEFAULT_KEY="org-task-default-recent-v1",
       HISTORY_DB="org-task-local-history",HISTORY_STORE="handles";
     const CUSTOM_KEY="org-task-custom-lists-v1",LAYOUT_KEY="org-task-list-columns-v1",
@@ -1575,11 +1683,13 @@ print("hello")
       FILE_ORDER_KEY="org-task-file-order-v1",DISPLAY_KEY="org-task-display-settings-v1",ADD_KEY="org-task-add-defaults-v1",
       WEBDAV_KEY="org-task-webdav-profiles-v1",STATUS_KEY="org-task-custom-status-v1",
       STARTUP_KEY="org-task-startup-page-v1",VIM_KEY="org-task-vim-mode-v1",
-      EDITOR_PLUGIN_KEY="org-task-editor-plugin-v1",EDITOR_FORMAT_KEY="org-task-editor-format-v1";
+      EDITOR_PLUGIN_KEY="org-task-editor-plugin-v1",EDITOR_FORMAT_KEY="org-task-editor-format-v1",
+      IMAGE_KEY="org-task-image-settings-v1",STATISTICS_KEY="org-task-statistics-settings-v1";
     const PLUGIN_DB="orglist-plugin-storage-v1",PLUGIN_STORE="plugins",PLUGIN_HOST_API=2;
     let searchHistoryTimer=null,externalEditorTimer=null,activeEditorPlugin=null,activeFormatPlugin=null,currentPluginRegistration="";
     const $ = id => document.getElementById(id);
-    const pluginRegistry=new Map(),pluginRuntime=new Map(),layoutSubscribers=new Set(),layoutRegionOwners=new Map();
+    const pluginRegistry=new Map(),pluginRuntime=new Map(),layoutSubscribers=new Set(),layoutRegionOwners=new Map(),
+      publicSettingSubscribers=new Set();
     function registerOrglistPlugin(plugin){
       const manifest=plugin?.manifest,id=String(manifest?.id||"");
       if(!/^[a-z0-9][a-z0-9._-]{1,63}$/.test(id)||!["editor","format","theme","layout"].includes(manifest?.type)||
@@ -1589,6 +1699,76 @@ print("hello")
       pluginRegistry.set(id,plugin);return true
     }
     window.OrglistPluginHost=Object.freeze({apiVersion:PLUGIN_HOST_API,register:registerOrglistPlugin});
+    const publicSettingDefinitions=[
+      {id:"images.defaultFolder",group:"图片",label:"默认图片文件夹",type:"text",
+        description:"相对当前 Org 文件所在目录；插入图片会保存到这里，也用于补全只写文件名的图片链接。",placeholder:"例如：mainImage",
+        read:()=>state.defaultImageFolder,write:value=>{state.defaultImageFolder=normalizeRelativeFolder(value);
+          saveImageSettings()}},
+      {id:"images.trashFolder",group:"图片",label:"图片回收站文件夹",type:"text",
+        description:"相对当前 Org 文件所在目录；留空时使用“默认图片文件夹/.orglist-trash”。",placeholder:"例如：trash/images",
+        read:()=>state.imageTrashFolder,write:value=>{state.imageTrashFolder=normalizeRelativeFolder(value);saveImageSettings()}},
+      {id:"display.filterPreference",group:"显示",label:"筛选区默认状态",type:"select",options:[
+        {value:"auto",label:"窄屏折叠，宽屏展开"},{value:"collapsed",label:"始终折叠"},{value:"expanded",label:"始终展开"}],
+        read:()=>state.filterPreference,write:value=>{state.filterPreference=value;saveDisplaySettings();syncFilterCollapse(true)}},
+      {id:"display.detailBehavior",group:"显示",label:"点击条目时打开详情",type:"select",options:[
+        {value:"desktop",label:"仅宽屏自动打开"},{value:"always",label:"所有屏幕自动打开"},{value:"manual",label:"从不自动打开"}],
+        read:()=>state.detailBehavior,write:value=>{state.detailBehavior=value;saveDisplaySettings()}},
+      {id:"add.position",group:"新增条目",label:"默认插入位置",type:"select",options:[
+        {value:"auto",label:"当前浏览位置"},{value:"last-parent",label:"上次选择的父级"},
+        {value:"selected",label:"当前选中条目之后"},{value:"top",label:"文件顶部"}],
+        read:()=>state.addDefaults.position,write:value=>{state.addDefaults.position=value;
+          localStorage.setItem(ADD_KEY,JSON.stringify(state.addDefaults))}},
+      {id:"defaults.columns",group:"默认筛选",label:"列表布局",type:"select",options:[
+        {value:"1",label:"一列"},{value:"2",label:"两列"}],read:()=>state.defaultFilters.columns,
+        write:value=>{state.defaultFilters.columns=value;saveDisplaySettings()}},
+      {id:"quadrant.important",group:"四象限",label:"重要判定",type:"select",options:[
+        {value:"A",label:"仅优先级 A"},{value:"AB",label:"优先级 A 或 B"},{value:"ANY",label:"任意优先级"},
+        {value:"TAG",label:"含“重要”标签"},{value:"PROP",label:"属性 IMPORTANT 为真"}],
+        read:()=>state.quadrantDefaults.important,write:value=>{state.quadrantDefaults.important=value;
+          state.quadrantImportant=value;localStorage.setItem(QUADRANT_KEY,JSON.stringify(state.quadrantDefaults));render()}},
+      {id:"quadrant.urgent",group:"四象限",label:"紧急判定",type:"select",options:[
+        {value:"0",label:"已到期或今天"},{value:"3",label:"已到期或未来 3 天"},{value:"7",label:"已到期或未来 7 天"},
+        {value:"14",label:"已到期或未来 14 天"},{value:"OVERDUE",label:"仅已逾期"},{value:"TAG",label:"含“紧急”标签"}],
+        read:()=>state.quadrantDefaults.urgent,write:value=>{state.quadrantDefaults.urgent=value;
+          state.quadrantUrgent=value;localStorage.setItem(QUADRANT_KEY,JSON.stringify(state.quadrantDefaults));render()}},
+      ...[["statistics.enabled","启用统计中心","enabled"],["statistics.completion","完成数与完成率","completion"],
+        ["statistics.trend","完成趋势","trend"],["statistics.categories","完成分类","categories"],
+        ["statistics.heatmap","年度热力图","heatmap"],["statistics.habits","习惯签到","habits"]].map(([id,label,key])=>({
+          id,group:"统计与倒计时",label,type:"select",options:[{value:"true",label:"显示"},{value:"false",label:"隐藏"}],
+          read:()=>String(state.statistics[key]!==false),write:value=>{state.statistics[key]=value!=="false";saveStatisticsSettings();render()}})),
+      {id:"statistics.period",group:"统计与倒计时",label:"默认统计周期",type:"select",options:[
+        {value:"week",label:"本周"},{value:"month",label:"本月"},{value:"year",label:"今年"}],
+        read:()=>state.statistics.period,write:value=>{state.statistics.period=value;saveStatisticsSettings();render()}},
+      {id:"countdown.compact",group:"统计与倒计时",label:"倒计时列表密度",type:"select",options:[
+        {value:"false",label:"标准"},{value:"true",label:"紧凑"}],read:()=>String(state.countdownCompact),
+        write:value=>{state.countdownCompact=value==="true";saveStatisticsSettings();render()}},
+      {id:"countdown.soonDays",group:"统计与倒计时",label:"倒计时临近阈值",type:"select",options:[
+        {value:"3",label:"3 天"},{value:"7",label:"7 天"},{value:"14",label:"14 天"},{value:"30",label:"30 天"}],
+        read:()=>String(state.countdownSoonDays),write:value=>{state.countdownSoonDays=Number(value)||7;saveStatisticsSettings();render()}}
+    ];
+    function normalizeRelativeFolder(value){
+      return String(value||"").trim().replace(/\\/g,"/").replace(/^\.\//,"").replace(/^\/+|\/+$/g,"")
+        .split("/").filter(part=>part&&part!=="."&&part!=="..").join("/").slice(0,240)
+    }
+    function effectiveImageTrashFolder(){return normalizeRelativeFolder(state.imageTrashFolder||`${state.defaultImageFolder?`${state.defaultImageFolder}/`:""}.orglist-trash`)}
+    function saveImageSettings(){try{localStorage.setItem(IMAGE_KEY,JSON.stringify({defaultFolder:state.defaultImageFolder,
+      trashFolder:state.imageTrashFolder}))}catch(_){}}
+    function saveStatisticsSettings(){try{localStorage.setItem(STATISTICS_KEY,JSON.stringify({...state.statistics,
+      countdownCompact:state.countdownCompact,countdownSoonDays:state.countdownSoonDays}))}catch(_){}}
+    function publicSettingsSnapshot(){return publicSettingDefinitions.map(definition=>({id:definition.id,group:definition.group,
+      label:definition.label,type:definition.type,description:definition.description||"",placeholder:definition.placeholder||"",
+      options:(definition.options||[]).map(option=>({...option})),value:definition.read()}))}
+    function notifyPublicSettings(changedId=""){
+      const snapshot=publicSettingsSnapshot();publicSettingSubscribers.forEach(listener=>{
+        try{listener(snapshot,changedId)}catch(error){console.warn("插件配置监听器失败",error)}
+      })
+    }
+    function setPublicSetting(id,value){
+      const definition=publicSettingDefinitions.find(item=>item.id===String(id));if(!definition)throw new Error("未知的主程序配置");
+      let normalized=String(value??"");if(definition.type==="select"&&!definition.options.some(option=>option.value===normalized))
+        throw new Error("配置值不在允许范围内");
+      definition.write(normalized);notifyPublicSettings(definition.id);return definition.read()
+    }
     function openPluginDb(){
       return new Promise((resolve,reject)=>{
         if(!window.indexedDB){reject(new Error("当前环境不支持 IndexedDB"));return}
@@ -1655,14 +1835,24 @@ print("hello")
       return Object.freeze({uid:task.uid,title:task.title,status:task.status,priority:task.priority||"",tags:[...task.tags],
         level:task.level,fileId:task.fileId,fileName:task.fileName,filePath:task.filePath,parentPath:[...task.parentPath],
         scheduled:task.scheduled||"",deadline:task.deadline||"",closed:task.closed||"",orgDate:task.orgDate||"",
-        calendarDates:[...new Set(calendarDateValues(task))],time:task.time||"",
-        done:isDone(task),overdue:taskOverdue(task),habit:!!task.isHabit,body:String(task.body||"")})
+        calendarDates:[...new Set(calendarDateValues(task))],time:task.time||"",countdownDate:task.countdownDate||"",
+        countdownTime:task.countdownTime||"",countdownPinned:!!task.countdownPinned,countdownAfter:task.countdownAfter||"elapsed",
+        countdownVisible:countdownVisible(task),countdownText:countdownLabel(task),done:isDone(task),overdue:taskOverdue(task),habit:!!task.isHabit,
+        habitDates:[...habitLogDates(task)],body:String(task.body||"")})
+    }
+    function layoutViewState(){
+      return Object.freeze({view:state.view==="calendar"?`calendar-${state.calendarMode}`:state.view,status:state.status,
+        priority:state.priority,tag:state.tag,fileId:state.file,search:state.query,sort:state.sort,dateField:state.dateField,
+        dateFrom:state.dateFrom,dateTo:state.dateTo,customActive:state.customActive||""})
     }
     function queryLayoutTasks(options={}){
       const view=String(options.view||"all"),now=today(),search=compileSearch(String(options.query||""));
       const statuses=Array.isArray(options.status)?options.status.map(String):options.status?[String(options.status)]:[];
       const priorities=Array.isArray(options.priority)?options.priority.map(String):options.priority?[String(options.priority)]:[];
       const tags=Array.isArray(options.tags)?options.tags.map(String):options.tag?[String(options.tag)]:[];
+      const dateField=["date","deadline","scheduled","closed","orgdate","anydate"].includes(options.dateField)?options.dateField:"date";
+      const dateFrom=/^\d{4}-\d{2}-\d{2}$/.test(String(options.dateFrom||""))?String(options.dateFrom):"";
+      const dateTo=/^\d{4}-\d{2}-\d{2}$/.test(String(options.dateTo||""))?String(options.dateTo):"";
       let tasks=state.tasks.filter(task=>!task.isGroup).filter(task=>{
         const done=isDone(task);
         if(view==="open"&&done)return false;
@@ -1672,18 +1862,21 @@ print("hello")
         if(view==="completed"&&!done)return false;
         if(view==="no-date"&&(done||dateValues(task,"date").length))return false;
         if(view==="habits"&&!task.isHabit)return false;
+        if(view==="countdown"&&!countdownVisible(task))return false;
         if(options.completed===true&&!done||options.completed===false&&done)return false;
         if(statuses.length&&!statuses.includes(task.status))return false;
         if(priorities.length&&!priorities.includes(task.priority||"NONE"))return false;
         if(tags.length&&!tags.every(tag=>task.tags.includes(tag)))return false;
         if(options.fileId&&options.fileId!=="all"&&task.fileId!==options.fileId)return false;
+        if((dateFrom||dateTo)&&!dateValues(task,dateField).some(date=>(!dateFrom||date>=dateFrom)&&(!dateTo||date<=dateTo)))return false;
         return search.predicate(task)
       });
       const priority=value=>value==="A"?0:value==="B"?1:value==="C"?2:3;
-      const date=task=>[task.deadline,task.scheduled,task.orgDate].filter(Boolean).sort()[0]||"9999";
-      tasks.sort(options.sort==="priority"?(a,b)=>priority(a.priority)-priority(b.priority)||date(a).localeCompare(date(b)):
+      const date=task=>dateValues(task,dateField).sort()[0]||"9999";
+      tasks.sort(view==="countdown"?(a,b)=>Number(b.countdownPinned)-Number(a.countdownPinned)||String(a.countdownDate).localeCompare(String(b.countdownDate)):
+        options.sort==="priority"?(a,b)=>priority(a.priority)-priority(b.priority)||date(a).localeCompare(date(b)):
         options.sort==="source"?(a,b)=>a.sourceIndex-b.sourceIndex:(a,b)=>date(a).localeCompare(date(b))||priority(a.priority)-priority(b.priority));
-      return tasks.slice(0,Math.max(1,Math.min(200,Number(options.limit)||50))).map(layoutTaskSnapshot)
+      return tasks.slice(0,Math.max(1,Math.min(5000,Number(options.limit)||50))).map(layoutTaskSnapshot)
     }
     function notifyLayoutPlugins(){
       const summary=Object.freeze({taskCount:state.tasks.filter(task=>!task.isGroup).length,fileCount:state.files.length,
@@ -1704,7 +1897,7 @@ print("hello")
         mounts.splice(0).forEach(element=>element.remove());styles.splice(0).forEach(style=>style.remove())
       };
       return Object.freeze({apiVersion:PLUGIN_HOST_API,platform:androidPlatform()?"android":"windows",escapeHtml:esc,today,
-        getRegion,queryTasks:queryLayoutTasks,
+        getRegion,queryTasks:queryLayoutTasks,getViewState:layoutViewState,listSettings:publicSettingsSnapshot,
         addStyle(css){const style=document.createElement("style");style.dataset.orglistPlugin=id;style.textContent=String(css||"");
           document.head.appendChild(style);styles.push(style);return ()=>{style.remove();const index=styles.indexOf(style);if(index>=0)styles.splice(index,1)}},
         createMount(className,parent="main",before=null){const target=typeof parent==="string"?getRegion(parent):parent;
@@ -1721,6 +1914,12 @@ print("hello")
         },restoreRegion,
         onUpdate(listener){if(typeof listener!=="function")throw new Error("布局更新监听器必须是函数");layoutSubscribers.add(listener);
           const unsubscribe=()=>layoutSubscribers.delete(listener);subscriptions.push(unsubscribe);return unsubscribe},
+        getAppSetting(key,fallback=null){const item=publicSettingsSnapshot().find(setting=>setting.id===String(key));
+          return item?item.value:fallback},
+        setAppSetting(key,value){return setPublicSetting(key,value)},
+        onSettingsChange(listener){if(typeof listener!=="function")throw new Error("配置更新监听器必须是函数");
+          publicSettingSubscribers.add(listener);const unsubscribe=()=>publicSettingSubscribers.delete(listener);
+          subscriptions.push(unsubscribe);return unsubscribe},
         openTask(uid){const task=state.tasks.find(item=>item.uid===uid);if(!task)return false;
           state.selected=uid;state.detailOpen=true;render();getRegion("detail")?.scrollIntoView?.({block:"nearest"});return true},
         setDetailOpen(open){state.detailOpen=!!open;renderDetail();notifyLayoutPlugins();return state.detailOpen},
@@ -1830,6 +2029,277 @@ print("hello")
     const cleanLinks = s => s.replace(/\[\[([^\]]+)\]\[([^\]]+)\]\]/g,"$2")
       .replace(/\[\[([^\]]+)\]\]/g,"$1").replace(/\s+/g," ").trim();
     const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+    const imageAssetCache=new Map();let editorImagePreviewTimer=null,editorImagePreviewGeneration=0,
+      editorImageWatchTimer=null,lastEditorImageText="";
+    function normalizeAssetPath(value){
+      let text=String(value||"").replace(/\\/g,"/").replace(/[?#].*$/,"");
+      try{text=decodeURIComponent(text)}catch(_){}
+      const parts=[];text.split("/").forEach(part=>{if(!part||part===".")return;if(part==="..")parts.pop();else parts.push(part)});
+      return parts.join("/")
+    }
+    function assetDirectory(value){const path=normalizeAssetPath(value),index=path.lastIndexOf("/");return index<0?"":path.slice(0,index)}
+    function joinAssetPath(...values){return normalizeAssetPath(values.filter(Boolean).join("/"))}
+    function clearImageAssetCache(){
+      imageAssetCache.forEach(value=>{if(typeof value==="string"&&value.startsWith("blob:"))URL.revokeObjectURL(value)});
+      imageAssetCache.clear()
+    }
+    function orgImageTarget(value){
+      let target=String(value||"").trim();if(/^file:/i.test(target))target=target.slice(5);
+      else if(/^attachment:/i.test(target))target=target.slice(11);
+      return target.replace(/\\([\[\]\\])/g,"$1")
+    }
+    function isOrgImageLink(value){return isImageFileName(orgImageTarget(value))}
+    function parseOrgImageLinks(text){
+      const rawText=String(text||""),results=[],lines=rawText.split(/\r\n?|\n/);let caption="",attributes={},offset=0,
+        directiveStart=null;
+      lines.forEach((line,index)=>{
+        const breakLength=index>=lines.length-1?0:rawText.startsWith("\r\n",offset+line.length)?2:1;
+        let directive=line.match(/^\s*#\+(CAPTION|ATTR_(?:ORG|HTML)):\s*(.*?)\s*$/i);
+        if(directive){
+          if(directiveStart===null)directiveStart=offset;
+          if(directive[1].toUpperCase()==="CAPTION")caption=directive[2];
+          else{
+            const value=directive[2],width=value.match(/:width\s+([^\s]+)/i)?.[1]||"",
+              align=value.match(/:align\s+(left|center|right)/i)?.[1]?.toLowerCase()||"",
+              alt=value.match(/:alt\s+(?:"([^"]+)"|'([^']+)'|([^:]+?))(?=\s+:[a-z]|$)/i),
+              title=value.match(/:title\s+(?:"([^"]+)"|'([^']+)'|([^:]+?))(?=\s+:[a-z]|$)/i);
+            if(width)attributes.width=width;if(align)attributes.align=align;
+            if(alt)attributes.alt=(alt[1]||alt[2]||alt[3]||"").trim();
+            if(title)attributes.title=(title[1]||title[2]||title[3]||"").trim()
+          }
+          offset+=line.length+breakLength;return
+        }
+        const matches=[...line.matchAll(/\[\[([^\]\n]+)\](?:\[([^\]\n]*)\])?\]/g)];
+        matches.forEach(match=>{
+          const target=match[1],description=match[2];if(!isOrgImageLink(target))return;
+          results.push({target,description:description===undefined?null:description,line:index+1,caption,
+            attributes:{...attributes},standalone:line.trim()===match[0],start:offset+match.index,end:offset+match.index+match[0].length,
+            directiveStart:directiveStart===null?offset+match.index:directiveStart,lineStart:offset,lineEnd:offset+line.length})
+        });
+        if(line.trim()&&!matches.length&&!/^\s*#\+NAME:/i.test(line)){caption="";attributes={};directiveStart=null}
+        else if(matches.length){caption="";attributes={};directiveStart=null}
+        offset+=line.length+breakLength
+      });
+      return results
+    }
+    function imageWidthStyle(value){
+      const match=String(value||"").trim().match(/^(\d+(?:\.\d+)?)(px|%)?$/i);if(!match)return "";
+      const number=Math.max(24,Math.min(match[2]==="%"?100:1200,Number(match[1]))),unit=match[2]||"px";
+      return `width:${number}${unit}`
+    }
+    function orgAttachmentCandidates(target,task,source){
+      const fileDir=assetDirectory(source.path),clean=normalizeAssetPath(orgImageTarget(target)),dir=normalizeAssetPath(task?.properties?.DIR||""),
+        id=String(task?.properties?.ID||"").trim(),candidates=[];
+      if(dir)candidates.push(joinAssetPath(fileDir,dir,clean));
+      if(id){candidates.push(joinAssetPath(fileDir,"data",id,clean));if(id.length>2)candidates.push(joinAssetPath(fileDir,"data",id.slice(0,2),id.slice(2),clean))}
+      return candidates
+    }
+    function orgImageCandidates(target,task,source){
+      const raw=String(target||"").trim(),clean=orgImageTarget(raw),fileDir=assetDirectory(source.path);
+      if(/^attachment:/i.test(raw))return orgAttachmentCandidates(raw,task,source);
+      if(/^https?:/i.test(clean))return [clean];
+      if(/^(?:[a-z]:[\\/]|\/)/i.test(clean))return [];
+      const standard=joinAssetPath(fileDir,clean),fallback=state.defaultImageFolder?
+        joinAssetPath(fileDir,state.defaultImageFolder,clean):"";
+      return [...new Set([standard,fallback].filter(Boolean))]
+    }
+    function sameWebdavResource(url,source){
+      try{return !!source?.webdavUrl&&new URL(url,source.webdavUrl).origin===new URL(source.webdavUrl).origin}catch(_){return false}
+    }
+    function webdavImageUrl(path,source){
+      if(/^https?:/i.test(path))return path;
+      try{
+        const normalized=normalizeAssetPath(path),fileDir=assetDirectory(source.path),relative=fileDir&&normalized.startsWith(`${fileDir}/`)?
+          normalized.slice(fileDir.length+1):normalized;
+        return new URL(relative.split("/").map(encodeURIComponent).join("/"),source.webdavUrl).href
+      }catch(_){return ""}
+    }
+    async function loadOrgImage(target,task,source){
+      if(!source)return {error:"找不到图片所属的 Org 文件"};const candidates=orgImageCandidates(target,task,source);
+      if(!candidates.length)return {error:"浏览器不能直接读取磁盘绝对路径；请使用相对路径并打开 Org 文件夹"};
+      for(const candidate of candidates){
+        const cacheKey=`${source.id}|${candidate}`;if(imageAssetCache.has(cacheKey)){
+          const cached=imageAssetCache.get(cacheKey),cachedResult=typeof cached==="string"?{url:cached,path:candidate}:await cached;
+          if(cachedResult?.url)return cachedResult;continue
+        }
+        const promise=(async()=>{
+          try{
+            if(/^https?:/i.test(candidate)&&!sameWebdavResource(candidate,source))return {url:candidate,path:candidate,external:true};
+            if(source.webdavUrl){
+              const url=webdavImageUrl(candidate,source);if(!url)throw new Error("远端图片地址无效");
+              const response=await webdavRequest(url,{method:"GET",responseType:"arrayBuffer"},source.webdavConfig),blob=await response.blob();
+              if(!blob.size)throw new Error("图片为空");const objectUrl=URL.createObjectURL(blob);imageAssetCache.set(cacheKey,objectUrl);
+              return {url:objectUrl,path:candidate}
+            }
+            const file=source.localAssets?.get(normalizeAssetPath(candidate));if(!file)throw new Error("所选文件夹中没有这张图片");
+            const objectUrl=URL.createObjectURL(file);imageAssetCache.set(cacheKey,objectUrl);return {url:objectUrl,path:candidate}
+          }catch(error){return {error:error?.message||String(error),path:candidate}}
+        })();
+        imageAssetCache.set(cacheKey,promise);const result=await promise;
+        if(result.url){imageAssetCache.set(cacheKey,result.url);return result}
+      }
+      return {error:`无法读取：${orgImageTarget(target)}`}
+    }
+    function safeImageFileName(file){
+      let name=String(file?.name||"image").replace(/[<>:"/\\|?*\[\]#\x00-\x1f]/g,"_").trim().replace(/[. ]+$/g,"");
+      if(!isImageFileName(name)){const extension=({"image/png":"png","image/jpeg":"jpg","image/gif":"gif","image/webp":"webp",
+        "image/bmp":"bmp","image/svg+xml":"svg","image/avif":"avif"})[file?.type]||"png";name=`${name||"image"}.${extension}`}
+      return name.slice(0,180)
+    }
+    function numberedImageName(name,index){
+      if(index<2)return name;const dot=name.lastIndexOf(".");return dot>0?`${name.slice(0,dot)}-${index}${name.slice(dot)}`:`${name}-${index}`
+    }
+    function imageInsertSource(target){
+      if(target==="visual"){
+        const task=state.tasks.find(item=>item.uid===state.visualEditing);
+        return state.visualMode==="edit"?state.sources.find(item=>item.id===task?.fileId):state.sources.find(item=>item.id===$("visualFile").value)
+      }
+      return state.sources.find(item=>item.id===state.editingFileId)
+    }
+    function sourceCanInsertImage(source){return !!source?.webdavUrl&&!!source.webdavConfig||!!source?.rootHandle}
+    function relativeImageLink(folder,name){return `./${joinAssetPath(folder,name)}`}
+    function sourceAssetPath(source,folder,name){return joinAssetPath(assetDirectory(source.path),folder,name)}
+    async function unusedLocalImageName(directory,name){
+      for(let index=1;index<1000;index++){const candidate=numberedImageName(name,index);
+        try{await directory.getFileHandle(candidate);continue}catch(error){if(error?.name==="NotFoundError")return candidate;throw error}}
+      throw new Error("同名图片过多，请先修改图片文件名。")
+    }
+    async function localImageDirectory(source,folder){
+      if(!source.rootHandle)throw new Error("当前文件没有目录写入权限，请重新点击“打开 Org 文件夹”。");
+      if(!await permissionGranted(source.rootHandle,"readwrite"))throw new Error("没有取得图片目录写入权限。");
+      let path=joinAssetPath(assetDirectory(source.path),folder),root=normalizeAssetPath(source.rootName||source.rootHandle.name);
+      if(root&&path===root)path="";else if(root&&path.startsWith(`${root}/`))path=path.slice(root.length+1);
+      let directory=source.rootHandle;for(const part of path.split("/").filter(Boolean))directory=await directory.getDirectoryHandle(part,{create:true});
+      return directory
+    }
+    function rememberInsertedLocalImage(source,path,file){
+      const normalized=normalizeAssetPath(path),root=normalizeAssetPath(source.rootName||"");source.localAssets?.set(normalized,file);
+      if(root&&normalized.startsWith(`${root}/`))source.localAssets?.set(normalized.slice(root.length+1),file);
+      else if(root)source.localAssets?.set(joinAssetPath(root,normalized),file);
+      imageAssetCache.delete(`${source.id}|${normalized}`)
+    }
+    async function saveLocalInsertedImage(source,file,folder){
+      const directory=await localImageDirectory(source,folder),name=await unusedLocalImageName(directory,safeImageFileName(file)),
+        handle=await directory.getFileHandle(name,{create:true}),writable=await handle.createWritable();
+      try{await writable.write(file)}finally{await writable.close()}
+      const saved=await handle.getFile(),path=sourceAssetPath(source,folder,name);rememberInsertedLocalImage(source,path,saved);
+      return {name,link:relativeImageLink(folder,name)}
+    }
+    async function ensureWebdavImageDirectory(source,folder){
+      let directory=new URL("./",source.webdavUrl);for(const part of normalizeRelativeFolder(folder).split("/").filter(Boolean)){
+        directory=new URL(`${encodeURIComponent(part)}/`,directory);
+        await webdavRequest(directory.href,{method:"MKCOL",acceptStatuses:[405]},source.webdavConfig)
+      }
+    }
+    async function unusedWebdavImageName(source,folder,name){
+      for(let index=1;index<1000;index++){const candidate=numberedImageName(name,index),path=sourceAssetPath(source,folder,candidate),
+        url=webdavImageUrl(path,source),response=await webdavRequest(url,{method:"PROPFIND",headers:{Depth:"0"},acceptStatuses:[404]},source.webdavConfig);
+        if(response.status===404)return candidate}
+      throw new Error("同名图片过多，请先修改图片文件名。")
+    }
+    async function saveWebdavInsertedImage(source,file,folder){
+      await ensureWebdavImageDirectory(source,folder);const name=await unusedWebdavImageName(source,folder,safeImageFileName(file)),
+        path=sourceAssetPath(source,folder,name),url=webdavImageUrl(path,source);
+      await webdavRequest(url,{method:"PUT",headers:{"Content-Type":file.type||"application/octet-stream"},body:file},source.webdavConfig);
+      imageAssetCache.delete(`${source.id}|${path}`);return {name,link:relativeImageLink(folder,name)}
+    }
+    async function saveInsertedImage(source,file){
+      if(!file||!isImageFileName(file.name))throw new Error("只支持 PNG、JPEG、GIF、WebP、BMP、SVG 或 AVIF 图片。");
+      if(file.size>25*1024*1024)throw new Error("单张图片不能超过 25 MB。");
+      const folder=normalizeRelativeFolder(state.defaultImageFolder);
+      return source.webdavUrl?saveWebdavInsertedImage(source,file,folder):saveLocalInsertedImage(source,file,folder)
+    }
+    function managedImagePath(target,source){
+      const raw=String(target||"").trim(),clean=orgImageTarget(raw);if(!source||!isImageFileName(clean)||
+        /^attachment:/i.test(raw)||/^https?:/i.test(clean)||/^(?:[a-z]:[\\/]|\/)/i.test(clean))return "";
+      const fileDir=assetDirectory(source.path),folder=normalizeRelativeFolder(state.defaultImageFolder),managedRoot=joinAssetPath(fileDir,folder);
+      const trashRoot=joinAssetPath(fileDir,effectiveImageTrashFolder()),normalizedClean=normalizeAssetPath(clean),
+        candidates=folder&&normalizedClean.includes("/")?[joinAssetPath(fileDir,normalizedClean)]:orgImageCandidates(target,null,source);
+      return candidates.find(path=>!(trashRoot&&(path===trashRoot||path.startsWith(`${trashRoot}/`)))&&
+        (folder?(path!==managedRoot&&path.startsWith(`${managedRoot}/`)):assetDirectory(path)===fileDir))||""
+    }
+    function imageReferencePaths(text,source){return new Set(parseOrgImageLinks(text).map(image=>managedImagePath(image.target,source)).filter(Boolean))}
+    function removedUnreferencedImagePaths(source,beforeText,afterText){
+      if(!source?.completeOrgScan||!source.webdavUrl&&!source.rootHandle)return [];
+      const before=imageReferencePaths(beforeText,source),after=imageReferencePaths(afterText,source),allAfter=new Set();
+      state.sources.forEach(item=>imageReferencePaths(item.id===source.id?afterText:item.text,item).forEach(path=>allAfter.add(path)));
+      return [...before].filter(path=>!after.has(path)&&!allAfter.has(path))
+    }
+    function pathRelativeToRoot(source,path){
+      const normalized=normalizeAssetPath(path),root=normalizeAssetPath(source.rootName||source.rootHandle?.name||"");
+      if(root&&normalized.startsWith(`${root}/`))return normalized.slice(root.length+1);
+      if(root&&normalized===root)return "";return normalized
+    }
+    async function localAssetParent(source,path){
+      if(!source.rootHandle||!await permissionGranted(source.rootHandle,"readwrite"))throw new Error("没有图片目录写入权限");
+      const parts=pathRelativeToRoot(source,path).split("/").filter(Boolean),name=parts.pop();if(!name)throw new Error("图片路径无效");
+      let directory=source.rootHandle;for(const part of parts)directory=await directory.getDirectoryHandle(part);return {directory,name}
+    }
+    async function moveLocalImageToTrash(source,path){
+      const original=await localAssetParent(source,path),handle=await original.directory.getFileHandle(original.name),file=await handle.getFile(),
+        trash=await localImageDirectory(source,effectiveImageTrashFolder()),name=await unusedLocalImageName(trash,original.name),
+        target=await trash.getFileHandle(name,{create:true}),writable=await target.createWritable();
+      try{await writable.write(file)}finally{await writable.close()}
+      try{await original.directory.removeEntry(original.name)}catch(error){try{await trash.removeEntry(name)}catch(_){}throw error}
+      const normalized=normalizeAssetPath(path),root=normalizeAssetPath(source.rootName||"");
+      [...(source.localAssets?.keys?.()||[])].forEach(key=>{const value=normalizeAssetPath(key);
+        if(value===normalized||root&&joinAssetPath(root,value)===normalized||root&&value===joinAssetPath(root,normalized))source.localAssets.delete(key)});
+      imageAssetCache.delete(`${source.id}|${normalized}`);return name
+    }
+    async function moveWebdavImageToTrash(source,path){
+      const folder=effectiveImageTrashFolder();await ensureWebdavImageDirectory(source,folder);
+      const originalName=normalizeAssetPath(path).split("/").at(-1),name=await unusedWebdavImageName(source,folder,originalName),
+        destinationPath=sourceAssetPath(source,folder,name),from=webdavImageUrl(path,source),destination=webdavImageUrl(destinationPath,source);
+      await webdavRequest(from,{method:"MOVE",headers:{Destination:destination,Overwrite:"F"}},source.webdavConfig);
+      imageAssetCache.delete(`${source.id}|${normalizeAssetPath(path)}`);return name
+    }
+    async function offerImageTrashCleanup(source,beforeText,afterText){
+      const paths=removedUnreferencedImagePaths(source,beforeText,afterText);if(!paths.length)return {moved:0,skipped:0};
+      const trash=effectiveImageTrashFolder();if(!trash)return {moved:0,skipped:paths.length};
+      const names=paths.map(path=>normalizeAssetPath(path).split("/").at(-1));
+      if(!window.confirm(`Org 已写回。检测到 ${paths.length} 张图片不再被已加载的 Org 文件引用：\n\n${names.slice(0,8).join("\n")}${names.length>8?`\n等 ${names.length} 张`:""}\n\n是否移入图片回收站“${trash}”？`))return {moved:0,skipped:paths.length};
+      let moved=0,failed=0;for(const path of paths){try{await (source.webdavUrl?moveWebdavImageToTrash(source,path):moveLocalImageToTrash(source,path));moved++}catch(error){console.warn("图片移入回收站失败",path,error);failed++}}
+      setNotice(failed?`已将 ${moved} 张图片移入“${trash}”；${failed} 张处理失败，原文件已保留。`:`已将 ${moved} 张图片移入“${trash}”，可从该文件夹手动恢复。`);
+      return {moved,skipped:failed}
+    }
+    function insertStandaloneOrgLinks(target,links){
+      const markup=links.map(link=>`[[file:${link}]]`).join("\n");
+      if(target==="visual"){
+        const input=$("visualBody"),start=input.selectionStart,end=input.selectionEnd,before=input.value.slice(0,start),after=input.value.slice(end),
+          insertion=`${before&&!before.endsWith("\n")?"\n":""}${markup}${after&&!after.startsWith("\n")?"\n":""}`;
+        input.setRangeText(insertion,start,end,"end");input.focus();return
+      }
+      const selection=editorSelection(),text=editorText(),before=text.slice(0,selection.start),after=text.slice(selection.end),
+        insertion=`${before&&!before.endsWith("\n")?"\n":""}${markup}${after&&!after.startsWith("\n")?"\n":""}`;
+      replaceEditorRange(insertion,selection.start,selection.end);renderEditHighlight();focusEditor()
+    }
+    async function insertSelectedImages(files,target){
+      const source=imageInsertSource(target);if(!sourceCanInsertImage(source)){
+        setNotice("不能保存图片：本地请用“打开 Org 文件夹”授予目录权限；远程请先从 WebDAV 打开清单。");return}
+      const selected=Array.from(files||[]).slice(0,20);if(!selected.length)return;
+      const button=$(target==="visual"?"insertVisualImage":"insertEditorImage"),label=button.textContent;button.disabled=true;button.textContent="正在保存…";
+      const saved=[];
+      try{
+        for(const file of selected)saved.push(await saveInsertedImage(source,file));
+        insertStandaloneOrgLinks(target,saved.map(item=>item.link));scheduleEditorImagePreview();
+        setNotice(`已保存 ${saved.length} 张图片并插入 Org 链接；正文仍需点击“应用”或“写回”。`)
+      }catch(error){
+        if(saved.length){insertStandaloneOrgLinks(target,saved.map(item=>item.link));scheduleEditorImagePreview();
+          setNotice(`已插入前 ${saved.length} 张图片；后续保存失败：${error?.message||error}`)}
+        else setNotice(`插入图片失败：${error?.message||error}`)
+      }finally{button.disabled=false;button.textContent=label}
+    }
+    let imageInsertTarget="editor";
+    function chooseImageForInsert(target){
+      const source=imageInsertSource(target);if(!sourceCanInsertImage(source)){
+        setNotice("当前来源不能添加图片。本地文件请通过“打开 Org 文件夹”重新打开；WebDAV 来源可直接上传。");return}
+      imageInsertTarget=target;$("imageInsertInput").click()
+    }
+    function openImageLightbox(url,title="图片预览"){
+      if(!url)return;$("imageLightboxTitle").textContent=title;$("imageLightboxImage").src=url;
+      $("imageLightboxImage").alt=title;$("imageLightbox").classList.add("show")
+    }
+    function closeImageLightbox(){$("imageLightbox").classList.remove("show");$("imageLightboxImage").removeAttribute("src")}
     function parseStatusList(value){
       return [...new Set(String(value||"").toUpperCase().split(/[\s,，;；]+/)
         .filter(item=>/^[A-Z][A-Z0-9_-]*$/.test(item)&&!BASE_STATUS.includes(item)&&!LEGACY_STATUS.includes(item)))]
@@ -1991,6 +2461,7 @@ print("hello")
         task.scheduled?`SCHEDULED: <${task.scheduled}>`:"",task.deadline?`DEADLINE: <${task.deadline}>`:"",
         task.closed?`CLOSED: [${task.closed}]`:"",task.orgDate?`ORG_GTD_TIMESTAMP: <${task.orgDate}>`:"",
         task.isHabit?`STYLE: habit ${task.habitRepeat}`:"",task.lunarMonth?`农历: ${task.lunarMonth}月${task.lunarDay}日`:"",
+        task.countdownDate?`COUNTDOWN: ${task.countdownDate} ${task.countdownTime}`:"",
         ...Object.entries(task.properties).map(([key,value])=>`${key}: ${value}`)].join("\n")
     }
     function dateValues(task,field){
@@ -1998,6 +2469,7 @@ print("hello")
       if(field==="deadline")return [task.deadline].filter(Boolean);
       if(field==="closed")return [task.closed].filter(Boolean);
       if(field==="orgdate")return [task.orgDate].filter(Boolean);
+      if(field==="countdown")return [task.countdownDate].filter(Boolean);
       if(field==="anydate")return [task.scheduled,task.deadline,task.closed,task.orgDate,task.lunarNext].filter(Boolean);
       return [task.scheduled,task.deadline,task.orgDate,task.lunarNext].filter(Boolean)
     }
@@ -2036,12 +2508,20 @@ print("hello")
       let test;
       if(["scheduled","deadline","closed","orgdate","date","anydate"].includes(field)){
         test=task=>dateExpressionMatches(dateValues(task,field),value)
+      }else if(field==="countdown"){
+        const wanted=value.toLocaleLowerCase(),date=task=>task.countdownDate,now=today(),future=days=>dateAfter(now,days);
+        test=task=>!date(task)?false:wanted==="today"?date(task)===now:wanted==="active"?countdownVisible(task)&&date(task)>=now:
+          ["overdue","expired"].includes(wanted)?date(task)<now:wanted==="pinned"?task.countdownPinned:
+          wanted==="next7d"?date(task)>=now&&date(task)<=future(7):wanted==="next30d"?date(task)>=now&&date(task)<=future(30):
+          dateExpressionMatches([date(task)],value)
       }else if(field==="level"){
         const range=value.match(/^(\d+)\.\.(\d+)$/),number=Number(value);
         test=task=>range?task.level>=Number(range[1])&&task.level<=Number(range[2]):task.level===number
       }else if(field==="has"){
         test=task=>value.toLocaleLowerCase()==="date"?dateValues(task,"date").length>0:
-          value.toLocaleLowerCase()==="anydate"?dateValues(task,"anydate").length>0:!!task[value.toLocaleLowerCase()]
+          value.toLocaleLowerCase()==="anydate"?dateValues(task,"anydate").length>0:
+          value.toLocaleLowerCase()==="countdown"?!!task.countdownDate:
+          value.toLocaleLowerCase()==="tag"?task.tags.length>0:!!task[value.toLocaleLowerCase()]
       }else if(field==="overdue"){
         const wanted=!["false","0","no"].includes(value.toLocaleLowerCase());test=task=>taskOverdue(task)===wanted
       }else if(field==="done"){
@@ -2204,6 +2684,12 @@ print("hello")
         propertyNames.scheduled,propertyNames.deadline]))drawer=updateDrawerBoolean(drawer,name,false);
       drawer=updateDrawerBoolean(drawer,propertyNames.scheduled,scheduledAlarm);
       drawer=updateDrawerBoolean(drawer,propertyNames.deadline,deadlineAlarm);
+      const countdownEnabled=orgBooleanProperty(values.countdownEnabled),countdownDate=String(values.countdownDate||"").trim(),
+        countdownTime=String(values.countdownTime||"").trim(),countdownAfter=["elapsed","expired","hide"].includes(values.countdownAfter)?values.countdownAfter:"elapsed";
+      if(countdownEnabled&&!/^\d{4}-\d{2}-\d{2}$/.test(countdownDate))throw new Error("倒计时需要填写有效目标日期。");
+      drawer=updateDrawerValue(drawer,"COUNTDOWN",countdownEnabled?formatOrgTimestamp(countdownDate,countdownTime,false):null);
+      drawer=updateDrawerValue(drawer,"COUNTDOWN_AFTER",countdownEnabled&&countdownAfter!=="elapsed"?countdownAfter:null);
+      drawer=updateDrawerValue(drawer,"COUNTDOWN_PINNED",countdownEnabled&&orgBooleanProperty(values.countdownPinned)?"true":null);
       const currentStyle=String(drawer.match(/^\s*:STYLE:\s*(.*?)\s*$/im)?.[1]||"").toLowerCase();
       if(habit)drawer=updateDrawerValue(drawer,"STYLE","habit");
       else if(currentStyle==="habit")drawer=updateDrawerValue(drawer,"STYLE",null);
@@ -2337,6 +2823,8 @@ print("hello")
           deadlineTime=planningTime(block,"DEADLINE"),scheduledTime=planningTime(block,"SCHEDULED"),
           closedTime=planningTime(block,"CLOSED"),orgTime=extractTime(props.ORG_GTD_TIMESTAMP),
           habitRepeat=planningRepeat(block,"SCHEDULED"),isHabit=String(props.STYLE||"").trim().toLowerCase()==="habit",
+          countdownDate=extractDate(props.COUNTDOWN),countdownTime=extractTime(props.COUNTDOWN),
+          countdownPinned=orgBooleanProperty(props.COUNTDOWN_PINNED),countdownAfter=["elapsed","expired","hide"].includes(String(props.COUNTDOWN_AFTER||"").toLowerCase())?String(props.COUNTDOWN_AFTER).toLowerCase():"elapsed",
           lunar=lunarAnniversary(block),lunarNext=lunar?lunarNextDate(lunar.month,lunar.day):"",
           date=deadline||scheduled||orgDate||lunarNext, hasChildren=i<heads.length-1&&heads[i+1].level>h.level;
         const bodyText=body.filter(x=>!/^\s*(DEADLINE|SCHEDULED|CLOSED):/i.test(x)&&
@@ -2345,9 +2833,9 @@ print("hello")
           startIndex:h.lineIndex,endIndex:end,rawBlock:lines.slice(h.lineIndex,end).join("\n"),
           line:h.lineIndex+1,level:h.level,title:p.title,status:p.status,priority:p.priority,tags:p.tags,
           properties:props,body:bodyText,parentPath:h.parents,deadline,scheduled,closed,orgDate,date,
-          isHabit,habitRepeat,lunarMonth:lunar?.month||0,lunarDay:lunar?.day||0,lunarNext,
+          isHabit,habitRepeat,lunarMonth:lunar?.month||0,lunarDay:lunar?.day||0,lunarNext,countdownDate,countdownTime,countdownPinned,countdownAfter,
           deadlineTime,scheduledTime,closedTime,orgTime,time:deadlineTime||scheduledTime||orgTime||closedTime,hasChildren,
-          parentUid:null,childCount:0,childOpenCount:0,isGroup:p.status==="NONE"&&hasChildren&&!bodyText&&!deadline&&!scheduled&&!lunar};
+          parentUid:null,childCount:0,childOpenCount:0,isGroup:p.status==="NONE"&&hasChildren&&!bodyText&&!deadline&&!scheduled&&!lunar&&!countdownDate};
       });
       const levelStack=[];
       parsed.forEach(task=>{
@@ -2425,6 +2913,7 @@ print("hello")
       }catch(_){}
       try{const visible=JSON.parse(localStorage.getItem(SMART_KEY)||"[]"),valid=VIEWS.map(view=>view[0]);
         state.smartVisible=Array.isArray(visible)?visible.filter(key=>valid.includes(key)):valid;
+        if(!localStorage.getItem(STATISTICS_KEY))state.smartVisible=[...new Set([...state.smartVisible,"countdown","statistics"])];
         if(!state.smartVisible.length)state.smartVisible=valid
       }catch(_){state.smartVisible=VIEWS.map(view=>view[0])}
       try{const settings=JSON.parse(localStorage.getItem(CALENDAR_KEY)||"{}");
@@ -2432,6 +2921,13 @@ print("hello")
         if(["ACTION","PRIMARY","DEADLINE","SCHEDULED","ANY"].includes(settings.dateRule))state.calendarDateRule=settings.dateRule;
         if(Number.isInteger(settings.dayStart))state.dayStart=Math.max(0,Math.min(23,settings.dayStart));
         if(Number.isInteger(settings.dayEnd))state.dayEnd=Math.max(state.dayStart+1,Math.min(24,settings.dayEnd))
+      }catch(_){}
+      try{const settings=JSON.parse(localStorage.getItem(STATISTICS_KEY)||"{}");
+        state.statistics={enabled:settings.enabled!==false,completion:settings.completion!==false,trend:settings.trend!==false,
+          categories:settings.categories!==false,heatmap:settings.heatmap!==false,habits:settings.habits!==false,
+          period:["week","month","year"].includes(settings.period)?settings.period:"week",category:"file"};
+        state.countdownCompact=!!settings.countdownCompact;
+        state.countdownSoonDays=[3,7,14,30].includes(Number(settings.countdownSoonDays))?Number(settings.countdownSoonDays):7
       }catch(_){}
       try{state.editMode=localStorage.getItem(EDITOR_KEY)==="highlight"?"highlight":"plain"}catch(_){state.editMode="plain"}
       try{const style=JSON.parse(localStorage.getItem(EDITOR_STYLE_KEY)||"{}");
@@ -2452,7 +2948,7 @@ print("hello")
         if(["auto","collapsed","expanded"].includes(display.filterPreference))state.filterPreference=display.filterPreference;
         if(["desktop","always","manual"].includes(display.detailBehavior))state.detailBehavior=display.detailBehavior;
         const defaults=display.defaultFilters||{};
-        if(["open","today","habits","upcoming","overdue","no-date","completed","all"].includes(defaults.view))state.defaultFilters.view=defaults.view;
+        if(["open","today","habits","upcoming","overdue","no-date","completed","countdown","statistics","all"].includes(defaults.view))state.defaultFilters.view=defaults.view;
         if(["ALL","OPEN","NONE",...configuredStatuses()].includes(defaults.status))state.defaultFilters.status=defaults.status;
         if(["ALL","A","B","C","NONE"].includes(defaults.priority))state.defaultFilters.priority=defaults.priority;
         if(["date","priority","source"].includes(defaults.sort))state.defaultFilters.sort=defaults.sort;
@@ -2471,6 +2967,10 @@ print("hello")
       catch(_){state.editorPlugin="builtin"}
       try{state.editorFormat=localStorage.getItem(EDITOR_FORMAT_KEY)||"builtin-org"}
       catch(_){state.editorFormat="builtin-org"}
+      try{const images=JSON.parse(localStorage.getItem(IMAGE_KEY)||"{}");
+        state.defaultImageFolder=normalizeRelativeFolder(images.defaultFolder||"");
+        state.imageTrashFolder=normalizeRelativeFolder(images.trashFolder||"")
+      }catch(_){state.defaultImageFolder="";state.imageTrashFolder=""}
       try{const profiles=JSON.parse(localStorage.getItem(WEBDAV_KEY)||"[]");
         state.webdavProfiles=Array.isArray(profiles)?profiles.filter(profile=>profile&&typeof profile.url==="string")
           .slice(0,8).map(profile=>({...profile,password:profile.rememberPassword?String(profile.password||""):""})):[]
@@ -2567,7 +3067,11 @@ print("hello")
       consumeApkSelectEvent(event);queueApkSelect(select)
     }
     const androidWebdavPending=new Map();
-    function androidWebdavFetch(url,options,headers){
+    async function androidWebdavFetch(url,options,headers){
+      let body=options.body==null?"":options.body,bodyEncoding="text";
+      if(body instanceof Blob){const bytes=new Uint8Array(await body.arrayBuffer());let binary="";
+        for(let index=0;index<bytes.length;index+=0x8000)binary+=String.fromCharCode(...bytes.subarray(index,index+0x8000));
+        body=btoa(binary);bodyEncoding="base64"}
       return new Promise((resolve,reject)=>{
         if(!androidWebdavActive()){reject(new Error("Android 原生桥接不可用。"));return}
         const id=`dav-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -2577,7 +3081,8 @@ print("hello")
         androidWebdavPending.set(id,{resolve,reject,timer});
         try{
           window.AndroidWebDav.request(JSON.stringify({id,url,method:options.method||"GET",
-            headers:Object.fromEntries(headers.entries()),body:options.body==null?"":String(options.body)}))
+            headers:Object.fromEntries(headers.entries()),body:String(body),bodyEncoding,
+            responseType:options.responseType||"text"}))
         }catch(error){
           clearTimeout(timer);androidWebdavPending.delete(id);reject(error)
         }
@@ -2589,7 +3094,9 @@ print("hello")
       try{
         const payload=typeof payloadText==="string"?JSON.parse(payloadText):payloadText;
         if(payload.error)throw new Error(payload.error);
-        pending.resolve(new Response(payload.body||null,{status:payload.status,statusText:payload.statusText||"",
+        let body=payload.body||null;if(payload.bodyEncoding==="base64"&&body){const binary=atob(body),bytes=new Uint8Array(binary.length);
+          for(let index=0;index<binary.length;index++)bytes[index]=binary.charCodeAt(index);body=bytes}
+        pending.resolve(new Response(body,{status:payload.status,statusText:payload.statusText||"",
           headers:payload.headers||{}}))
       }catch(error){pending.reject(error)}
     };
@@ -2682,6 +3189,7 @@ print("hello")
     }
     function openSettings(){
       syncStatusSelects();$("filterPreference").value=state.filterPreference;$("detailBehavior").value=state.detailBehavior;
+      $("defaultImageFolder").value=state.defaultImageFolder;$("imageTrashFolder").value=state.imageTrashFolder;
       $("defaultView").value=state.defaultFilters.view;$("defaultStatus").value=state.defaultFilters.status;
       $("defaultPriority").value=state.defaultFilters.priority;$("defaultSort").value=state.defaultFilters.sort;
       $("defaultDateField").value=state.defaultFilters.dateField;$("defaultColumns").value=state.defaultFilters.columns;
@@ -2690,6 +3198,11 @@ print("hello")
       $("defaultUrgentRule").value=state.quadrantDefaults.urgent;
       $("customOpenStatuses").value=state.customOpenStatuses.join(" ");
       $("customDoneStatuses").value=state.customDoneStatuses.join(" ");
+      $("statisticsEnabled").checked=state.statistics.enabled;$("statCompletion").checked=state.statistics.completion;
+      $("statTrend").checked=state.statistics.trend;$("statCategories").checked=state.statistics.categories;
+      $("statHeatmap").checked=state.statistics.heatmap;$("statHabits").checked=state.statistics.habits;
+      $("statDefaultPeriod").value=state.statistics.period;$("countdownCompact").value=state.countdownCompact?"1":"0";
+      $("countdownSoonDays").value=String(state.countdownSoonDays);
       renderStartupSummary();
       setWebdavStatus("");updateWebdavMode();renderWebdavProfiles();renderSettingsOrdering();renderPluginList();syncReminderPlatformUI();loadReminderSettings();
       if(state.webdavProfiles.length)fillWebdavProfile(state.webdavProfiles[0]);
@@ -2961,6 +3474,13 @@ print("hello")
     };
     function saveSettingsForm(){
       state.filterPreference=$("filterPreference").value;state.detailBehavior=$("detailBehavior").value;
+      state.defaultImageFolder=normalizeRelativeFolder($("defaultImageFolder").value);
+      state.imageTrashFolder=normalizeRelativeFolder($("imageTrashFolder").value);saveImageSettings();
+      state.statistics={...state.statistics,enabled:$("statisticsEnabled").checked,completion:$("statCompletion").checked,
+        trend:$("statTrend").checked,categories:$("statCategories").checked,heatmap:$("statHeatmap").checked,
+        habits:$("statHabits").checked,period:$("statDefaultPeriod").value};
+      state.countdownCompact=$("countdownCompact").value==="1";state.countdownSoonDays=Number($("countdownSoonDays").value)||7;
+      try{localStorage.setItem(STATISTICS_KEY,JSON.stringify({...state.statistics,countdownCompact:state.countdownCompact,countdownSoonDays:state.countdownSoonDays}))}catch(_){}
       state.customOpenStatuses=parseStatusList($("customOpenStatuses").value);
       state.customDoneStatuses=parseStatusList($("customDoneStatuses").value)
         .filter(status=>!state.customOpenStatuses.includes(status));
@@ -2979,11 +3499,11 @@ print("hello")
       if($("webdavUrl").value.trim()){
         try{saveWebdavProfile(webdavFormConfig())}catch(error){setWebdavStatus(error.message,true);return false}
       }
-      closeSettings();render();setNotice("设置已保存；默认筛选条件会优先于启动页曾保存的筛选。");return true
+      notifyPublicSettings();closeSettings();render();setNotice("设置已保存；默认筛选条件会优先于启动页曾保存的筛选。");return true
     }
     const CONFIG_KEYS=[HISTORY_KEY,HISTORY_DEFAULT_KEY,CUSTOM_KEY,LAYOUT_KEY,SEARCH_HISTORY_KEY,QUADRANT_KEY,SMART_KEY,
       CALENDAR_KEY,EDITOR_KEY,EDITOR_STYLE_KEY,SIDE_ORDER_KEY,SMART_ORDER_KEY,FILE_ORDER_KEY,
-      DISPLAY_KEY,ADD_KEY,WEBDAV_KEY,STATUS_KEY,STARTUP_KEY,VIM_KEY];
+      DISPLAY_KEY,ADD_KEY,WEBDAV_KEY,STATUS_KEY,STARTUP_KEY,VIM_KEY,IMAGE_KEY,STATISTICS_KEY];
     function buildConfigurationExport(){
       const values={};CONFIG_KEYS.forEach(key=>{const value=localStorage.getItem(key);if(value!==null)values[key]=value});
       if(values[WEBDAV_KEY]){
@@ -3026,7 +3546,7 @@ print("hello")
       bytes.forEach(byte=>binary+=String.fromCharCode(byte));return `Basic ${btoa(binary)}`
     }
     async function webdavRequest(url,options={},config){
-      const headers=new Headers(options.headers||{}),authorization=basicAuthorization(config.username,config.password);
+      const headers=new Headers(options.headers||{}),authorization=basicAuthorization(config?.username||"",config?.password||"");
       if(authorization)headers.set("Authorization",authorization);
       const bridge=webdavBridgeActive(),token=webdavBridgeToken(),requestUrl=bridge?
         `/webdav-proxy?url=${encodeURIComponent(url)}${token?`&token=${encodeURIComponent(token)}`:""}`:url;
@@ -3036,7 +3556,8 @@ print("hello")
       catch(error){throw new Error(android?`Android WebDAV 连接失败：${error?.message||"请检查网络、地址和账号。"}`:
         bridge?"本地桥接无法访问 WebDAV，请检查服务器地址、网络和账号。":
         "浏览器阻止了 WebDAV 直连（通常是 CORS）。请双击同目录的“OrglistWebDAV.cmd”，在自动打开的新页面中重试。")}
-      if(!response.ok){
+      const accepted=Array.isArray(options.acceptStatuses)&&options.acceptStatuses.includes(response.status);
+      if(!response.ok&&!accepted){
         const detail=(await response.text()).trim().slice(0,240);
         throw new Error(`WebDAV 返回 ${response.status} ${response.statusText||""}${detail?`：${detail}`:""}`.trim())
       }
@@ -3073,7 +3594,7 @@ print("hello")
     }
     async function scanWebdavOrgFiles(root,config){
       const maxDepth=config.recursive===false?0:4,queue=[{url:root,depth:0}],visited=new Set(),files=new Map();
-      const samples=[];let scannedDirectories=0,failedDirectories=0,totalEntries=0;
+      const samples=[];let scannedDirectories=0,failedDirectories=0,totalEntries=0,truncated=false;
       while(queue.length&&scannedDirectories<80&&files.size<500){
         const current=queue.shift(),key=current.url.replace(/\/+$/,"");
         if(visited.has(key))continue;visited.add(key);scannedDirectories++;
@@ -3085,13 +3606,15 @@ print("hello")
         items.forEach(item=>{
           if(samples.length<8&&item.name)samples.push(`${item.collection?"文件夹":"文件"}：${item.name}`);
           if(item.collection){
-            if(current.depth<maxDepth&&queue.length+visited.size<80)queue.push({url:item.url,depth:current.depth+1})
+            if(current.depth<maxDepth&&queue.length+visited.size<80)queue.push({url:item.url,depth:current.depth+1});
+            else truncated=true
           }else if(isOrgFileName(item.name)&&!files.has(item.url)){
             files.set(item.url,{url:item.url,name:item.name,path:webdavRelativePath(item.url,root)||item.name})
           }
         })
       }
-      return {files:[...files.values()],scannedDirectories,failedDirectories,totalEntries,samples}
+      return {files:[...files.values()],scannedDirectories,failedDirectories,totalEntries,samples,
+        complete:!queue.length&&!failedDirectories&&!truncated&&files.size<500&&scannedDirectories<80}
     }
     function setWebdavBusy(busy,label=""){
       state.webdavBusy=busy;$("testWebdav").disabled=busy;$("openWebdav").disabled=busy;
@@ -3123,7 +3646,7 @@ print("hello")
             handle:null,webdavUrl:files[index].url,webdavEtag:response.headers.get("etag")||"",
             webdavConfig:{...config}})
         }
-        await load(entries,{id:`webdav:${config.profileId}`,kind:"webdav",label:webdavProfileLabel(config)});
+        await load(entries,{id:`webdav:${config.profileId}`,kind:"webdav",label:webdavProfileLabel(config),completeOrgScan:scan.complete});
         closeSettings();setNotice(`已从 WebDAV 的 ${scan.scannedDirectories} 个目录读取 ${entries.length} 个 Org 文件。`)
       }catch(error){setWebdavStatus(error.message,true)}
       finally{setWebdavBusy(false)}
@@ -3291,8 +3814,9 @@ print("hello")
       }
     }
     function orderedViews(){return state.smartOrder.map(key=>VIEWS.find(view=>view[0]===key)).filter(Boolean)}
+    function availableViews(){return orderedViews().filter(([key])=>key!=="statistics"||state.statistics.enabled)}
     function renderSmartChoices(){
-      $("smartChoiceGrid").innerHTML=orderedViews().map(([key,icon,label])=>`<label class="smartChoice">
+      $("smartChoiceGrid").innerHTML=availableViews().map(([key,icon,label])=>`<label class="smartChoice">
         <input type="checkbox" data-smart-choice="${key}" ${state.smartVisible.includes(key)?"checked":""}>
         <span class="navIcon">${icon}</span><span>${label}</span></label>`).join("")
     }
@@ -3429,11 +3953,13 @@ print("hello")
       if(typeof handle.queryPermission!=="function")return true;
       try{return await handle.queryPermission({mode})==="granted"}catch(_){return false}
     }
+    function isImageFileName(name){return /\.(?:png|jpe?g|gif|webp|bmp|svg|avif)$/i.test(String(name||"").split(/[?#]/)[0])}
     async function collectDirectory(handle,base=handle.name,output=[]){
       for await(const entry of handle.values()){
-        if(output.length>=500)break;
+        if(output.length>=2500)break;
         const path=`${base}/${entry.name}`;
-        if(entry.kind==="file"&&isOrgFileName(entry.name))output.push({file:await entry.getFile(),path,handle:entry});
+        if(entry.kind==="file"&&(isOrgFileName(entry.name)||isImageFileName(entry.name)))
+          output.push({file:await entry.getFile(),path,handle:entry});
         else if(entry.kind==="directory")await collectDirectory(entry,path,output)
       }
       return output
@@ -3513,17 +4039,26 @@ print("hello")
     }
     async function load(fileList,source) {
       const incoming=Array.from(fileList).map(item=>item?.file?item:{file:item,path:item.webkitRelativePath||item.name,handle:null});
-      const chosen=incoming.filter(item=>isOrgFileName(item.file.name)).slice(0,500);
+      const chosen=incoming.filter(item=>isOrgFileName(item.file.name)).slice(0,500),assetFiles=incoming.filter(item=>isImageFileName(item.file?.name));
       if(!chosen.length){setNotice("没有找到 .org 文件，请重新选择。");return}
-      if(chosen.reduce((n,item)=>n+item.file.size,0)>20*1024*1024){setNotice("所选文件超过 20 MB，请减少文件数量。");return}
+      if(chosen.reduce((n,item)=>n+item.file.size,0)>20*1024*1024){setNotice("所选 Org 文件超过 20 MB，请减少文件数量。");return}
+      if(assetFiles.some(item=>item.file.size>25*1024*1024)){setNotice("单张图片不能超过 25 MB。");return}
       $("listHost").innerHTML='<div class="empty"><div class="emptyIcon">…</div><h2>正在读取</h2><p>正在解析 Org 标题、状态、日期、标签和属性。</p></div>';
       try {
         const decoded=await Promise.all(chosen.map(async({file,path,handle,webdavUrl,webdavEtag,webdavConfig},i)=>({file,path,handle,
           webdavUrl,webdavEtag,webdavConfig,text:await decode(file),id:"f"+i,eol:"\r\n"})));
+        clearImageAssetCache();const rootName=typeof source?.handle?.name==="string"?source.handle.name:
+          (assetFiles[0]?.path||chosen[0]?.path||"").split("/")[0]||"";
+        const assets=new Map();assetFiles.forEach(item=>{
+          const path=normalizeAssetPath(item.path||item.file.name);assets.set(path,item.file);
+          if(rootName&&path.startsWith(`${rootName}/`))assets.set(path.slice(rootName.length+1),item.file)
+        });
         state.sources=decoded.map(item=>({id:item.id,name:item.file.name,path:item.path||item.file.name,
           text:item.text,eol:item.text.includes("\r\n")?"\r\n":"\n",fileHandle:item.handle||null,
+          rootHandle:source?.kind==="folder"&&!Array.isArray(source.handle)?source.handle:null,
+          rootName,localAssets:assets,completeOrgScan:source?.kind==="folder"?incoming.length<2500&&chosen.length<500:source?.completeOrgScan===true,
           webdavUrl:item.webdavUrl||"",webdavEtag:item.webdavEtag||"",webdavConfig:item.webdavConfig||null,
-          webdavBaseText:item.webdavUrl?item.text:null,dirty:false}));
+          webdavBaseText:item.webdavUrl?item.text:null,persistedText:item.text,dirty:false}));
         rebuildFromSources();
         state.file="all";state.selected=null;state.hierParent=null;state.lastAddParent=null;
         state.navHistory=[];state.batchMode=false;state.batchSelected=[];state.batchSources=[];
@@ -3541,7 +4076,7 @@ print("hello")
         upcoming:base.filter(t=>!isDone(t)&&dateValues(t,"date").some(date=>date>d)).length,
         overdue:base.filter(taskOverdue).length,
         "no-date":base.filter(t=>!isDone(t)&&!dateValues(t,"date").length).length,
-        completed:base.filter(isDone).length,quadrant:base.filter(t=>!isDone(t)).length,
+        completed:base.filter(isDone).length,countdown:state.tasks.filter(countdownVisible).length,statistics:base.filter(t=>t.closed).length,quadrant:base.filter(t=>!isDone(t)).length,
         calendar:base.filter(t=>calendarDateValues(t).length).length,all:base.length};
     }
     function matchesFilters(task,search) {
@@ -3564,7 +4099,7 @@ print("hello")
     function filtered() {
       const d=today(),search=compileSearch(state.query);state.searchError=search.error;
       return state.tasks.filter(t=>{
-        if(t.isGroup&&state.view!=="all")return false;
+        if(t.isGroup&&!["all","countdown"].includes(state.view))return false;
         if(state.file!=="all"&&t.fileId!==state.file)return false;
         const done=isDone(t);
         if(state.view==="open"&&done)return false;
@@ -3574,15 +4109,29 @@ print("hello")
         if(state.view==="overdue"&&!taskOverdue(t))return false;
         if(state.view==="no-date"&&(done||dateValues(t,"date").length))return false;
         if(state.view==="completed"&&!done)return false;
+        if(state.view==="countdown"&&!countdownVisible(t))return false;
         return matchesFilters(t,search);
-      }).sort(taskCompare);
+      }).sort(state.view==="countdown"?(a,b)=>Number(b.countdownPinned)-Number(a.countdownPinned)||a.countdownDate.localeCompare(b.countdownDate)||taskCompare(a,b):taskCompare);
     }
     function dateLabel(date){if(!date)return"";const d=new Date(date+"T00:00:00"),now=today();
       if(date===now)return"今天";const tm=new Date();tm.setDate(tm.getDate()+1);
       if(date===`${tm.getFullYear()}-${String(tm.getMonth()+1).padStart(2,"0")}-${String(tm.getDate()).padStart(2,"0")}`)return"明天";
       return `${d.getMonth()+1}月${d.getDate()}日`}
+    function dateAfter(date,days){const value=new Date(`${date}T12:00:00`);value.setDate(value.getDate()+Number(days||0));return todayFrom(value)}
+    function dateDayDifference(from,to){return Math.round((new Date(`${to}T12:00:00`)-new Date(`${from}T12:00:00`))/86400000)}
+    function countdownVisible(task){return !!task.countdownDate&&!(task.countdownAfter==="hide"&&task.countdownDate<today())}
+    function countdownLabel(task){if(!task?.countdownDate)return"";const days=dateDayDifference(today(),task.countdownDate);
+      if(task.countdownTime){const target=new Date(`${task.countdownDate}T${task.countdownTime}:00`),difference=target-Date.now(),absolute=Math.abs(difference),
+        totalMinutes=Math.floor(absolute/60000),displayDays=Math.floor(totalMinutes/1440),hours=Math.floor(totalMinutes%1440/60),minutes=totalMinutes%60,
+        duration=[displayDays?`${displayDays}天`:"",hours?`${hours}小时`:"",`${minutes}分`].filter(Boolean).join(" ");
+        if(difference>0)return `还剩 ${duration}`;return task.countdownAfter==="expired"?`已到期 ${duration}`:`已过去 ${duration}`}
+      if(days>0)return `还剩 ${days} 天`;if(days===0)return"就是今天";
+      return task.countdownAfter==="expired"?`已到期 ${Math.abs(days)} 天`:`已过去 ${Math.abs(days)} 天`}
+    function countdownTone(task){const days=dateDayDifference(today(),task.countdownDate);
+      return days<0?"expired":days===0?"today":days<=3?"urgent":days<=state.countdownSoonDays?"soon":""}
     function renderDateBadges(task){
       const now=today(),badges=[];
+      if(countdownVisible(task))badges.push(`<span class="date countdown ${countdownTone(task)}" title="COUNTDOWN: ${esc(task.countdownDate)}${task.countdownTime?` ${esc(task.countdownTime)}`:""}">${esc(countdownLabel(task))}</span>`);
       if(task.isHabit)badges.push(`<span class="date orgdate" title="Org Habit · ${esc(task.habitRepeat)}">习惯 ${esc(task.habitRepeat)}</span>`);
       if(task.scheduled)badges.push(`<span class="date scheduled" title="SCHEDULED: ${task.scheduled}">计划 ${dateLabel(task.scheduled)}</span>`);
       if(task.deadline)badges.push(`<span class="date deadline ${!isDone(task)&&task.deadline<now?"overdue":""}" title="DEADLINE: ${task.deadline}">截止 ${dateLabel(task.deadline)}</span>`);
@@ -3600,7 +4149,7 @@ print("hello")
       return "查看详情"
     }
     function renderNav(){
-      const c=counts();$("nav").innerHTML=orderedViews().filter(([key])=>state.smartVisible.includes(key)).map(([key,icon,label])=>
+      const c=counts();$("nav").innerHTML=availableViews().filter(([key])=>state.smartVisible.includes(key)).map(([key,icon,label])=>
         `<button class="navItem ${state.mode==="global"&&state.view===key?"active":""}" data-view="${key}">
         <span class="navIcon">${icon}</span><span class="navName">${label}</span><em class="count">${c[key]}</em></button>`).join("");
       $("nav").querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{state.mode="global";state.view=b.dataset.view;
@@ -3958,9 +4507,69 @@ print("hello")
       if(!state.tasks.length){$("listHost").innerHTML=`<div class="empty"><div class="emptyIcon">✓</div><h2>选择你的 Org 文件</h2><p>点击“打开 Org 文件夹”后选择 <b>D:\\gtd</b>。这个 HTML 完全在本地工作，不需要登录，也不会上传文件。</p><button class="btn primary" id="emptyOpen">打开 Org 文件夹</button></div>`;$("emptyOpen").onclick=()=>chooseFolder();return}
       if(!shown.length){$("listHost").innerHTML='<div class="empty"><div class="emptyIcon">○</div><h2>这里暂时没有条目</h2><p>可以调整筛选条件，或换一个文件查看。</p></div>';return}
       const rows=shown.map(taskCard).join("");
-      $("listHost").innerHTML=`<div class="list ${state.columns==="2"?"columns2":""}">${rows}${state.visible<all.length?`<button class="more" id="more">再显示 ${Math.min(100,all.length-state.visible)} 个</button>`:""}</div>`;
+      $("listHost").innerHTML=`<div class="list ${state.columns==="2"?"columns2":""} ${state.view==="countdown"?`countdownList ${state.countdownCompact?"compact":""}`:""}">${rows}${state.visible<all.length?`<button class="more" id="more">再显示 ${Math.min(100,all.length-state.visible)} 个</button>`:""}</div>`;
       bindTaskCards($("listHost"),renderList);
       if($("more"))$("more").onclick=()=>{state.visible+=100;renderList()};
+    }
+    function periodBounds(period=state.statistics.period,reference=today()){
+      const date=new Date(`${reference}T12:00:00`),start=new Date(date),end=new Date(date);
+      if(period==="week"){const day=(date.getDay()+6)%7;start.setDate(date.getDate()-day);end.setDate(start.getDate()+6)}
+      else if(period==="month"){start.setDate(1);end.setMonth(date.getMonth()+1,0)}
+      else{start.setMonth(0,1);end.setMonth(11,31)}
+      return {start:todayFrom(start),end:todayFrom(end)}
+    }
+    function previousPeriodBounds(period,bounds){const end=dateAfter(bounds.start,-1),anchor=new Date(`${end}T12:00:00`);
+      if(period==="week")return {start:dateAfter(end,-6),end};
+      if(period==="month")return {start:`${anchor.getFullYear()}-${String(anchor.getMonth()+1).padStart(2,"0")}-01`,end};
+      return {start:`${anchor.getFullYear()}-01-01`,end:`${anchor.getFullYear()}-12-31`}}
+    function inDateRange(date,bounds){return !!date&&date>=bounds.start&&date<=bounds.end}
+    function scopedStatisticsTasks(){const search=compileSearch(state.query);state.searchError=search.error;
+      return state.tasks.filter(task=>!task.isGroup&&matchesFilters(task,search))}
+    function completedStatisticsTasks(bounds){return scopedStatisticsTasks().filter(task=>task.closed&&task.status!=="CNCL"&&inDateRange(task.closed,bounds))}
+    function habitLogDates(task){const dates=[];String(task.rawBlock||"").replace(/-\s+State\s+"DONE"[^\n]*\[(\d{4}-\d{2}-\d{2})[^\]]*\]/gi,(_,date)=>{dates.push(date);return _});return dates}
+    function statisticsSeries(period,bounds,tasks){const entries=[];
+      if(period==="year"){for(let month=1;month<=12;month++){const prefix=`${bounds.start.slice(0,4)}-${String(month).padStart(2,"0")}`;
+        entries.push({key:prefix,label:`${month}月`,count:tasks.filter(task=>task.closed?.startsWith(prefix)).length,query:`closed:${prefix}-01..${prefix}-${new Date(Number(prefix.slice(0,4)),month,0).getDate()}`})}
+      }else{for(let date=bounds.start;date<=bounds.end;date=dateAfter(date,1))entries.push({key:date,label:period==="week"?"一二三四五六日"[entries.length]:date.slice(8),count:tasks.filter(task=>task.closed===date).length,query:`closed:${date}`})}
+      return entries
+    }
+    function statisticsCategories(tasks,type){const counts=new Map(),add=name=>counts.set(name,(counts.get(name)||0)+1);
+      tasks.forEach(task=>{if(type==="file")add(task.fileName);else if(type==="priority")add(task.priority?`优先级 ${task.priority}`:"无优先级");
+        else if(type==="heading")add(task.parentPath[0]||"顶层条目");else (task.tags.length?task.tags:["无标签"]).forEach(add)});
+      return [...counts].map(([name,count])=>({name,count})).sort((a,b)=>b.count-a||a.name.localeCompare(b.name,"zh-CN")).slice(0,12)
+    }
+    function openStatisticsTasks(query){const scopedQuery=state.query;state.view="completed";state.mode="global";state.selected=null;state.detailOpen=false;
+      setSearchQuery([scopedQuery,query,"-status:CNCL"].filter(Boolean).join(" "));render()}
+    function renderStatistics(){const period=state.statistics.period,bounds=periodBounds(period),previous=previousPeriodBounds(period,bounds),
+      base=scopedStatisticsTasks(),completed=completedStatisticsTasks(bounds),previousCount=completedStatisticsTasks(previous).length,
+      planned=base.filter(task=>inDateRange(task.deadline||task.scheduled,bounds)),plannedDone=planned.filter(task=>task.closed&&inDateRange(task.closed,bounds)&&task.status!=="CNCL"),
+      timedDone=completed.filter(task=>task.deadline||task.scheduled),onTime=timedDone.filter(task=>task.closed<=(task.deadline||task.scheduled)),
+      overdue=base.filter(taskOverdue),change=completed.length-previousCount,series=statisticsSeries(period,bounds,completed),max=Math.max(1,...series.map(item=>item.count)),
+      habitDates=base.filter(task=>task.isHabit).flatMap(habitLogDates).filter(date=>inDateRange(date,bounds));
+      if(!state.tasks.length){$("viewTitle").textContent="统计";$("summary").textContent="0 个条目";$("scope").textContent="尚未选择文件";
+        $("listHost").innerHTML=`<div class="empty"><div class="emptyIcon">统</div><h2>选择你的 Org 文件</h2><p>统计中心会读取 CLOSED、计划日期、标签、优先级和 Habit LOGBOOK。</p><button class="btn primary" id="emptyOpen">打开 Org 文件夹</button></div>`;$("emptyOpen").onclick=()=>chooseFolder();return}
+      $("viewTitle").textContent="统计";$("scope").textContent=state.file==="all"?"全部文件":state.files.find(file=>file.id===state.file)?.name||"当前文件";
+      $("summary").textContent=`${bounds.start} 至 ${bounds.end} · 点击图表可查看任务`;
+      const cards=state.statistics.completion?`<div class="statsGrid">
+        <button class="statCard" data-stat-query="closed:${bounds.start}..${bounds.end}"><h3>完成任务</h3><div class="statValue">${completed.length}</div><div class="statSub">较上周期 ${change>=0?"+":""}${change}</div></button>
+        <div class="statCard"><h3>计划完成率</h3><div class="statValue">${planned.length?Math.round(plannedDone.length/planned.length*100):0}%</div><div class="statSub">${plannedDone.length} / ${planned.length} · 现存计划口径</div></div>
+        <div class="statCard"><h3>按期完成率</h3><div class="statValue">${timedDone.length?Math.round(onTime.length/timedDone.length*100):0}%</div><div class="statSub">${onTime.length} / ${timedDone.length} 个有日期的完成项</div></div>
+        <button class="statCard" data-stat-overdue="1"><h3>当前逾期</h3><div class="statValue">${overdue.length}</div><div class="statSub">尚未完成且日期已过</div></button></div>`:"";
+      const trend=state.statistics.trend?`<section class="statsPanel full"><div class="statsPanelHead"><h2>完成趋势</h2></div><div class="trendChart">${series.map(item=>
+        `<button class="trendColumn" data-stat-query="${item.query}" title="${item.key}：${item.count} 个"><span class="trendValue">${item.count||""}</span><span class="trendBar" style="height:${Math.max(2,item.count/max*120)}px"></span><span class="trendLabel">${item.label}</span></button>`).join("")}</div></section>`:"";
+      const category=state.statistics.categories?`<section class="statsPanel"><div class="statsPanelHead"><h2>完成分类</h2><select id="statCategoryType"><option value="file">文件</option><option value="tag">标签</option><option value="priority">优先级</option><option value="heading">顶级标题</option></select></div><div class="categoryRows" id="statCategoryRows"></div></section>`:"";
+      const habit=state.statistics.habits?`<section class="statsPanel"><div class="statsPanelHead"><h2>习惯签到</h2></div><div class="statValue">${habitDates.length}</div><div class="statSub">周期内 ${base.filter(task=>task.isHabit).length} 个习惯的 LOGBOOK 完成记录</div></section>`:"";
+      const year=today().slice(0,4),heatTasks=base.filter(task=>task.closed?.startsWith(year)),heatCounts=new Map();heatTasks.forEach(task=>heatCounts.set(task.closed,(heatCounts.get(task.closed)||0)+1));
+      const heat=state.statistics.heatmap?`<section class="statsPanel full"><div class="statsPanelHead"><h2>${year} 年完成热力图</h2><span class="statSub">${heatTasks.length} 个</span></div><div class="heatmap">${Array.from({length:366},(_,i)=>dateAfter(`${year}-01-01`,i)).filter(date=>date.startsWith(year)).map(date=>{const count=heatCounts.get(date)||0,level=count?Math.min(4,Math.ceil(count/2)):0;return `<button class="heatCell l${level}" data-stat-query="closed:${date}" title="${date}：${count} 个"></button>`}).join("")}</div></section>`:"";
+      $("listHost").innerHTML=`<div class="statsControls"><label>周期 <select id="statPeriod"><option value="week">本周</option><option value="month">本月</option><option value="year">今年</option></select></label><span class="statSub">取消任务不计入完成数；习惯签到单独统计。</span></div>${cards}<div class="statsPanels">${trend}${category}${habit}${heat}</div>`;
+      $("statPeriod").value=period;$("statPeriod").onchange=event=>{state.statistics.period=event.target.value;renderStatistics()};
+      const renderCategoryRows=()=>{if(!$("statCategoryRows"))return;const type=state.statistics.category,items=statisticsCategories(completed,type),categoryMax=Math.max(1,...items.map(item=>item.count));
+        $("statCategoryRows").innerHTML=items.length?items.map(item=>`<button class="categoryRow" data-stat-category="${esc(item.name)}"><span class="categoryName">${esc(item.name)}</span><span class="categoryTrack"><span class="categoryFill" style="width:${item.count/categoryMax*100}%"></span></span><span class="categoryCount">${item.count}</span></button>`).join(""):'<div class="statsEmpty">这个周期还没有完成记录</div>';
+        $("statCategoryRows").querySelectorAll("[data-stat-category]").forEach(button=>button.onclick=()=>{const value=button.dataset.statCategory,
+          field=type==="file"?"file":type==="tag"?"tag":type==="priority"?"priority":"grep",query=type==="priority"?(value==="无优先级"?"-has:priority":`priority:${value.slice(-1)}`):type==="tag"&&value==="无标签"?"-has:tag":type==="heading"?`grep:"${value.replaceAll('"','')}"`:`${field}:"${value.replaceAll('"','')}"`;openStatisticsTasks(`closed:${bounds.start}..${bounds.end} ${query}`)})};
+      if($("statCategoryType")){$("statCategoryType").value=state.statistics.category;$("statCategoryType").onchange=event=>{state.statistics.category=event.target.value;renderCategoryRows()};renderCategoryRows()}
+      $("listHost").querySelectorAll("[data-stat-query]").forEach(button=>button.onclick=()=>openStatisticsTasks(button.dataset.statQuery));
+      $("listHost").querySelectorAll("[data-stat-overdue]").forEach(button=>button.onclick=()=>{state.view="overdue";render()})
     }
     function hierarchyMatches(task,searchPredicate){
       if(state.file!=="all"&&task.fileId!==state.file)return false;
@@ -4291,9 +4900,41 @@ print("hello")
         button.classList.toggle("active",button.dataset.calendarMode===state.calendarMode));
       $("search").placeholder=hierarchy?"搜索所有层级的标题、正文、标签或属性…":"搜索标题、正文、标签或属性…";
       if(hierarchy)renderHierarchy();else{$("hierBar").innerHTML="";
-        if(state.view==="quadrant")renderQuadrant();else if(state.view==="calendar")renderCalendar();else renderList()}
+        if(state.view==="statistics")renderStatistics();else if(state.view==="quadrant")renderQuadrant();else if(state.view==="calendar")renderCalendar();else renderList()}
       $("searchStatus").textContent=state.searchError?`搜索表达式错误：${state.searchError}`:"";
       $("searchStatus").classList.toggle("show",!!state.searchError)
+    }
+    function renderOrgBodyMarkup(text){
+      const images=parseOrgImageLinks(text),byLine=new Map();images.forEach(image=>{
+        const values=byLine.get(image.line)||[];values.push(image);byLine.set(image.line,values)
+      });
+      return `<div class="orgBody">${String(text||"").replace(/\r\n?/g,"\n").split("\n").map((line,index)=>{
+        if(/^\s*#\+(?:CAPTION|ATTR_(?:ORG|HTML)|NAME):/i.test(line))return "";
+        const lineImages=byLine.get(index+1)||[],standalone=lineImages.length===1&&lineImages[0].standalone&&
+          (lineImages[0].description===null||isOrgImageLink(lineImages[0].description));
+        if(standalone){const image=lineImages[0],style=imageWidthStyle(image.attributes.width),align=image.attributes.align||"left";
+          return `<figure class="orgImageFigure ${align}" data-org-image-target="${esc(image.target)}" data-org-image-preview="${esc(image.description||image.target)}" data-org-image-caption="${esc(image.caption||image.attributes.title||"")}">
+            <button class="orgImageButton" type="button" disabled ${style?`style="${style}"`:""}><span class="orgImagePlaceholder">图片加载中…</span></button>
+            ${image.caption?`<figcaption>${esc(image.caption)}</figcaption>`:""}</figure>`}
+        let cursor=0,markup="";lineImages.forEach(image=>{const literal=image.description===null?`[[${image.target}]]`:`[[${image.target}][${image.description}]]`,start=line.indexOf(literal,cursor);
+          if(start<0)return;markup+=esc(line.slice(cursor,start));const label=image.description===null?orgImageTarget(image.target):image.description;
+          markup+=`<button class="orgImageTextLink" type="button" data-org-image-target="${esc(image.target)}">${esc(label)}<span class="orgImageHover"><span class="orgImagePlaceholder">图片加载中…</span></span></button>`;
+          cursor=start+literal.length});markup+=esc(line.slice(cursor));return `<div class="orgBodyLine">${markup||"&nbsp;"}</div>`
+      }).join("")}</div>`
+    }
+    async function hydrateOrgImages(container,task,source){
+      if(!container)return;const elements=[...container.querySelectorAll("[data-org-image-target]")];
+      await Promise.all(elements.map(async element=>{
+        const previewTarget=element.dataset.orgImagePreview||element.dataset.orgImageTarget,
+          result=await loadOrgImage(previewTarget,task,source),figure=element.matches("figure"),
+          button=figure?element.querySelector(".orgImageButton"):element,host=figure?button:element.querySelector(".orgImageHover");
+        if(!element.isConnected)return;if(!result.url){host.innerHTML=`<span class="orgImagePlaceholder">${esc(result.error||"图片无法读取")}</span>`;return}
+        const alt=element.dataset.orgImageCaption||orgImageTarget(element.dataset.orgImageTarget),image=`<img class="${figure?"orgImage":""}" src="${esc(result.url)}" alt="${esc(alt)}">`;
+        host.innerHTML=image;if(figure)button.disabled=false;
+        element.onclick=async event=>{event.preventDefault();event.stopPropagation();
+          const full=previewTarget===element.dataset.orgImageTarget?result:await loadOrgImage(element.dataset.orgImageTarget,task,source);
+          openImageLightbox(full.url||result.url,alt)}
+      }))
     }
     function renderDetail(){
       const t=state.tasks.find(x=>x.uid===state.selected);
@@ -4307,9 +4948,10 @@ print("hello")
         <div><span>DEADLINE</span><b>${esc(t.deadline||"未设置")}</b></div>
         <div><span>CLOSED</span><b>${esc(t.closed||"未设置")}</b></div>
         ${t.isHabit?`<div><span>习惯重复</span><b>${esc(t.habitRepeat||"未设置")}</b></div>`:""}
+        ${t.countdownDate?`<div><span>倒计时</span><b>${esc(countdownLabel(t))} · ${esc(t.countdownDate)}${t.countdownTime?` ${esc(t.countdownTime)}`:""}</b></div>`:""}
         ${t.lunarMonth?`<div><span>农历周年</span><b>${t.lunarMonth} 月 ${t.lunarDay} 日 · 下次 ${esc(t.lunarNext||"超出支持范围")}</b></div>`:""}</div>
         ${t.tags.length?`<section class="section"><h3>标签</h3><div class="tagCloud">${t.tags.map(x=>`<button data-tag="${esc(x)}">#${esc(x)}</button>`).join("")}</div></section>`:""}
-        ${t.body?`<section class="section"><h3>正文与备注</h3><pre>${esc(t.body)}</pre></section>`:""}
+        ${t.body?`<section class="section"><h3>正文与备注</h3><div id="detailOrgBody">${renderOrgBodyMarkup(t.body)}</div></section>`:""}
         ${props.length?`<section class="section"><h3>Org 属性</h3><dl>${props.map(([k,v])=>`<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl></section>`:""}
         <section class="section sourceInfo"><h3>来源</h3><p>${esc(t.filePath)}</p><small>第 ${t.line} 行 · ${t.level} 级标题</small></section></div>
         <div class="detailNote">普通条目点击圆圈会改为 DONE 并写入 CLOSED；习惯条目会记录本次完成、更新 LAST_REPEAT 和 LOGBOOK，并自动推进下一次 SCHEDULED。</div>`;
@@ -4319,6 +4961,7 @@ print("hello")
       $("visualEditTask").onclick=()=>openVisualEditor("edit",t.uid);
       $("editTask").onclick=()=>openEditor(t.uid);
       $("detailCheck").onclick=()=>toggleTaskCompletion(t.uid);
+      if(t.body)hydrateOrgImages($("detailOrgBody"),t,state.sources.find(source=>source.id===t.fileId));
       $("detail").querySelectorAll("[data-tag]").forEach(b=>b.onclick=()=>{state.mode="global";state.tag=b.dataset.tag;$("tagFilter").value=state.tag;state.visible=100;render()});
     }
     function tokenSpan(className,value){return `<span class="${className}">${esc(value)}</span>`}
@@ -4379,7 +5022,51 @@ print("hello")
       catch(error){markup=highlightOrg(text);$("editorPluginStatus").textContent=`格式插件错误：${error?.message||error}`}
       $("editHighlight").innerHTML=markup+"\n";
       $("editLineNumbers").textContent=Array.from({length:Math.max(1,$("editText").value.split("\n").length)},(_,index)=>index+1).join("\n");
-      syncEditorScroll();if(!activeEditorPlugin)updateVimCursorStatus()
+      scheduleEditorImagePreview();syncEditorScroll();if(!activeEditorPlugin)updateVimCursorStatus()
+    }
+    function editingImageContext(){
+      const source=state.sources.find(item=>item.id===state.editingFileId);
+      const task=state.editingScope==="task"?state.tasks.find(item=>item.uid===state.editing):null;return {source,task}
+    }
+    function editorImageRemovalRange(text,image){
+      const value=String(text||"");if(!image?.standalone)return {start:image?.start||0,end:image?.end||0};
+      let start=image.directiveStart??image.lineStart??image.start??0,end=image.lineEnd??image.end??start;
+      if(value.slice(end,end+2)==="\r\n")end+=2;else if(/[\r\n]/.test(value[end]||""))end++;
+      else if(start>1&&value.slice(start-2,start)==="\r\n")start-=2;else if(start>0&&/[\r\n]/.test(value[start-1]))start--;
+      return {start,end}
+    }
+    function locateEditorImage(image){
+      setEditorSelection(image.start,image.end);focusEditor();setNotice(`已定位第 ${image.line} 行的图片链接。`)
+    }
+    function removeEditorImageLink(image){
+      const text=editorText(),range=editorImageRemovalRange(text,image);
+      if(!window.confirm("从当前正文移除这张图片的链接吗？\n\n图片文件暂时保留；成功写回 Org 后，确认没有其他引用才会询问是否移入回收站。"))return;
+      replaceEditorRange("",range.start,range.end);renderEditHighlight();focusEditor();
+      setNotice("已从编辑正文移除图片链接；图片文件尚未处理。高级 Vim 可按 u 撤销，内置编辑器可按 Ctrl+Z 撤销。")
+    }
+    function scheduleEditorImagePreview(){
+      clearTimeout(editorImagePreviewTimer);const generation=++editorImagePreviewGeneration;
+      editorImagePreviewTimer=setTimeout(()=>renderEditorImagePreview(generation),180)
+    }
+    async function renderEditorImagePreview(generation=++editorImagePreviewGeneration){
+      const preview=$("editImagePreview");if(!preview)return;const images=parseOrgImageLinks(editorText());
+      if(!images.length){preview.classList.remove("show");preview.innerHTML="";return}
+      preview.classList.add("show");preview.innerHTML=`<div class="editorImagePreviewHead"><strong>图片预览 · ${images.length} 张</strong><span>编辑区保持纯文本，Vim 光标与撤销不受图片影响</span></div><div class="editorImageGrid">${images.map((image,index)=>
+        `<article class="editorImageCard" data-editor-image="${index}"><div class="orgImagePlaceholder">图片加载中…</div><div class="editorImageMeta"><span>第 ${image.line} 行</span><span>${esc(orgImageTarget(image.target))}</span></div><div class="editorImageActions"><button class="locateImageLink" type="button">定位链接</button><button class="removeImageLink" type="button">移除链接</button></div></article>`).join("")}</div>`;
+      images.forEach((image,index)=>{const card=preview.querySelector(`[data-editor-image="${index}"]`);
+        card?.querySelector(".locateImageLink")?.addEventListener("click",()=>locateEditorImage(image));
+        card?.querySelector(".removeImageLink")?.addEventListener("click",()=>removeEditorImageLink(image))});
+      const {source,task}=editingImageContext(),fileTasks=state.editingScope==="file"&&source?
+        parseOrg(editorText(),{id:source.id,name:source.name,path:source.path},0):[];
+      await Promise.all(images.map(async(image,index)=>{
+        const lineIndex=image.line-1,imageTask=task||fileTasks.find(item=>item.startIndex<=lineIndex&&lineIndex<item.endIndex),
+          result=await loadOrgImage(image.target,imageTask,source);if(generation!==editorImagePreviewGeneration)return;
+        const card=preview.querySelector(`[data-editor-image="${index}"]`);if(!card)return;
+        if(!result.url){card.firstElementChild.outerHTML=`<div class="orgImagePlaceholder">${esc(result.error||"图片无法读取")}</div>`;return}
+        const title=image.caption||image.attributes.title||orgImageTarget(image.target);card.firstElementChild.outerHTML=
+          `<button type="button" title="点击查看大图"><img src="${esc(result.url)}" alt="${esc(title)}"></button>`;
+        card.querySelector("button").onclick=()=>openImageLightbox(result.url,title)
+      }))
     }
     function applyEditorScale(delta=0,persist=true){
       state.editorScale=Math.max(70,Math.min(180,state.editorScale+delta));
@@ -4421,7 +5108,7 @@ print("hello")
     function createEditorPluginApi(){
       return Object.freeze({
         apiVersion:PLUGIN_HOST_API,platform:androidPlatform()?"android":"windows",getText:()=>$("editText").value,
-        setText:text=>{$("editText").value=String(text??"")},
+        setText:text=>{$("editText").value=String(text??"");scheduleEditorImagePreview()},
         getEditorMode:()=>state.editMode,
         getFormatPresentation:text=>{
           const presenter=activeFormatPlugin?.instance?.presentation;
@@ -4436,6 +5123,7 @@ print("hello")
         setMessage(message){$("vimCommandEntry").classList.remove("show");$("vimCommandMessage").style.display="";
           $("vimCommandMessage").textContent=message},
         setCursor(position){$("vimCursorPosition").textContent=position},
+        refreshImagePreview:scheduleEditorImagePreview,
         write:closeAfter=>writeEditedSource(!!closeAfter),close:closeEditor,
         showHelp:()=>$("vimHelpModal").classList.add("show")
       })
@@ -4484,7 +5172,13 @@ print("hello")
     async function prepareEditorSurface(){
       if(state.editorFormat!=="builtin-org"&&state.editMode!=="highlight")setEditorMode("highlight");
       $("editorPluginSelect").value=state.editorPlugin;const instance=await activateEditorPlugin(state.editorPlugin);
+      startEditorImageWatch();
       if(instance?.focus)instance.focus();else $("editText").focus()
+    }
+    function startEditorImageWatch(){
+      clearInterval(editorImageWatchTimer);lastEditorImageText=editorText();scheduleEditorImagePreview();
+      editorImageWatchTimer=setInterval(()=>{if(!$("editModal").classList.contains("show"))return;
+        const current=editorText();if(current!==lastEditorImageText){lastEditorImageText=current;scheduleEditorImagePreview()}},350)
     }
     function editorText(){return activeEditorPlugin?.instance?.getText?.()??$("editText").value}
     function formattedEditorText(){
@@ -4791,7 +5485,8 @@ print("hello")
     }
     function closeEditor(){
       stopExternalEditorPolling();state.editing=null;state.editingFileId=null;state.editingScope="task";closeVimCommandLine(false);
-      $("editModal").classList.remove("show")
+      clearInterval(editorImageWatchTimer);editorImageWatchTimer=null;editorImagePreviewGeneration++;
+      $("editImagePreview").classList.remove("show");$("editImagePreview").innerHTML="";$("editModal").classList.remove("show")
     }
     function sourceCanWrite(source){
       return !!source?.webdavUrl&&!!source.webdavConfig||
@@ -4896,6 +5591,7 @@ print("hello")
         lines.splice(match.startIndex,match.endIndex-match.startIndex,...normalized.split("\n"));
         const eol=latest.text.includes("\r\n")?"\r\n":"\n",merged=lines.join(eol);
         await writeTextToOriginal(source,merged,latest.etag);
+        source.persistedText=merged;
         if(hadPendingChanges)source.dirty=true;
         else{
           source.text=merged;source.eol=eol;source.dirty=false;
@@ -4903,7 +5599,7 @@ print("hello")
         }
         render();setNotice(hadPendingChanges?
           `当前条目已单独写回 ${source.name}；页面中仍有其他未写回修改。`:
-          `当前条目已单独写回 ${source.name}。`);return true
+          `当前条目已单独写回 ${source.name}。`);if(!hadPendingChanges)await offerImageTrashCleanup(source,latest.text,merged);return true
       }catch(error){writeFailureNotice(error);return false}
     }
     async function writeSourceToOriginal(source,confirmed=false){
@@ -4912,11 +5608,12 @@ print("hello")
       }
       if(!confirmed&&!window.confirm(`确定覆盖写回“${source.name}”${source.webdavUrl?"的 WebDAV 远程文件":"吗"}？`))return false;
       try{
-        const selected=state.tasks.find(task=>task.uid===state.selected);
+        const selected=state.tasks.find(task=>task.uid===state.selected);let previousText=source.persistedText??source.text;
         if(source.webdavUrl){
           const latest=await readLatestSourceText(source);
           if(typeof source.webdavBaseText==="string"&&latest.text!==source.webdavBaseText)
             throw new Error("远程文件刚刚发生变化");
+          previousText=latest.text;
           await writeTextToOriginal(source,source.text,latest.etag||source.webdavEtag)
         }else{
           const handle=source.fileHandle;
@@ -4925,11 +5622,12 @@ print("hello")
           if(permission!=="granted"){setNotice("没有获得写入权限，原文件未修改。");return false}
           const writable=await handle.createWritable();await writable.write(source.text);await writable.close()
         }
-        source.dirty=false;
+        source.persistedText=source.text;source.dirty=false;
         if(selected)rebuildFromSources({fileId:selected.fileId,startIndex:selected.startIndex,line:selected.line});
         else{rebuildFromSources();state.selected=null}
         render();
-        setNotice(source.webdavUrl?`已写回 WebDAV：${source.name}`:`已写回原文件：${source.name}`);return true
+        setNotice(source.webdavUrl?`已写回 WebDAV：${source.name}`:`已写回原文件：${source.name}`);
+        await offerImageTrashCleanup(source,previousText,source.text);return true
       }catch(error){writeFailureNotice(error);return false}
     }
     function downloadSourceFile(source){
@@ -4978,7 +5676,10 @@ print("hello")
         closedTime:$("visualClosedTime").value,scheduledAlarm:$("visualScheduledAlarm").checked,
         deadlineAlarm:$("visualDeadlineAlarm").checked,habit:$("visualHabit").checked,
         habitRepeat:$("visualHabitRepeat").value,lunar:$("visualLunar").checked,
-        lunarMonth:$("visualLunarMonth").value,lunarDay:$("visualLunarDay").value,body:$("visualBody").value})
+        lunarMonth:$("visualLunarMonth").value,lunarDay:$("visualLunarDay").value,
+        countdownEnabled:$("visualCountdownEnabled").checked,countdownDate:$("visualCountdownDate").value,
+        countdownTime:$("visualCountdownTime").value,countdownAfter:$("visualCountdownAfter").value,
+        countdownPinned:$("visualCountdownPinned").checked,body:$("visualBody").value})
     }
     function syncVisualClosedForStatus(clearWhenOpen=false){
       if(DONE.has($("visualStatus").value)){
@@ -4999,6 +5700,9 @@ print("hello")
       $("visualHabit").checked=!!task?.isHabit;$("visualHabitRepeat").value=task?.habitRepeat||".+1d";
       $("visualLunar").checked=!!task?.lunarMonth;$("visualLunarMonth").value=task?.lunarMonth||"";
       $("visualLunarDay").value=task?.lunarDay||"";
+      $("visualCountdownEnabled").checked=!!task?.countdownDate;$("visualCountdownDate").value=task?.countdownDate||"";
+      $("visualCountdownTime").value=task?.countdownTime||"";$("visualCountdownAfter").value=task?.countdownAfter||"elapsed";
+      $("visualCountdownPinned").checked=!!task?.countdownPinned;
       const propertyNames=alarmPropertyNames(),legacyValue=firstTaskProperty(task,[propertyNames.legacy,"ALARM"]),
         legacyAlarm=legacyValue===undefined?false:orgBooleanProperty(legacyValue),
         scheduledValue=firstTaskProperty(task,[propertyNames.scheduled,"SCHEDULED_ALARM"]),
@@ -5012,6 +5716,7 @@ print("hello")
       if(changed==="lunar"&&$("visualLunar").checked)$("visualHabit").checked=false;
       $("visualHabitRepeat").disabled=!$("visualHabit").checked;
       $("visualLunarMonth").disabled=!$("visualLunar").checked;$("visualLunarDay").disabled=!$("visualLunar").checked
+      ;["visualCountdownDate","visualCountdownTime","visualCountdownAfter","visualCountdownPinned"].forEach(id=>$(id).disabled=!$("visualCountdownEnabled").checked)
     }
     function updateVisualParents(selectedUid=""){
       const fileId=$("visualFile").value;
@@ -5496,6 +6201,8 @@ print("hello")
     $("setStartupCurrent").onclick=saveCurrentAsStartup;$("clearStartup").onclick=clearStartupPage;
     $("exportConfig").onclick=exportConfiguration;$("importConfig").onclick=()=>$("configImport").click();
     $("configImport").onchange=async event=>{await importConfigurationFile(event.target.files?.[0]);event.target.value=""};
+    $("insertEditorImage").onclick=()=>chooseImageForInsert("editor");$("insertVisualImage").onclick=()=>chooseImageForInsert("visual");
+    $("imageInsertInput").onchange=async event=>{await insertSelectedImages(event.target.files,imageInsertTarget);event.target.value=""};
     $("importPlugin").onclick=()=>$("pluginFileInput").click();
     $("pluginFileInput").onchange=async event=>{await importPluginFiles(event.target.files);event.target.value=""};
     $("openPluginDocs").onclick=()=>window.open("README-Plugins.md","_blank","noopener");
@@ -5597,6 +6304,7 @@ print("hello")
     $("visualStatus").onchange=()=>syncVisualClosedForStatus(true);
     $("visualHabit").onchange=()=>syncSpecialScheduleFields("habit");
     $("visualLunar").onchange=()=>syncSpecialScheduleFields("lunar");
+    $("visualCountdownEnabled").onchange=()=>syncSpecialScheduleFields("countdown");
     $("applyVisual").onclick=()=>{if(commitVisualChanges())closeVisualEditor()};
     $("writeVisual").onclick=()=>writeVisualSource();
     $("downloadVisual").onclick=downloadVisualSource;
@@ -5624,6 +6332,8 @@ print("hello")
     $("smartModal").onclick=event=>{if(event.target===$("smartModal"))closeSmartModal()};
     $("closeApkSelect").onclick=closeApkSelect;
     $("apkSelectBackdrop").onclick=event=>{if(event.target===$("apkSelectBackdrop"))closeApkSelect()};
+    $("closeImageLightbox").onclick=closeImageLightbox;
+    $("imageLightbox").onclick=event=>{if(event.target===$("imageLightbox")||event.target.closest?.(".imageLightboxBody")&&!event.target.closest?.("img"))closeImageLightbox()};
     $("apkSelectOptions").onclick=event=>{
       const button=event.target.closest("[data-apk-option]"),select=state.apkSelectTarget;if(!button||!select)return;
       const option=select.options[Number(button.dataset.apkOption)];if(!option||option.disabled)return;
@@ -5645,6 +6355,7 @@ print("hello")
     document.addEventListener("keydown",event=>{
       if(event.altKey&&event.key==="ArrowLeft"){event.preventDefault();goBack();return}
       if(event.key==="Escape"){
+      if($("imageLightbox").classList.contains("show")){closeImageLightbox();return}
       if($("apkSelectBackdrop").classList.contains("show")){closeApkSelect();return}
       if($("vimHelpModal").classList.contains("show")){$("vimHelpModal").classList.remove("show");return}
       if($("orgHelpModal").classList.contains("show")){$("orgHelpModal").classList.remove("show");return}
@@ -5654,6 +6365,7 @@ print("hello")
     $("menu").onclick=()=>{$("sidebar").classList.add("open");$("scrim").classList.add("show")};
     $("closeSide").onclick=$("scrim").onclick=closeSidebar;
     window.addEventListener("resize",()=>syncFilterCollapse());
+    setInterval(()=>{if(state.view==="countdown")renderContent()},60000);
     document.body.ondragover=e=>e.preventDefault();
     document.body.ondrop=e=>{e.preventDefault();if(e.dataTransfer.files.length)load(e.dataTransfer.files)};
     loadRecent();loadPreferences();render();initializeInstalledPlugins();autoOpenDefaultRecent();

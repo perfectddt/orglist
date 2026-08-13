@@ -481,14 +481,20 @@ class OrgWebDavHandler(BaseHTTPRequestHandler):
     def do_OPTIONS(self) -> None:
         self.send_response(204)
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PROPFIND, PUT")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, Depth, If-Match")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PROPFIND, PUT, MKCOL, MOVE")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, Depth, If-Match, Destination, Overwrite")
         self.end_headers()
 
     def do_PROPFIND(self) -> None:
         self._proxy()
 
     def do_PUT(self) -> None:
+        self._proxy()
+
+    def do_MKCOL(self) -> None:
+        self._proxy()
+
+    def do_MOVE(self) -> None:
         self._proxy()
 
     def _serve_html(self) -> None:
