@@ -2,16 +2,24 @@
 
 安装包：[`OrglistAndroid.apk`](OrglistAndroid.apk)
 
-当前安装包版本：`2.0.0`（versionCode 23）  
-Android 工程源码：`2.0.0`  
+当前安装包版本：`2.1.0`（versionCode 24）  
+Android 工程源码：`2.1.0`  
 最低系统：Android 8.0（API 26）  
 安装包 SHA-256：
 
 ```text
-2212691266da126e5a5884cf4df8a8394c2444a0d2d1edae31dce7f21fc428d0
+d3692ec022d9cd7771c3cdd50ae75a0b8e6187228193b51d6c036496f8ddb27c
 ```
 
 以下“更新内容”是版本历史；实际使用方式以本文后面的“当前提醒规则”和“常见问题”为准。
+
+## 2.1.0 更新内容
+
+- 搜索框新增 AI 对话模式：支持把中文需求转换为搜索语法，也支持询问功能说明和操作方法。
+- 默认使用 DeepSeek V4 Flash 预设；API Key、模型、接口、鉴权和兼容协议均可在设置中配置并测试。
+- AI 转换出搜索条件后会立即执行并退出 AI 模式，回车后直接显示正常搜索结果。
+- Android AI 请求改走原生 HTTPS 网络桥接，并开放桥接所需的 POST 请求，避免 WebView 跨域限制。
+- “关于”的当前版本更新为 2.1.0；Android 工程 `versionCode` 更新为 24。
 
 ## 2.0.0 更新内容
 

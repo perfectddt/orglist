@@ -2,12 +2,21 @@
 
 主程序：[`Orglist.html`](Orglist.html)
 
+供 AI 检索、提示词接入和功能问答使用的结构化说明：[`README-AI.md`](README-AI.md)。
+
 这是一个读取和管理 Org Mode 计划清单的单文件网页。默认完全在本地运行，不需要登录账号，也不会主动上传 Org 文件。
 
 Android 手机可直接安装 [`OrglistAndroid.apk`](OrglistAndroid.apk)，详细步骤见
 [`README-Android.md`](README-Android.md)。
 
-Windows HTML、Android 工程源码与当前安装包均为 `2.0.0`（versionCode 23）。
+Windows HTML、Android 工程源码与当前安装包均为 `2.1.0`（versionCode 24）。
+
+## 2.1.0 功能概览
+
+- 搜索框新增 AI 对话模式，可将中文需求转换成 Orglist 搜索语法，也可解释软件功能和操作方法。
+- 默认提供 DeepSeek V4 Flash 预设，可在设置中填写 API Key、模型、接口地址、鉴权方式和兼容协议，并测试连接。
+- AI 生成搜索条件后会直接应用并退出 AI 模式，回车即可回到普通搜索结果，无需再次点击 AI 按钮。
+- Windows 本地桥接与 Android 原生网络桥接均可转发 AI 请求，避免浏览器或 WebView 跨域限制。
 
 ## 2.0.0 功能概览
 
@@ -155,6 +164,18 @@ has:deadline overdue:true             是否有截止日期、是否逾期
 ```
 
 正则支持 `i`、`m`、`s`、`u` 标志。点击搜索框旁的“搜索语法”可随时查看内置说明。搜索历史只保留适量记录，并存储在当前浏览器。
+
+### AI 搜索与功能问答
+
+1. 打开“设置 → AI 助手”，勾选启用。
+2. 默认预设已经填写 `https://api.deepseek.com/chat/completions`、Chat Completions 协议和 `deepseek-v4-flash`，通常只需填写 API Key、勾选启用，再点击“测试 AI 连接”。如需其他服务商，可选择“自定义兼容接口”。
+3. 点击顶部搜索框内的“AI”，输入自然语言并按 Enter。
+
+AI 可以把“找出今天未完成的任务”转换成页面支持的搜索表达式，也可以解释批量操作、写回、WebDAV 等功能。搜索表达式应用前会在本地校验；转换成功后会自动关闭 AI 面板、切回普通搜索界面并直接显示结果，不需要再次点击 AI。打开清单或设置等操作会显示为可点击建议。AI 不会直接写回、删除、完成或编辑 Org 条目。
+
+默认只向服务商发送对话、当前日期，以及可选的文件名/标签/状态/筛选摘要，不发送任务标题、正文或 Org 原文。API Key 默认只保存在当前标签页会话；勾选“关闭浏览器后仍在本机保存”后才会写入浏览器本地存储。配置备份不包含 API Key，并会清空额外请求头。
+
+如果浏览器提示 CORS 或无法直连，可改用 `OrglistWebDAV.cmd` 自动打开的页面，让请求经本机桥接转发。完整的 AI 可读搜索、操作和安全说明见 [`README-AI.md`](README-AI.md)。
 
 ## 5. 新增条目
 

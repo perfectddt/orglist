@@ -376,6 +376,9 @@ class OrgWebDavHandler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:
         parsed = urllib.parse.urlparse(self.path)
+        if parsed.path == "/webdav-proxy":
+            self._proxy()
+            return
         if parsed.path == "/external-editor/open":
             if not self._external_editor_allowed():
                 return
@@ -482,7 +485,10 @@ class OrgWebDavHandler(BaseHTTPRequestHandler):
         self.send_response(204)
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PROPFIND, PUT, MKCOL, MOVE")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, Depth, If-Match, Destination, Overwrite")
+        self.send_header(
+            "Access-Control-Allow-Headers",
+            "Content-Type, Accept, Authorization, api-key, x-api-key, Depth, If-Match, Destination, Overwrite",
+        )
         self.end_headers()
 
     def do_PROPFIND(self) -> None:
@@ -565,6 +571,9 @@ class OrgWebDavHandler(BaseHTTPRequestHandler):
         forwarded_headers: Dict[str, str] = {}
         for name in (
             "Authorization",
+            "Accept",
+            "api-key",
+            "x-api-key",
             "Depth",
             "Content-Type",
             "If-Match",
@@ -574,6 +583,10 @@ class OrgWebDavHandler(BaseHTTPRequestHandler):
         ):
             value = self.headers.get(name)
             if value:
+                forwarded_headers[name] = value
+        for name, value in self.headers.items():
+            lowered = name.lower()
+            if lowered.startswith(("x-", "openai-", "anthropic-", "http-")):
                 forwarded_headers[name] = value
 
         request = urllib.request.Request(

@@ -123,6 +123,10 @@
     .search:focus-within{background:var(--panel);border-color:var(--line)}
     .search input{flex:1;min-width:0;padding:9px 0;background:transparent;border:0;outline:0;font-size:13px}
     .search input::placeholder{color:var(--muted2)}.search button{border:0;background:transparent;color:var(--muted)}
+    .search .aiModeToggle{flex:0 0 auto;padding:4px 7px;color:var(--accent);background:var(--accentSoft);
+      border:1px solid color-mix(in srgb,var(--accent) 28%,transparent);border-radius:6px;font-size:9px;font-weight:900}
+    .search .aiModeToggle:hover,.search .aiModeToggle.active{color:#fff;background:var(--accent);border-color:var(--accent)}
+    .search.aiMode{border-color:color-mix(in srgb,var(--accent) 55%,var(--line));box-shadow:0 0 0 3px var(--accentSoft)}
     .searchHistory{position:absolute;z-index:70;top:calc(100% + 8px);right:0;left:0;display:none;
       max-height:310px;padding:7px;overflow:auto;background:var(--panel);border:1px solid var(--line);
       border-radius:11px;box-shadow:0 18px 45px rgba(45,42,34,.16);scrollbar-width:thin}
@@ -136,6 +140,24 @@
       place-items:center;width:24px;height:24px;padding:0!important;border-radius:6px!important}
     .searchHistoryRemove:hover{color:var(--red)!important;background:var(--redSoft)!important}
     .searchHistoryEmpty{padding:16px 8px;color:var(--muted2);font-size:10px;text-align:center}
+    .aiPanel{position:absolute;z-index:75;top:calc(100% + 8px);left:0;display:none;width:min(640px,calc(100vw - 28px));
+      max-height:min(620px,72vh);overflow:hidden;background:var(--panel);border:1px solid var(--line);border-radius:13px;
+      box-shadow:0 22px 56px rgba(45,42,34,.2)}.aiPanel.show{display:flex;flex-direction:column}
+    .aiPanelHead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 13px;border-bottom:1px solid var(--line)}
+    .aiPanelHead strong{font-size:11px}.aiPanelHead span{display:block;margin-top:2px;color:var(--muted2);font-size:8px;font-weight:500}
+    .aiPanelHeadActions{display:flex;gap:5px}.search .aiPanelHeadActions button,.search .aiQuick,.search .aiApply{
+      padding:6px 8px;color:var(--muted);background:var(--soft);border:1px solid var(--line);border-radius:7px;font-size:8px;font-weight:750}
+    .search .aiPanelHeadActions button:hover,.search .aiQuick:hover{color:var(--accent);border-color:var(--accent)}
+    .aiMessages{display:flex;flex-direction:column;gap:9px;min-height:100px;padding:12px;overflow:auto;scrollbar-width:thin}
+    .aiWelcome{padding:10px 11px;color:var(--muted);background:var(--soft);border-radius:9px;font-size:9px;line-height:1.7}
+    .aiQuickList{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.aiMessage{max-width:92%;padding:9px 10px;border-radius:10px;
+      font-size:10px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}.aiMessage.user{align-self:flex-end;color:#fff;background:var(--accent)}
+    .aiMessage.assistant{align-self:flex-start;color:var(--text);background:var(--soft);border:1px solid var(--line)}
+    .aiMessage.error{color:var(--red);background:var(--redSoft);border-color:color-mix(in srgb,var(--red) 28%,var(--line))}
+    .aiMessageMeta{display:block;margin-top:5px;color:var(--muted2);font-size:8px}.aiMessage.user .aiMessageMeta{color:rgba(255,255,255,.7)}
+    .search .aiApply{display:block;margin-top:7px;color:var(--accent);background:var(--panel);border-color:color-mix(in srgb,var(--accent) 35%,var(--line))}
+    .search .aiApply:hover{color:#fff;background:var(--accent);border-color:var(--accent)}
+    .aiPanelFoot{padding:9px 12px;color:var(--muted2);background:var(--soft);border-top:1px solid var(--line);font-size:8px;line-height:1.55}
     .syntaxButton{flex:0 0 auto;padding:7px 9px;color:var(--muted);background:transparent;
       border:1px solid var(--line);border-radius:8px;font-size:10px;font-weight:700}
     .syntaxButton:hover{color:var(--accent);background:var(--accentSoft);border-color:var(--accent)}
@@ -768,6 +790,7 @@
     .bridgeDot{flex:0 0 8px;width:8px;height:8px;margin-top:4px;background:var(--yellow);border-radius:50%}
     .bridgeMode.active .bridgeDot{background:var(--green)}.bridgeMode.active strong{color:var(--green)}
     .webdavStatus.show{display:block}.webdavStatus.info{color:var(--blue);background:var(--blueSoft)}
+    .webdavStatus.success{color:var(--green);background:var(--greenSoft)}
     .webdavStatus.error{color:var(--red);background:var(--redSoft)}.profileList{display:grid;gap:7px;margin-top:11px}
     .profileItem{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:6px;
       padding:8px 9px;background:var(--soft);border:1px solid var(--line);border-radius:8px}
@@ -896,9 +919,16 @@
         <div class="search">
           <span aria-hidden="true">⌕</span>
           <input id="search" placeholder="搜索标题、正文、标签或属性…" aria-label="搜索任务">
+          <button class="aiModeToggle" id="aiModeToggle" aria-label="切换 AI 助手" title="切换 AI 助手">AI</button>
           <button id="searchHistoryToggle" aria-label="搜索历史" title="搜索历史">↶</button>
           <button id="clearSearch" aria-label="清除搜索">×</button>
           <div class="searchHistory" id="searchHistory"></div>
+          <div class="aiPanel" id="aiPanel" aria-live="polite">
+            <div class="aiPanelHead"><div><strong>Orglist AI 助手</strong><span>自然语言搜索 · 功能解释 · 安全操作建议</span></div>
+              <div class="aiPanelHeadActions"><button id="clearAiChat" type="button">清空</button><button id="closeAiPanel" type="button" aria-label="关闭 AI 助手">×</button></div></div>
+            <div class="aiMessages" id="aiMessages"></div>
+            <div class="aiPanelFoot" id="aiPanelFoot">在上方搜索框输入问题，按 Enter 发送；Esc 返回普通搜索。AI 不会直接写回、删除或修改 Org 文件。</div>
+          </div>
         </div>
         <button class="syntaxButton" id="searchHelp">搜索语法</button>
         <div class="topActions">
@@ -1365,6 +1395,7 @@ print("hello")
           <button data-settings-target="settings-statuses">Org 自定义状态</button>
           <button data-settings-target="settings-statistics">统计与倒计时</button>
           <button data-settings-target="settings-backup">配置备份</button>
+          <button data-settings-target="settings-ai">AI 助手</button>
           <button id="reminderNavLabel" data-settings-target="settings-reminder">Windows 提醒</button>
           <button class="settingsNavSub" data-settings-target="settings-reminder-source">数据与同步</button>
           <button class="settingsNavSub" data-settings-target="settings-reminder-rules">提醒规则</button>
@@ -1483,6 +1514,33 @@ print("hello")
           <div class="configActions"><button class="btn secondary" id="exportConfig">导出配置</button>
             <button class="btn secondary" id="importConfig">导入配置</button></div>
           <div class="configNote">为安全起见，导出的 WebDAV 记录不包含密码；文件访问权限和文件内容也不会被导出。</div>
+        </section>
+        <section class="settingsSection" id="settings-ai">
+          <h3>AI 助手</h3>
+          <p class="settingsHint">在顶部搜索框切换到 AI 模式，可用自然语言生成搜索表达式、询问功能用法，或获得打开视图/设置的操作建议。默认使用 DeepSeek V4 Flash 官方 Chat Completions 接口，也兼容 Responses 格式。</p>
+          <div class="settingsGrid">
+            <label class="settingsCheck full"><input id="aiEnabled" type="checkbox"><span>启用搜索框 AI 助手</span></label>
+            <label class="visualField"><span>配置预设</span><select id="aiPreset"><option value="deepseek-flash">DeepSeek V4 Flash（默认）</option>
+              <option value="custom">自定义兼容接口</option></select><small>选择默认预设后会自动填写地址、协议、模型和鉴权方式。</small></label>
+            <label class="visualField"><span>接口协议</span><select id="aiApiFormat"><option value="chat">Chat Completions</option>
+              <option value="responses">Responses</option></select></label>
+            <label class="visualField full"><span>API 地址</span><input id="aiApiUrl" autocomplete="off" placeholder="https://api.deepseek.com/chat/completions">
+              <small>可填写基础地址或完整接口路径；程序会按所选协议补全 <code>/v1/responses</code> 或 <code>/v1/chat/completions</code>。</small></label>
+            <label class="visualField"><span>模型</span><input id="aiModel" autocomplete="off" placeholder="deepseek-v4-flash"></label>
+            <label class="visualField"><span>鉴权方式</span><select id="aiAuthMode"><option value="bearer">Authorization: Bearer</option>
+              <option value="api-key">api-key</option><option value="x-api-key">x-api-key</option><option value="none">无需鉴权</option></select></label>
+            <label class="visualField full"><span>API Key</span><input id="aiApiKey" type="password" autocomplete="new-password" placeholder="仅保存在当前浏览器">
+              <small>留空会保留当前已加载的 Key；API 请求不可避免地会把 Key 发给你填写的 API 地址。</small></label>
+            <label class="settingsCheck full"><input id="aiRememberKey" type="checkbox"><span>关闭浏览器后仍在本机保存 API Key（不勾选则只保存到当前标签页会话）</span></label>
+            <label class="settingsCheck full"><input id="aiShareMetadata" type="checkbox" checked><span>向 AI 提供当前文件名、标签、状态和筛选摘要，以提高搜索翻译准确度；不会发送任务标题、正文或 Org 原文</span></label>
+            <label class="visualField full"><span>额外请求头（JSON，可选）</span><textarea id="aiExtraHeaders" rows="3" spellcheck="false" placeholder='{"OpenAI-Organization":"org_..."}'></textarea>
+              <small>只允许字符串值；Host、Cookie、Origin、Content-Length 等浏览器保留头会被拒绝。备份时此项会被清空。</small></label>
+            <label class="visualField full"><span>补充指令（可选）</span><textarea id="aiCustomInstructions" rows="3" placeholder="例如：搜索结果优先使用中文说明"></textarea></label>
+          </div>
+          <div class="webdavActions"><button class="btn secondary" id="testAi" type="button">测试 AI 连接</button>
+            <button class="btn secondary" id="forgetAiKey" type="button">清除已保存 Key</button></div>
+          <div class="webdavStatus" id="aiStatus"></div>
+          <p class="pluginWarning" style="margin-top:12px"><strong>隐私提醒：</strong>AI 对话内容、当前日期和可选的文件/标签摘要会发送到你配置的服务商。任务标题、正文和 Org 原文默认不会发送；AI 也不能直接写回或删除文件。</p>
         </section>
         <section class="settingsSection" id="settings-reminder">
           <h3 id="reminderHeading">Windows 后台提醒</h3>
@@ -1618,7 +1676,7 @@ print("hello")
           <h3>关于</h3>
           <div class="aboutCard"><strong>Orglist</strong>
             <p>面向 Org 文件的本地任务清单与浏览工具。数据默认保存在本地，只有在你主动使用写回或 WebDAV 时才会与文件交互。</p>
-            <dl><div><dt>当前版本</dt><dd>2.0.0</dd></div>
+            <dl><div><dt>当前版本</dt><dd>2.1.0</dd></div>
               <div><dt>项目地址</dt><dd><a href="https://github.com/perfectddt/orglist" target="_blank" rel="noopener noreferrer">github.com/perfectddt/orglist</a></dd></div>
               <div><dt>使用方式</dt><dd>支持本地 HTML、Android APK 与 WebDAV。</dd></div>
             </dl>
@@ -1674,7 +1732,9 @@ print("hello")
       vimLastKey:"",vimLastKeyAt:0,vimInputRestore:null,vimInputGuard:null,vimVisualAnchor:null,vimVisualCursor:null,
       apkSelectTarget:null,apkSelectPending:null,apkSelectScheduled:false,defaultImageFolder:"",imageTrashFolder:"",
       statistics:{enabled:true,completion:true,trend:true,categories:true,heatmap:true,habits:true,period:"week",category:"file"},
-      countdownCompact:false,countdownSoonDays:7};
+      countdownCompact:false,countdownSoonDays:7,aiMode:false,aiDraft:"",aiBusy:false,aiConversation:[],
+      aiConfig:{enabled:false,preset:"deepseek-flash",apiFormat:"chat",apiUrl:"https://api.deepseek.com/chat/completions",model:"deepseek-v4-flash",
+        authMode:"bearer",rememberKey:false,shareMetadata:true,extraHeaders:"",customInstructions:""},aiApiKey:""};
     const HISTORY_KEY="org-task-recent-sources-v2",HISTORY_DEFAULT_KEY="org-task-default-recent-v1",
       HISTORY_DB="org-task-local-history",HISTORY_STORE="handles";
     const CUSTOM_KEY="org-task-custom-lists-v1",LAYOUT_KEY="org-task-list-columns-v1",
@@ -1686,10 +1746,87 @@ print("hello")
       WEBDAV_KEY="org-task-webdav-profiles-v1",STATUS_KEY="org-task-custom-status-v1",
       STARTUP_KEY="org-task-startup-page-v1",VIM_KEY="org-task-vim-mode-v1",
       EDITOR_PLUGIN_KEY="org-task-editor-plugin-v1",EDITOR_FORMAT_KEY="org-task-editor-format-v1",
-      IMAGE_KEY="org-task-image-settings-v1",STATISTICS_KEY="org-task-statistics-settings-v1";
+       IMAGE_KEY="org-task-image-settings-v1",STATISTICS_KEY="org-task-statistics-settings-v1",
+       AI_SETTINGS_KEY="org-task-ai-settings-v1",AI_SECRET_KEY="org-task-ai-secret-v1";
     const PLUGIN_DB="orglist-plugin-storage-v1",PLUGIN_STORE="plugins",PLUGIN_HOST_API=2;
     let searchHistoryTimer=null,externalEditorTimer=null,activeEditorPlugin=null,activeFormatPlugin=null,currentPluginRegistration="";
     const $ = id => document.getElementById(id);
+    const AI_DEFAULTS=Object.freeze({enabled:false,preset:"deepseek-flash",apiFormat:"chat",apiUrl:"https://api.deepseek.com/chat/completions",
+      model:"deepseek-v4-flash",authMode:"bearer",rememberKey:false,
+      shareMetadata:true,extraHeaders:"",customInstructions:""});
+    const AI_BLOCKED_HEADERS=new Set(["host","cookie","origin","referer","content-length","connection","transfer-encoding"]);
+    function normalizeAiEndpoint(value,format="chat"){
+      const raw=String(value||"").trim();if(!raw)throw new Error("请填写 AI API 地址。");
+      let url;try{url=new URL(raw)}catch(_){throw new Error("AI API 地址格式无效。")}
+      if(!["http:","https:"].includes(url.protocol))throw new Error("AI API 地址必须使用 http 或 https。");
+      url.hash="";const clean=url.href.replace(/\/+$/,"");
+      if(format==="responses"){
+        if(/\/responses$/i.test(clean))return clean;
+        return /\/v1$/i.test(clean)?`${clean}/responses`:`${clean}/v1/responses`
+      }
+      if(/\/chat\/completions$/i.test(clean))return clean;
+      if(url.hostname.toLocaleLowerCase()==="api.deepseek.com"&&/^\/?$/.test(url.pathname))return `${clean}/chat/completions`;
+      return /\/v1$/i.test(clean)?`${clean}/chat/completions`:`${clean}/v1/chat/completions`
+    }
+    function parseAiExtraHeaders(value){
+      const text=String(value||"").trim();if(!text)return {};
+      let parsed;try{parsed=JSON.parse(text)}catch(_){throw new Error("额外请求头必须是有效的 JSON 对象。")}
+      if(!parsed||Array.isArray(parsed)||typeof parsed!=="object")throw new Error("额外请求头必须是 JSON 对象。");
+      const headers={};Object.entries(parsed).forEach(([name,item])=>{
+        const key=String(name).trim();if(!/^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/.test(key)||AI_BLOCKED_HEADERS.has(key.toLocaleLowerCase()))
+          throw new Error(`不允许使用请求头：${name}`);
+        if(typeof item!=="string")throw new Error(`请求头 ${name} 的值必须是字符串。`);headers[key]=item
+      });return headers
+    }
+    function loadAiSettings(){
+      let saved={};try{saved=JSON.parse(localStorage.getItem(AI_SETTINGS_KEY)||"{}")||{}}catch(_){}
+      const legacyEmpty=!Object.prototype.hasOwnProperty.call(saved,"preset")&&!String(saved.apiUrl||"").trim()&&!String(saved.model||"").trim();
+      state.aiConfig=legacyEmpty?{...AI_DEFAULTS,enabled:!!saved.enabled}:{...AI_DEFAULTS,...saved,
+        preset:["deepseek-flash","custom"].includes(saved.preset)?saved.preset:"custom",
+        apiFormat:["responses","chat"].includes(saved.apiFormat)?saved.apiFormat:"chat",
+        authMode:["bearer","api-key","x-api-key","none"].includes(saved.authMode)?saved.authMode:"bearer"};
+      let localKey="",sessionKey="";try{localKey=localStorage.getItem(AI_SECRET_KEY)||""}catch(_){}
+      try{sessionKey=sessionStorage.getItem(AI_SECRET_KEY)||""}catch(_){}
+      state.aiApiKey=sessionKey||localKey;state.aiConfig.rememberKey=!!localKey
+    }
+    function fillAiSettingsForm(){
+      const config=state.aiConfig;$("aiEnabled").checked=!!config.enabled;$("aiPreset").value=config.preset||"custom";
+      $("aiApiFormat").value=config.apiFormat||"chat";$("aiApiUrl").value=config.apiUrl||"";
+      $("aiModel").value=config.model||"";$("aiAuthMode").value=config.authMode||"bearer";$("aiApiKey").value=state.aiApiKey||"";
+      $("aiRememberKey").checked=!!config.rememberKey;$("aiShareMetadata").checked=config.shareMetadata!==false;
+      $("aiExtraHeaders").value=config.extraHeaders||"";$("aiCustomInstructions").value=config.customInstructions||"";setAiStatus("")
+    }
+    function readAiSettingsForm(){
+      const enabled=$("aiEnabled").checked,apiUrl=$("aiApiUrl").value.trim(),model=$("aiModel").value.trim(),
+        preset=$("aiPreset").value,apiFormat=$("aiApiFormat").value,authMode=$("aiAuthMode").value,
+        key=$("aiApiKey").value.trim()||state.aiApiKey||"",extraHeaders=$("aiExtraHeaders").value.trim();
+      if(enabled){normalizeAiEndpoint(apiUrl,apiFormat);if(!model)throw new Error("请填写 AI 模型名称。");
+        if(authMode!=="none"&&!key)throw new Error("请填写 API Key，或选择“无需鉴权”。")}
+      parseAiExtraHeaders(extraHeaders);
+      return {config:{enabled,preset,apiFormat,apiUrl,model,authMode,rememberKey:$("aiRememberKey").checked,
+        shareMetadata:$("aiShareMetadata").checked,extraHeaders,customInstructions:$("aiCustomInstructions").value.trim()},key}
+    }
+    function applyAiPreset(value){
+      if(value!=="deepseek-flash")return;
+      $("aiApiFormat").value="chat";$("aiApiUrl").value="https://api.deepseek.com/chat/completions";
+      $("aiModel").value="deepseek-v4-flash";$("aiAuthMode").value="bearer";
+      setAiStatus("已应用 DeepSeek V4 Flash 默认配置；现在只需填写 API Key、勾选启用并测试连接。","success")
+    }
+    function markAiPresetCustom(){if($("aiPreset").value!=="custom")$("aiPreset").value="custom"}
+    function persistAiSettings(value){
+      const {config,key}=value;state.aiConfig={...AI_DEFAULTS,...config};state.aiApiKey=key;
+      try{localStorage.setItem(AI_SETTINGS_KEY,JSON.stringify(state.aiConfig));
+        if(config.rememberKey&&key)localStorage.setItem(AI_SECRET_KEY,key);else localStorage.removeItem(AI_SECRET_KEY)}catch(_){}
+      try{if(!config.rememberKey&&key)sessionStorage.setItem(AI_SECRET_KEY,key);else sessionStorage.removeItem(AI_SECRET_KEY)}catch(_){}
+    }
+    function setAiStatus(message,type="info"){
+      const element=$("aiStatus");if(!element)return;element.textContent=message;
+      element.className=`webdavStatus ${type}${message?" show":""}`
+    }
+    function forgetAiKey(){
+      state.aiApiKey="";try{localStorage.removeItem(AI_SECRET_KEY)}catch(_){}try{sessionStorage.removeItem(AI_SECRET_KEY)}catch(_){}
+      $("aiApiKey").value="";$("aiRememberKey").checked=false;state.aiConfig.rememberKey=false;setAiStatus("已清除当前页面加载的 API Key。","success")
+    }
     const pluginRegistry=new Map(),pluginRuntime=new Map(),layoutSubscribers=new Set(),layoutRegionOwners=new Map(),
       publicSettingSubscribers=new Set();
     function registerOrglistPlugin(plugin){
@@ -2560,6 +2697,159 @@ print("hello")
         return {predicate:task=>valid.some(group=>group.every(test=>test(task))),error:""}
       }catch(error){return {predicate:()=>false,error:error?.message||"搜索表达式无效"}}
     }
+    const ORGLIST_AI_GUIDE=`
+APPLICATION: Orglist, a local Org Mode task list. The AI assistant translates natural language into supported search syntax and explains UI operations. It never writes, edits, deletes, completes, or saves tasks.
+SEARCH BOOLEAN: spaces mean AND; | or OR separates OR groups; prefix - negates; quote phrases; /pattern/imsu is regex.
+SEARCH FIELDS: title, body, tag, file/files, path, status, priority, prop/property, level, scheduled, deadline, closed, orgdate, date, anydate, modified, countdown, has, overdue, done, grep/re/regex.
+ALIASES_ZH: 标题, 正文, 标签, 状态, 优先级, 文件, 路径, 层级, 计划, 截止, 完成, 修改, 最近修改.
+FIELD RULES:
+- title/body/tag/file/path/status/priority use substring matching. Comma-separated values inside one field mean OR. file:all and file:* mean all files.
+- prop:KEY or prop:KEY=value searches Org properties. level:2 or level:1..3.
+- scheduled/deadline/closed/orgdate/date/anydate accept YYYY-MM-DD, today, yesterday, tomorrow, ranges start..end, or comparisons < <= > >= followed by a date.
+- modified accepts today, yesterday, 7d, 30d, a date, or date range.
+- countdown accepts today, active, overdue, expired, pinned, next7d, next30d, a date/range/comparison.
+- has accepts date, anydate, countdown, tag, deadline, scheduled, closed, body, priority, etc.
+- overdue:true/false and done:true/false are booleans.
+- grep searches the complete indexed text. Regex length max 240.
+VIEWS: open=待办, today=今天, habits=习惯, upcoming=未来, overdue=已逾期, no-date=无日期, completed=已完成, countdown=倒计时, statistics=统计, all=全部, quadrant=四象限, calendar=日历.
+OPERATIONS: top + opens add; task detail provides visual/raw edit; changes stay in page until explicit write-back; batch mode uses the check icon; settings contains display, defaults, add defaults, quadrant, startup, statuses, statistics, backup, AI, reminders, WebDAV, plugins, about.
+SAFETY: Do not claim that an operation was executed. Only the allowlisted action suggestions can be offered. Never request task contents, Org source, passwords, or API keys.
+OUTPUT: Return one JSON object only, no Markdown. Schema:
+{"mode":"search|explain|action","message":"concise Chinese answer","searchQuery":"supported syntax or empty","action":{"name":"open_view|open_settings|open_add|clear_filters|switch_mode","args":{}} or null}
+Use mode=search for questions about finding/listing tasks. Put an executable expression in searchQuery. Use action only when the user clearly asks to open/switch/clear something; otherwise explain. open_view args={"view":"one VIEWS key"}; open_settings args={"section":"display|defaults|add-defaults|quadrant|startup|statuses|statistics|backup|ai|reminder|webdav|plugins|about"}; switch_mode args={"mode":"global|hierarchy"}.`;
+    const AI_ACTIONS=new Set(["open_view","open_settings","open_add","clear_filters","switch_mode"]);
+    function aiDateContext(){
+      const current=today(),date=localDate(current),day=(date.getDay()+6)%7,monday=new Date(date),sunday=new Date(date);
+      monday.setDate(date.getDate()-day);sunday.setDate(date.getDate()+6-day);
+      return {today:current,weekStart:todayFrom(monday),weekEnd:todayFrom(sunday),timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||"local"}
+    }
+    function aiMetadataContext(){
+      if(state.aiConfig.shareMetadata===false)return {shared:false};
+      const files=[...new Set(state.tasks.map(task=>task.fileName).filter(Boolean))].slice(0,80),
+        tags=[...new Set(state.tasks.flatMap(task=>task.tags||[]).filter(Boolean))].slice(0,100);
+      return {shared:true,files,tags,statuses:configuredStatuses(),current:{mode:state.mode,view:state.view,file:state.file,
+        status:state.status,priority:state.priority,tag:state.tag,dateField:state.dateField,dateFrom:state.dateFrom,dateTo:state.dateTo,search:state.query}}
+    }
+    function aiSystemPrompt(){
+      const extra=state.aiConfig.customInstructions?`\nUSER_CUSTOM_INSTRUCTIONS: ${state.aiConfig.customInstructions}`:"";
+      return `${ORGLIST_AI_GUIDE}\nDATE_CONTEXT: ${JSON.stringify(aiDateContext())}\nAPP_CONTEXT: ${JSON.stringify(aiMetadataContext())}${extra}`
+    }
+    function aiResponseText(payload){
+      let value=payload?.choices?.[0]?.message?.content??payload?.output_text??payload?.response;
+      if(!value&&Array.isArray(payload?.output))value=payload.output.flatMap(item=>item?.content||[])
+        .map(item=>item?.text||item?.content||"").filter(Boolean).join("");
+      if(Array.isArray(value))value=value.map(item=>typeof item==="string"?item:item?.text||item?.content||"").join("");
+      if(typeof value!=="string"||!value.trim())throw new Error(payload?.error?.message||"AI 返回内容为空。");return value.trim()
+    }
+    function parseAiJson(text){
+      const clean=String(text||"").trim().replace(/^```(?:json)?\s*/i,"").replace(/\s*```$/i,"");
+      try{return JSON.parse(clean)}catch(_){const start=clean.indexOf("{"),end=clean.lastIndexOf("}");
+        if(start>=0&&end>start)try{return JSON.parse(clean.slice(start,end+1))}catch(__){}throw new Error("AI 没有返回可识别的结构化结果。")}
+    }
+    function normalizeAiResult(value){
+      if(!value||typeof value!=="object"||Array.isArray(value))throw new Error("AI 结果格式无效。");
+      let mode=["search","explain","action"].includes(value.mode)?value.mode:"explain",message=String(value.message||value.answer||"").trim(),
+        searchQuery=String(value.searchQuery||value.query||"").trim();
+      if(searchQuery.length>500)throw new Error("AI 生成的搜索表达式过长。");
+      if(searchQuery){const compiled=compileSearch(searchQuery);if(compiled.error)throw new Error(`AI 生成的搜索表达式无效：${compiled.error}`);mode="search"}
+      let action=null;if(value.action&&typeof value.action==="object"&&AI_ACTIONS.has(value.action.name)){
+        const name=value.action.name,args=value.action.args&&typeof value.action.args==="object"?value.action.args:{};
+        if(name==="open_view"&&!VIEWS.some(view=>view[0]===args.view))throw new Error("AI 建议了不存在的清单视图。");
+        if(name==="switch_mode"&&!["global","hierarchy"].includes(args.mode))throw new Error("AI 建议了不存在的浏览模式。");
+        if(name==="open_settings"&&!new Set(["display","defaults","add-defaults","quadrant","startup","statuses","statistics","backup","ai","reminder","webdav","plugins","about"]).has(args.section))
+          throw new Error("AI 建议了不存在的设置页面。");action={name,args}
+      }
+      if(!message)message=searchQuery?`已生成并应用搜索：${searchQuery}`:action?"可以执行下面的安全操作建议。":"我暂时无法确定你的意图，请换一种说法。";
+      return {mode,message,searchQuery,action}
+    }
+    function aiRequestHeaders(config,key){
+      const headers=new Headers({"Content-Type":"application/json",Accept:"application/json"});
+      Object.entries(parseAiExtraHeaders(config.extraHeaders)).forEach(([name,value])=>headers.set(name,value));
+      if(config.authMode==="bearer"&&key)headers.set("Authorization",`Bearer ${key}`);
+      else if(config.authMode==="api-key"&&key)headers.set("api-key",key);
+      else if(config.authMode==="x-api-key"&&key)headers.set("x-api-key",key);return headers
+    }
+    async function requestAiCompletion(messages,settings={config:state.aiConfig,key:state.aiApiKey}){
+      const {config,key}=settings,format=config.apiFormat==="responses"?"responses":"chat",
+        endpoint=normalizeAiEndpoint(config.apiUrl,format),headers=aiRequestHeaders(config,key),token=webdavBridgeToken(),
+        requestUrl=webdavBridgeActive()?`/webdav-proxy?url=${encodeURIComponent(endpoint)}${token?`&token=${encodeURIComponent(token)}`:""}`:endpoint,
+        controller=new AbortController(),timer=setTimeout(()=>controller.abort(),60000),
+        requestBody=format==="responses"?{model:config.model,input:messages}:{model:config.model,messages,temperature:.1,
+          ...(config.preset==="deepseek-flash"?{max_tokens:900,response_format:{type:"json_object"}}:{})};
+      let response;try{response=androidWebdavActive()
+        ?await androidWebdavFetch(endpoint,{method:"POST",body:JSON.stringify(requestBody)},headers)
+        :await fetch(requestUrl,{method:"POST",headers,body:JSON.stringify(requestBody),credentials:"omit",signal:controller.signal})}catch(error){
+        if(error?.name==="AbortError")throw new Error("AI 请求超过 60 秒，已取消。");
+        throw new Error(androidWebdavActive()?`Android 原生桥接无法连接 AI 服务：${error?.message||error}`:webdavBridgeActive()?`本地桥接无法连接 AI 服务：${error?.message||error}`:
+          `浏览器无法直连 AI 服务（可能是 CORS 或网络问题）：${error?.message||error}。可改用 OrglistWebDAV.cmd 打开的页面。`)
+      }finally{clearTimeout(timer)}
+      const responseText=await response.text();let payload;try{payload=JSON.parse(responseText)}catch(_){throw new Error(`AI 接口返回了非 JSON 内容${responseText?`：${responseText.slice(0,180)}`:"。"}`)}
+      if(!response.ok)throw new Error(payload?.error?.message||payload?.message||`AI 接口返回 HTTP ${response.status}`);return aiResponseText(payload)
+    }
+    function aiConversationMessages(){
+      return state.aiConversation.filter(item=>!item.pending&&!item.error).slice(-8).map(item=>({role:item.role,
+        content:item.role==="assistant"?JSON.stringify({message:item.text,searchQuery:item.result?.searchQuery||"",action:item.result?.action||null}):item.text}))
+    }
+    function aiActionLabel(action){
+      if(!action)return "";return {open_view:"打开这个清单",open_settings:"打开对应设置",open_add:"打开新增条目",clear_filters:"清除筛选条件",switch_mode:"切换浏览模式"}[action.name]||"执行建议"
+    }
+    function renderAiPanel(){
+      const host=$("aiMessages");if(!host)return;
+      const welcome=`<div class="aiWelcome">可以说“找出本周截止但未完成的工作任务”“怎么批量修改状态”“打开 WebDAV 设置”。
+        <div class="aiQuickList"><button class="aiQuick" data-ai-prompt="查找今天未完成的任务">今天未完成</button>
+          <button class="aiQuick" data-ai-prompt="怎样批量修改任务状态？">批量操作说明</button>
+          <button class="aiQuick" data-ai-prompt="打开 AI 设置">AI 设置</button></div></div>`;
+      host.innerHTML=(state.aiConversation.length?"":welcome)+state.aiConversation.map((item,index)=>
+        `<div class="aiMessage ${item.role} ${item.error?"error":""}">${esc(item.pending?"正在思考…":item.text)}
+          ${item.result?.searchQuery?`<span class="aiMessageMeta">搜索表达式：${esc(item.result.searchQuery)}${item.result.applied?" · 已应用":""}</span>`:""}
+          ${item.result?.action?`<button class="aiApply" data-ai-action="${index}" type="button">${esc(aiActionLabel(item.result.action))}</button>`:""}</div>`).join("");
+      host.querySelectorAll("[data-ai-prompt]").forEach(button=>button.onclick=()=>{$("search").value=button.dataset.aiPrompt;state.aiDraft=button.dataset.aiPrompt;askAiAssistant()});
+      host.querySelectorAll("[data-ai-action]").forEach(button=>button.onclick=()=>executeAiAction(state.aiConversation[Number(button.dataset.aiAction)]?.result?.action));
+      host.scrollTop=host.scrollHeight
+    }
+    function applyAiSearchResult(result){
+      if(!result.searchQuery)return;state.query=result.searchQuery;state.visible=100;state.customActive=null;result.applied=true;
+      rememberSearch(state.query);setAiMode(false);renderCustomLists();renderContent();
+      setNotice(`AI 已转换并应用搜索：${state.query}`)
+    }
+    async function askAiAssistant(){
+      if(state.aiBusy)return;const question=String(state.aiDraft||$("search").value||"").trim();if(!question)return;
+      if(!state.aiConfig.enabled){setAiMode(false);openSettings();navigateSettings("settings-ai","auto");setAiStatus("请先启用并配置 AI 助手。","error");return}
+      if(state.aiConfig.authMode!=="none"&&!state.aiApiKey){setAiMode(false);openSettings();navigateSettings("settings-ai","auto");setAiStatus("请先填写 API Key。","error");return}
+      state.aiConversation.push({role:"user",text:question},{role:"assistant",text:"正在思考…",pending:true});state.aiBusy=true;state.aiDraft="";$("search").value="";renderAiPanel();
+      try{const raw=await requestAiCompletion([{role:"system",content:aiSystemPrompt()},...aiConversationMessages().filter(item=>item.content!=="正在思考…")]),
+        result=normalizeAiResult(parseAiJson(raw)),pending=state.aiConversation.findLast(item=>item.pending);
+        if(pending){pending.pending=false;pending.text=result.message;pending.result=result}applyAiSearchResult(result)
+      }catch(error){const pending=state.aiConversation.findLast(item=>item.pending);if(pending){pending.pending=false;pending.error=true;pending.text=error?.message||String(error)}}
+      finally{state.aiBusy=false;renderAiPanel();$("search").focus()}
+    }
+    function setAiMode(enabled){
+      if(enabled&&!state.aiConfig.enabled){openSettings();navigateSettings("settings-ai","auto");setAiStatus("请先勾选启用并填写连接信息。","error");return}
+      state.aiMode=!!enabled;hideSearchHistory();$("aiPanel").classList.toggle("show",state.aiMode);$("aiModeToggle").classList.toggle("active",state.aiMode);
+      $("aiModeToggle").setAttribute("aria-pressed",String(state.aiMode));$("search").closest(".search").classList.toggle("aiMode",state.aiMode);
+      $("searchHistoryToggle").hidden=state.aiMode;$("search").value=state.aiMode?state.aiDraft:state.query;
+      $("search").placeholder=state.aiMode?"问 AI：搜索任务、解释功能或打开页面…":(state.mode==="hierarchy"?"搜索所有层级的标题、正文、标签或属性…":"搜索标题、正文、标签或属性…");
+      if(state.aiMode)renderAiPanel();$("search").focus()
+    }
+    function executeAiAction(action){
+      if(!action||!AI_ACTIONS.has(action.name))return;const args=action.args||{};
+      if(action.name==="open_settings"){setAiMode(false);openSettings();navigateSettings(`settings-${args.section}`,"auto");return}
+      if(action.name==="open_add"){setAiMode(false);openVisualEditor("add");return}
+      rememberNavigation();
+      if(action.name==="open_view"){state.mode="global";state.view=args.view;state.selected=null;state.detailOpen=false;state.customActive=null}
+      else if(action.name==="switch_mode"){state.mode=args.mode;state.selected=null;state.detailOpen=false;if(args.mode==="hierarchy")state.hierParent=null}
+      else if(action.name==="clear_filters"){state.query="";state.status="ALL";state.priority="ALL";state.tag="ALL";state.dateFrom="";state.dateTo="";state.customActive=null;syncFilterControls()}
+      setAiMode(false);state.visible=100;render()
+    }
+    async function testAiConnection(){
+      let settings;try{settings=readAiSettingsForm()}catch(error){setAiStatus(error.message,"error");return}
+      const button=$("testAi"),label=button.textContent,endpoint=normalizeAiEndpoint(settings.config.apiUrl,settings.config.apiFormat);
+      button.disabled=true;button.textContent="正在测试…";
+      setAiStatus(`正在连接 ${endpoint}，模型 ${settings.config.model}；最长等待 60 秒…`);$("aiStatus").scrollIntoView({block:"nearest"});
+      try{const reply=await requestAiCompletion([{role:"system",content:"请只输出一个 JSON 对象。"},
+        {role:"user",content:'输出 JSON：{"status":"连接成功"}'}],settings);setAiStatus(`连接成功：${reply.slice(0,160)}`,"success")}
+      catch(error){setAiStatus(error?.message||String(error),"error")}finally{button.disabled=false;button.textContent=label}
+    }
     function cleanHeading(raw) {
       let value=raw.trim(), tags=[], status="NONE", priority="";
       const tm=value.match(/\s+(:[^\s:]+(?::[^\s:]+)*:)\s*$/);
@@ -2901,6 +3191,7 @@ print("hello")
       }
     }
     function loadPreferences(){
+      loadAiSettings();
       try{const saved=JSON.parse(localStorage.getItem(CUSTOM_KEY)||"[]");state.custom=Array.isArray(saved)?saved.slice(0,30):[]}
       catch(_){state.custom=[]}
       try{const statuses=JSON.parse(localStorage.getItem(STATUS_KEY)||"{}");
@@ -3220,6 +3511,7 @@ print("hello")
       $("statHeatmap").checked=state.statistics.heatmap;$("statHabits").checked=state.statistics.habits;
       $("statDefaultPeriod").value=state.statistics.period;$("countdownCompact").value=state.countdownCompact?"1":"0";
       $("countdownSoonDays").value=String(state.countdownSoonDays);
+      fillAiSettingsForm();
       renderStartupSummary();
       setWebdavStatus("");updateWebdavMode();renderWebdavProfiles();renderSettingsOrdering();renderPluginList();syncReminderPlatformUI();loadReminderSettings();
       if(state.webdavProfiles.length)fillWebdavProfile(state.webdavProfiles[0]);
@@ -3490,6 +3782,8 @@ print("hello")
       if(element)element.value=String(uri||"")
     };
     function saveSettingsForm(){
+      let aiSettings;try{aiSettings=readAiSettingsForm()}catch(error){setAiStatus(error.message,"error");navigateSettings("settings-ai");return false}
+      persistAiSettings(aiSettings);
       state.filterPreference=$("filterPreference").value;state.detailBehavior=$("detailBehavior").value;
       state.defaultImageFolder=normalizeRelativeFolder($("defaultImageFolder").value);
       state.imageTrashFolder=normalizeRelativeFolder($("imageTrashFolder").value);saveImageSettings();
@@ -3520,12 +3814,16 @@ print("hello")
     }
     const CONFIG_KEYS=[HISTORY_KEY,HISTORY_DEFAULT_KEY,CUSTOM_KEY,LAYOUT_KEY,SEARCH_HISTORY_KEY,QUADRANT_KEY,SMART_KEY,
       CALENDAR_KEY,EDITOR_KEY,EDITOR_STYLE_KEY,SIDE_ORDER_KEY,SMART_ORDER_KEY,FILE_ORDER_KEY,
-      DISPLAY_KEY,ADD_KEY,WEBDAV_KEY,STATUS_KEY,STARTUP_KEY,VIM_KEY,IMAGE_KEY,STATISTICS_KEY];
+      DISPLAY_KEY,ADD_KEY,WEBDAV_KEY,STATUS_KEY,STARTUP_KEY,VIM_KEY,IMAGE_KEY,STATISTICS_KEY,AI_SETTINGS_KEY];
     function buildConfigurationExport(){
       const values={};CONFIG_KEYS.forEach(key=>{const value=localStorage.getItem(key);if(value!==null)values[key]=value});
       if(values[WEBDAV_KEY]){
         try{values[WEBDAV_KEY]=JSON.stringify(JSON.parse(values[WEBDAV_KEY]).map(profile=>
           ({...profile,password:"",rememberPassword:false})))}catch(_){delete values[WEBDAV_KEY]}
+      }
+      if(values[AI_SETTINGS_KEY]){
+        try{const settings=JSON.parse(values[AI_SETTINGS_KEY]);settings.extraHeaders="";settings.rememberKey=false;
+          values[AI_SETTINGS_KEY]=JSON.stringify(settings)}catch(_){delete values[AI_SETTINGS_KEY]}
       }
       return {format:"org-checklist-config-v1",exportedAt:new Date().toISOString(),values}
     }
@@ -5021,7 +5319,8 @@ print("hello")
       $("calendarControls").classList.toggle("day",calendar&&state.calendarMode==="day");
       $("calendarControls").querySelectorAll("[data-calendar-mode]").forEach(button=>
         button.classList.toggle("active",button.dataset.calendarMode===state.calendarMode));
-      $("search").placeholder=hierarchy?"搜索所有层级的标题、正文、标签或属性…":"搜索标题、正文、标签或属性…";
+      $("search").placeholder=state.aiMode?"问 AI：搜索任务、解释功能或打开页面…":
+        (hierarchy?"搜索所有层级的标题、正文、标签或属性…":"搜索标题、正文、标签或属性…");
       if(hierarchy)renderHierarchy();else{$("hierBar").innerHTML="";
         if(state.view==="statistics")renderStatistics();else if(state.view==="quadrant")renderQuadrant();else if(state.view==="calendar")renderCalendar();else renderList()}
       $("searchStatus").textContent=state.searchError?`搜索表达式错误：${state.searchError}`:"";
@@ -6332,6 +6631,9 @@ print("hello")
       navigateSettings(button.dataset.settingsTarget));
     $("settingsContent").onscroll=syncSettingsNavFromScroll;
     $("saveSettings").onclick=saveSettingsForm;$("testWebdav").onclick=()=>testWebdavConnection();
+    $("testAi").onclick=testAiConnection;$("forgetAiKey").onclick=forgetAiKey;
+    $("aiPreset").onchange=event=>applyAiPreset(event.target.value);
+    ["aiApiFormat","aiApiUrl","aiModel","aiAuthMode"].forEach(id=>$(id).addEventListener(id==="aiApiUrl"||id==="aiModel"?"input":"change",markAiPresetCustom));
     $("saveReminder").onclick=saveReminderSettings;$("testReminder").onclick=testReminderNotification;
     document.querySelectorAll("[data-reminder-section]").forEach(button=>button.onclick=()=>setReminderSubsection(button.dataset.reminderSection));
     $("testAlarm").onclick=testAlarmNotification;
@@ -6367,16 +6669,18 @@ print("hello")
       load(files,{id:`fallback-files:${files.map(file=>file.name).join("|")}`,kind:"files",label});e.target.value=""
     };
     $("saveCustom").onclick=openCustomModal;
-    $("search").onfocus=e=>renderSearchHistory(e.target.value);
-    $("search").oninput=e=>{setSearchQuery(e.target.value);renderSearchHistory(e.target.value);
+    $("aiModeToggle").onclick=event=>{event.stopPropagation();setAiMode(!state.aiMode)};
+    $("closeAiPanel").onclick=()=>setAiMode(false);$("clearAiChat").onclick=()=>{state.aiConversation=[];renderAiPanel()};
+    $("search").onfocus=e=>{if(state.aiMode){$("aiPanel").classList.add("show");renderAiPanel()}else renderSearchHistory(e.target.value)};
+    $("search").oninput=e=>{if(state.aiMode){state.aiDraft=e.target.value;return}setSearchQuery(e.target.value);renderSearchHistory(e.target.value);
       clearTimeout(searchHistoryTimer);searchHistoryTimer=setTimeout(()=>rememberSearch(state.query),1200);
       renderCustomLists();renderContent()};
     $("search").onkeydown=e=>{
-      if(e.key==="Enter"){clearTimeout(searchHistoryTimer);rememberSearch(state.query);hideSearchHistory();e.preventDefault()}
-      if(e.key==="Escape"){setSearchQuery("");hideSearchHistory();renderCustomLists();renderContent();e.target.blur()}
+      if(e.key==="Enter"){if(state.aiMode){state.aiDraft=e.target.value;askAiAssistant()}else{clearTimeout(searchHistoryTimer);rememberSearch(state.query);hideSearchHistory()}e.preventDefault()}
+      if(e.key==="Escape"){if(state.aiMode)setAiMode(false);else{setSearchQuery("");hideSearchHistory();renderCustomLists();renderContent();e.target.blur()}}
     };
     $("searchHistoryToggle").onclick=event=>{event.stopPropagation();renderSearchHistory("")};
-    $("clearSearch").onclick=()=>{setSearchQuery("");hideSearchHistory();renderCustomLists();renderContent()};
+    $("clearSearch").onclick=()=>{if(state.aiMode){state.aiDraft="";$("search").value="";return}setSearchQuery("");hideSearchHistory();renderCustomLists();renderContent()};
     [["statusFilter","status"],["priorityFilter","priority"],["tagFilter","tag"],["sortFilter","sort"]].forEach(([id,key])=>{
       $(id).onchange=e=>{state[key]=e.target.value;state.customActive=null;state.visible=100;renderCustomLists();renderContent()}
     });
