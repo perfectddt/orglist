@@ -1,4 +1,4 @@
-/* @orglist-plugin {"id":"orglist.configurable-workbench","name":"空白画布工作台","version":"4.1.1","type":"layout","hostApi":2} */
+/* @orglist-plugin {"id":"orglist.configurable-workbench","name":"空白画布工作台","version":"4.1.0","type":"layout","hostApi":2} */
 (function () {
   "use strict";
 
@@ -168,7 +168,7 @@
   function nodeLabel(node) { return node.kind === "container" ? "容器" : node.content === "decor" ? "" : contentKinds[node.content]?.label || "窗口"; }
 
   host.register({
-    manifest: { id: pluginId, name: "空白画布工作台", version: "4.1.1", type: "layout", hostApi: 2, platforms: ["windows", "android"], description: "修复按钮重新显示目标时触发全画布高亮蒙版" },
+    manifest: { id: pluginId, name: "空白画布工作台", version: "4.1.0", type: "layout", hostApi: 2, platforms: ["windows", "android"], description: "按钮可绑定窗口或容器并切换显隐，新增按钮形状、配色、填充与阴影样式" },
     activate(api) {
       let config = normalizeConfig(api.getSetting("config", defaults));
       let editingId = null; let lastSummary = { selected: "", detailOpen: false, view: "" };
@@ -191,7 +191,7 @@
         api.setSetting("layoutHistory", history);
       };
       const exportHistory = () => {
-        const payload = { app: "orglist.configurable-workbench", version: "4.1.1", exportedAt: new Date().toISOString(), defaultLayout: api.getSetting("defaultLayout", null), layoutHistory: api.getSetting("layoutHistory", []), config: { schema: 4, mode: config.mode, nodes: config.nodes } };
+        const payload = { app: "orglist.configurable-workbench", version: "4.1.0", exportedAt: new Date().toISOString(), defaultLayout: api.getSetting("defaultLayout", null), layoutHistory: api.getSetting("layoutHistory", []), config: { schema: 4, mode: config.mode, nodes: config.nodes } };
         const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
@@ -495,6 +495,7 @@
         const target = findNode(id); if (!target) return;
         target.visible = !target.visible;
         save(); renderWorkspace();
+        if (target.visible) locateNode(id);
         if (drawer.classList.contains("show")) renderDrawer();
       }
 

@@ -854,7 +854,6 @@
   </style>
 </head>
 <body>
-  <input id="folderInput" class="hidden" type="file" webkitdirectory directory multiple>
   <input id="fileInput" class="hidden" type="file" accept=".org,text/plain" multiple>
   <input id="imageInsertInput" class="hidden" type="file" accept="image/png,image/jpeg,image/gif,image/webp,image/bmp,image/svg+xml,image/avif" multiple>
   <input id="configImport" class="hidden" type="file" accept=".json,application/json">
@@ -1054,6 +1053,7 @@
           <div class="syntaxCode">deadline:2026-07-01..2026-07-31</div><div>日期闭区间</div>
           <div class="syntaxCode">scheduled:&lt;2026-08-01</div><div>日期比较，支持 &gt;、&gt;=、&lt;、&lt;=</div>
           <div class="syntaxCode">closed:today</div><div>支持 today、yesterday、tomorrow</div>
+          <div class="syntaxCode">modified:today</div><div>按 Org 的 MODIFIED 属性搜索；也支持 7d、30d、具体日期和日期范围</div>
           <div class="syntaxCode">has:deadline overdue:true</div><div>判断是否存在日期或是否逾期</div>
           <div class="syntaxCode">has:countdown countdown:next30d</div><div>筛选倒计时；支持 today、active、overdue、next7d、next30d、pinned 和日期范围</div>
         </div>
@@ -1063,6 +1063,7 @@
           <code>file:inbox.org,nextactions.org 报名 -宁波</code>
           <code>closed:&gt;=2026-07-01 closed:&lt;=2026-07-31</code>
           <code>countdown:next30d tag:考试</code>
+          <code>modified:7d file:inbox.org</code>
         </div>
       </div>
     </div>
@@ -1297,8 +1298,9 @@ CLOSED: [2026-07-31 Fri 17:30]</code></div><div>计划、截止与完成时间�
 CLOSED: [2026-07-30 Thu 09:45]</code></div><div>CNCL 表示已取消，也按已完成处理。其他状态可在设置中添加。</div>
           <div class="guideCode"><code>:PROPERTIES:
 :OWNER: 张三
+:MODIFIED: [2026-08-20 Thu 21:15]
 :ORG_GTD: Calendar
-:END:</code></div><div>属性抽屉。属性名写在两个冒号之间。</div>
+:END:</code></div><div>属性抽屉。属性名写在两个冒号之间；Orglist 修改条目时会自动更新 MODIFIED。</div>
           <div class="guideCode"><code>* NEXT 每天阅读
 SCHEDULED: &lt;2026-08-11 Tue .+1d&gt;
 :PROPERTIES:
@@ -1434,13 +1436,13 @@ print("hello")
         </section>
         <section class="settingsSection" id="settings-add-defaults">
           <h3>新增条目默认项</h3>
-          <p class="settingsHint">控制点击“＋”打开新增窗口时，新条目默认放到哪里。“当前浏览位置”指层级视图中你展开或选中的标题位置。</p>
+          <p class="settingsHint">条目详情打开时，新条目默认放在该条目下面；否则层级浏览使用当前层级。这里的设置用于控制其他视图中的默认位置。</p>
           <div class="settingsGrid">
-            <label class="visualField"><span>默认添加位置</span><select id="addPositionDefault">
-              <option value="auto">层级视图用当前浏览位置；其他视图用上次父级（推荐）</option>
-              <option value="last-parent">总是使用上次添加条目的父级标题</option>
-              <option value="selected">总是使用当前选中条目作为父级（旧行为）</option>
-              <option value="top">总是顶层（H1）</option>
+            <label class="visualField"><span>其他视图的默认添加位置</span><select id="addPositionDefault">
+              <option value="auto">使用上次添加条目的父级标题（推荐）</option>
+              <option value="last-parent">使用上次添加条目的父级标题</option>
+              <option value="selected">使用当前选中条目作为父级（旧行为）</option>
+              <option value="top">使用顶层（H1）</option>
             </select><small>“上次父级”指上一次新增条目的父级标题；连续新增会排在同一个父级下，而不是嵌套进刚添加的条目。</small></label>
           </div>
         </section>
@@ -1713,9 +1715,9 @@ print("hello")
       {id:"display.detailBehavior",group:"显示",label:"点击条目时打开详情",type:"select",options:[
         {value:"desktop",label:"仅宽屏自动打开"},{value:"always",label:"所有屏幕自动打开"},{value:"manual",label:"从不自动打开"}],
         read:()=>state.detailBehavior,write:value=>{state.detailBehavior=value;saveDisplaySettings()}},
-      {id:"add.position",group:"新增条目",label:"默认插入位置",type:"select",options:[
-        {value:"auto",label:"当前浏览位置"},{value:"last-parent",label:"上次选择的父级"},
-        {value:"selected",label:"当前选中条目之后"},{value:"top",label:"文件顶部"}],
+      {id:"add.position",group:"新增条目",label:"其他视图默认插入位置",type:"select",options:[
+        {value:"auto",label:"上次添加条目的父级"},{value:"last-parent",label:"上次添加条目的父级"},
+        {value:"selected",label:"当前选中条目作为父级"},{value:"top",label:"文件顶部"}],
         read:()=>state.addDefaults.position,write:value=>{state.addDefaults.position=value;
           localStorage.setItem(ADD_KEY,JSON.stringify(state.addDefaults))}},
       {id:"defaults.columns",group:"默认筛选",label:"列表布局",type:"select",options:[
@@ -2503,11 +2505,14 @@ print("hello")
       let field="grep",value=token;const colon=token.indexOf(":");
       if(colon>0){field=token.slice(0,colon).toLocaleLowerCase();value=token.slice(colon+1)}
       const aliases={re:"grep",regex:"grep","标题":"title","正文":"body","标签":"tag","状态":"status",
-        "优先级":"priority","文件":"file","files":"file","路径":"path","层级":"level","计划":"scheduled","截止":"deadline","完成":"closed"};
+        "优先级":"priority","文件":"file","files":"file","路径":"path","层级":"level","计划":"scheduled","截止":"deadline","完成":"closed",
+        "修改":"modified","最近修改":"modified"};
       field=aliases[field]||field;if(!value)throw new Error(`搜索条件缺少内容：${raw}`);
       let test;
       if(["scheduled","deadline","closed","orgdate","date","anydate"].includes(field)){
         test=task=>dateExpressionMatches(dateValues(task,field),value)
+      }else if(field==="modified"){
+        test=task=>modifiedExpressionMatches(task,value)
       }else if(field==="countdown"){
         const wanted=value.toLocaleLowerCase(),date=task=>task.countdownDate,now=today(),future=days=>dateAfter(now,days);
         test=task=>!date(task)?false:wanted==="today"?date(task)===now:wanted==="active"?countdownVisible(task)&&date(task)>=now:
@@ -2693,6 +2698,7 @@ print("hello")
       const currentStyle=String(drawer.match(/^\s*:STYLE:\s*(.*?)\s*$/im)?.[1]||"").toLowerCase();
       if(habit)drawer=updateDrawerValue(drawer,"STYLE","habit");
       else if(currentStyle==="habit")drawer=updateDrawerValue(drawer,"STYLE",null);
+      drawer=updateDrawerValue(drawer,"MODIFIED",modifiedPropertyValue());
       const lunarLine=lunar?`<%%(diary-chinese-anniversary ${lunarMonth} ${lunarDay})>`:"",
         body=String(values.body||"").replace(/\r\n?/g,"\n")
           .replace(/^\s*<%%\(diary-chinese-anniversary\s+\d{1,2}\s+\d{1,2}\s*\)>\s*$/gim,"").trim();
@@ -3015,6 +3021,17 @@ print("hello")
     }
     function selectTask(uid,explicit=false){
       state.selected=uid;state.detailOpen=explicit||shouldAutoOpenDetail();renderDetail();notifyLayoutPlugins()
+    }
+    function parentTask(task){return task?.parentUid?state.tasks.find(item=>item.uid===task.parentUid)||null:null}
+    function jumpToParentTask(uid=state.selected,{renderPage=true,remember=true}={}){
+      const task=state.tasks.find(item=>item.uid===uid),parent=parentTask(task);
+      if(!parent){if(renderPage)setNotice("当前条目是顶层条目，没有上级条目。");return null}
+      if(remember)rememberNavigation();
+      state.mode="hierarchy";state.view="all";state.file=parent.fileId;state.hierParent=parent.parentUid||null;
+      state.status="ALL";state.priority="ALL";state.tag="ALL";state.dateFrom="";state.dateTo="";state.query="";
+      state.customActive=null;state.selected=parent.uid;state.detailOpen=true;state.visible=100;
+      if(renderPage){syncFilterControls();$("search").value="";closeSidebar();render();setNotice(`已跳转到上级条目“${parent.title}”。`)}
+      return parent
     }
     function saveDisplaySettings(){
       try{localStorage.setItem(DISPLAY_KEY,JSON.stringify({filterPreference:state.filterPreference,
@@ -3692,7 +3709,7 @@ print("hello")
     function currentStartupPage(){
       const file=state.sources.find(source=>source.id===state.file);
       const parent=state.tasks.find(task=>task.uid===state.hierParent);
-      return {mode:state.mode,view:state.view,filePath:file?.path||"all",status:state.status,
+      return {mode:state.mode,view:state.view,filePath:state.file==="recent"?"recent":file?.path||"all",status:state.status,
         priority:state.priority,tag:state.tag,sort:state.sort,dateField:state.dateField,
         dateFrom:state.dateFrom,dateTo:state.dateTo,columns:state.columns,query:state.query,
         calendarMode:state.calendarMode,calendarDateRule:state.calendarDateRule,
@@ -3703,7 +3720,7 @@ print("hello")
       const view=page.mode==="hierarchy"?"层级浏览":
         page.view==="calendar"?`日历 · ${{year:"年",month:"月",week:"周",day:"日"}[page.calendarMode]||"月"}`:
         (VIEWS.find(item=>item[0]===page.view)?.[2]||"全局清单");
-      const file=page.filePath&&page.filePath!=="all"?` · ${page.filePath}`:" · 全部文件";
+      const file=page.filePath==="recent"?" · 最近修改":page.filePath&&page.filePath!=="all"?` · ${page.filePath}`:" · 全部文件";
       return `当前启动页：${view}${file}；筛选使用“默认筛选条件”。`
     }
     function renderDefaultFilterStartupHint(){
@@ -3735,7 +3752,8 @@ print("hello")
       state.customActive=null;state.selected=null;state.detailOpen=false;
       if(["year","month","week","day"].includes(page.calendarMode))state.calendarMode=page.calendarMode;
       if(["ACTION","PRIMARY","DEADLINE","SCHEDULED","ANY"].includes(page.calendarDateRule))state.calendarDateRule=page.calendarDateRule;
-      const source=state.sources.find(item=>item.path===page.filePath);state.file=source?.id||"all";
+      const source=state.sources.find(item=>item.path===page.filePath);state.file=page.filePath==="recent"?"recent":source?.id||"all";
+      if(state.file==="recent")state.mode="global";
       const parent=page.hierParent&&state.tasks.find(task=>task.filePath===page.hierParent.filePath&&
         task.line===page.hierParent.line&&task.level===page.hierParent.level&&task.title===page.hierParent.title);
       state.hierParent=parent?.uid||null;syncFilterControls();$("search").value=state.query
@@ -3848,7 +3866,8 @@ print("hello")
         state.quadrantUrgent=["0","3","7","14","OVERDUE","TAG"].includes(item.quadrantUrgent)?item.quadrantUrgent:"3";
         state.calendarMode=["year","month","week","day"].includes(item.calendarMode)?item.calendarMode:state.calendarMode;
         state.calendarDateRule=["ACTION","PRIMARY","DEADLINE","SCHEDULED","ANY"].includes(item.calendarDateRule)?item.calendarDateRule:state.calendarDateRule;
-        if(item.filePath&&item.filePath!=="all"){
+        if(item.filePath==="recent")state.file="recent";
+        else if(item.filePath&&item.filePath!=="all"){
           const file=state.files.find(entry=>entry.path===item.filePath);if(file)state.file=file.id;
           else setNotice(`自定义清单“${item.name}”指定的文件尚未打开，已改为全部文件。`)
         }
@@ -3862,7 +3881,7 @@ print("hello")
     }
     function customFilterSummary(){
       const view=VIEWS.find(item=>item[0]===state.view)?.[2]||"待办";
-      const file=state.file==="all"?"全部文件":state.files.find(item=>item.id===state.file)?.name||"全部文件";
+      const file=currentFileScopeLabel("全部文件");
       const parts=[`视图：${view}`,`文件：${file}`,`状态：${$("statusFilter").selectedOptions[0]?.textContent||state.status}`,
         `优先级：${$("priorityFilter").selectedOptions[0]?.textContent||state.priority}`,
         `标签：${$("tagFilter").selectedOptions[0]?.textContent||state.tag}`];
@@ -3881,7 +3900,7 @@ print("hello")
     function closeCustomModal(){$("customModal").classList.remove("show")}
     function saveCurrentCustom(){
       const name=$("customName").value.trim();if(!name){$("customName").focus();setNotice("请先输入自定义清单名称。");return}
-      const filePath=state.file==="all"?"all":state.files.find(file=>file.id===state.file)?.path||"all";
+      const filePath=state.file==="recent"?"recent":state.file==="all"?"all":state.files.find(file=>file.id===state.file)?.path||"all";
       const existing=state.custom.find(item=>item.name===name),item={id:existing?.id||`custom-${Date.now()}`,name:name.slice(0,40),view:state.view,filePath,
         status:state.status,priority:state.priority,tag:state.tag,sort:state.sort,dateField:state.dateField,
         dateFrom:state.dateFrom,dateTo:state.dateTo,query:state.query,columns:state.columns,
@@ -3965,9 +3984,13 @@ print("hello")
       return output
     }
     async function chooseFolder(){
-      if(typeof window.showDirectoryPicker!=="function"){$("folderInput").click();return}
+      if(typeof window.showDirectoryPicker!=="function"){
+        setNotice("当前浏览器或打开方式只能读取文件夹，不能覆盖原文件。请使用最新版 Edge 或 Chrome 直接打开本页面，再点击“打开 Org 文件夹”。");return
+      }
       try{
-        const handle=await window.showDirectoryPicker({mode:"readwrite"}),entries=await collectDirectory(handle);
+        const handle=await window.showDirectoryPicker({id:"orglist-local-folder",mode:"readwrite"});
+        if(!await permissionGranted(handle,"readwrite"))throw new DOMException("没有获得文件夹写入权限","NotAllowedError");
+        const entries=await collectDirectory(handle);
         await load(entries,{id:`folder:${handle.name}`,kind:"folder",label:handle.name,handle})
       }catch(error){
         if(error?.name!=="AbortError"){setNotice("没有取得文件夹读写权限。可改用“选择文件”读取并下载副本，或换支持文件写回的浏览器。")}
@@ -4005,6 +4028,10 @@ print("hello")
           }
           return
         }
+        if(item.kind==="folder"){
+          setNotice(automatic?"默认文件夹需要重新授予读写权限；请点击“打开 Org 文件夹”重新选择。":
+            "该文件夹的读写权限已经失效；请点击“打开 Org 文件夹”重新选择并授权。");return
+        }
         if(record?.cache?.length){
           const entries=record.cache.map(saved=>({file:new File([saved.text],saved.name,{type:"text/plain"}),path:saved.path}));
           await load(entries,{...item,handle:null});
@@ -4024,18 +4051,106 @@ print("hello")
     }
     const isDone = t => DONE.has(t.status)||!!t.closed;
     function setNotice(text){$("noticeText").textContent=text;$("notice").classList.toggle("show",!!text)}
+    function taskModifiedIdentity(task){
+      if(!task)return "";const filePath=String(task.filePath||""),orgId=String(task.properties?.ID||"").trim();
+      return orgId?`id:${filePath}\u0000${orgId}`:
+        `task:${filePath}\u0000${Number(task.level)||0}\u0000${(task.parentPath||[]).join("\u0001")}\u0000${String(task.title||"")}`
+    }
+    function modifiedPropertyTimestamp(value){
+      const date=extractDate(String(value||""));if(!date)return 0;
+      const time=extractTime(String(value||""))||"00:00",timestamp=new Date(`${date}T${time}:00`).getTime();
+      return Number.isFinite(timestamp)?timestamp:0
+    }
+    function modifiedPropertyValue(now=new Date()){
+      const value=now instanceof Date?now:new Date(now),date=todayFrom(value),
+        time=`${String(value.getHours()).padStart(2,"0")}:${String(value.getMinutes()).padStart(2,"0")}`;
+      return formatOrgTimestamp(date,time,true)
+    }
+    function updateModifiedProperty(block,now=new Date()){
+      const normalized=String(block||"").replace(/\r\n?/g,"\n"),drawer=updateDrawerValue(extractPropertyDrawer(normalized),"MODIFIED",modifiedPropertyValue(now));
+      return replaceOrInsertPropertyDrawer(normalized,drawer)
+    }
+    function recentModifiedTasks(){return state.tasks.filter(task=>taskModifiedAt(task)>0).sort((left,right)=>taskModifiedAt(right)-taskModifiedAt(left)||taskCompare(left,right))}
+    function taskModifiedAt(task){
+      return modifiedPropertyTimestamp(task?.properties?.MODIFIED)
+    }
+    function modifiedExpressionMatches(task,expression){
+      const timestamp=taskModifiedAt(task);if(!timestamp)return false;
+      const wanted=String(expression||"").trim().toLocaleLowerCase();if(["recent","all","*"].includes(wanted))return true;
+      const days=wanted.match(/^(\d+)d$/);if(days)return timestamp>=Date.now()-Math.max(1,Number(days[1]))*86400000;
+      return dateExpressionMatches([todayFrom(new Date(timestamp))],wanted)
+    }
+    function taskInCurrentFileScope(task){
+      if(state.file==="all")return true;
+      if(state.file==="recent")return taskModifiedAt(task)>0;
+      return task.fileId===state.file
+    }
+    function currentFileScopeLabel(emptyLabel="尚未选择文件"){
+      if(state.file==="recent")return "最近修改";
+      if(state.file==="all")return state.files.length?"全部文件":emptyLabel;
+      return state.files.find(file=>file.id===state.file)?.name||"全部文件"
+    }
+    function taskDescendants(task){
+      if(!task)return [];const later=state.tasks.filter(item=>item.fileId===task.fileId&&item.sourceIndex>task.sourceIndex),
+        boundary=later.find(item=>item.level<=task.level)?.sourceIndex??Infinity;
+      return later.filter(item=>item.sourceIndex<boundary)
+    }
+    function directCheckboxStates(task){
+      const rows=String(task?.rawBlock||"").replace(/\r\n?/g,"\n").split("\n").slice(1).map(line=>{
+        const match=line.match(/^(\s*)(?:[-+*]|\d+[.)])\s+\[([ Xx-])\]/);return match?{indent:match[1].replace(/\t/g,"    ").length,state:match[2]}:null
+      }).filter(Boolean);if(!rows.length)return [];
+      const minimum=Math.min(...rows.map(row=>row.indent));return rows.filter(row=>row.indent===minimum).map(row=>row.state)
+    }
+    function taskStatisticsCounts(task){
+      if(!task)return null;const cookieData=String(task.properties?.COOKIE_DATA||"").toLocaleLowerCase(),recursive=/\brecursive\b/.test(cookieData),
+        descendants=taskDescendants(task),headingItems=recursive?descendants:state.tasks.filter(item=>item.parentUid===task.uid),
+        explicitTodo=/\btodo\b/.test(cookieData),todoItems=explicitTodo?headingItems.filter(item=>item.status!=="NONE"):headingItems,
+        checkboxTasks=recursive?[task,...descendants]:[task],checkboxStates=checkboxTasks.flatMap(directCheckboxStates),
+        mode=/\bcheckbox\b/.test(cookieData)?"checkbox":explicitTodo?"todo":checkboxStates.length?"checkbox":"heading";
+      const countedItems=mode==="todo"?todoItems:headingItems,total=mode==="checkbox"?checkboxStates.length:countedItems.length;if(!total)return null;
+      const done=mode==="checkbox"?checkboxStates.filter(value=>/[Xx]/.test(value)).length:countedItems.filter(isDone).length;
+      return {done,total,mode,recursive}
+    }
+    function displayTaskTitle(task){
+      const title=String(task?.title||""),cookie=title.match(/\[(?:\d+\/\d+|\/|\d+%|%)\]/),counts=taskStatisticsCounts(task);
+      if(!cookie||!counts)return title;
+      const replacement=cookie[0].includes("%")?`[${Math.floor(counts.done/counts.total*100)}%]`:`[${counts.done}/${counts.total}]`;
+      return title.replace(cookie[0],replacement)
+    }
+    function updateStatisticsCookiesInSources(){
+      let updated=0;state.sources.forEach(source=>{
+        const tasks=state.tasks.filter(task=>task.fileId===source.id),lines=source.text.replace(/\r\n?/g,"\n").split("\n");let changed=false;
+        tasks.forEach(task=>{
+          const current=task.title.match(/\[(?:\d+\/\d+|\/|\d+%|%)\]/)?.[0],display=displayTaskTitle(task),next=display.match(/\[(?:\d+\/\d+|\d+%)\]/)?.[0];
+          if(!current||!next||current===next)return;
+          lines[task.startIndex]=String(lines[task.startIndex]||"").replace(current,next);changed=true;updated++
+        });
+        if(changed){source.text=lines.join(source.eol||"\n");source.dirty=true}
+      });return updated
+    }
+    function updateChangedFileTaskProperties(source,before){
+      const prior=new Map((before||[]).map(task=>[taskModifiedIdentity(task),String(task.rawBlock||"")]));
+      const parsed=parseOrg(source.text,{id:source.id,name:source.name,path:source.path},0),changed=parsed.filter(task=>
+        prior.get(taskModifiedIdentity(task))!==String(task.rawBlock||""));
+      if(!changed.length)return 0;
+      const lines=source.text.replace(/\r\n?/g,"\n").split("\n");changed.sort((left,right)=>right.startIndex-left.startIndex).forEach(task=>{
+        const touched=updateModifiedProperty(lines.slice(task.startIndex,task.endIndex).join("\n")).split("\n");
+        lines.splice(task.startIndex,task.endIndex-task.startIndex,...touched)
+      });source.text=lines.join(source.eol||"\n");return changed.length
+    }
     function rebuildFromSources(preserve) {
-      let offset=0;state.tasks=[];state.files=state.sources.map(source=>{
-        const meta={id:source.id,name:source.name,path:source.path,size:new Blob([source.text]).size,count:0,dirty:!!source.dirty};
-        const tasks=parseOrg(source.text,meta,offset);offset+=tasks.length;state.tasks.push(...tasks);
-        meta.count=tasks.filter(task=>!task.isGroup).length;return meta
-      });
+      const parseAll=()=>{let offset=0;state.tasks=[];state.files=state.sources.map(source=>{
+          const meta={id:source.id,name:source.name,path:source.path,size:new Blob([source.text]).size,count:0,dirty:!!source.dirty};
+          const tasks=parseOrg(source.text,meta,offset);offset+=tasks.length;state.tasks.push(...tasks);
+          meta.count=tasks.filter(task=>!task.isGroup).length;return meta
+        })};
+      parseAll();const cookieUpdates=updateStatisticsCookiesInSources();if(cookieUpdates)parseAll();
       if(preserve){
         const selected=state.tasks.find(task=>task.fileId===preserve.fileId&&task.startIndex===preserve.startIndex)||
           state.tasks.find(task=>task.fileId===preserve.fileId&&task.line>=preserve.line);
         state.selected=selected?.uid||null
       }
-      buildTags()
+      buildTags();return cookieUpdates
     }
     async function load(fileList,source) {
       const incoming=Array.from(fileList).map(item=>item?.file?item:{file:item,path:item.webkitRelativePath||item.name,handle:null});
@@ -4059,28 +4174,31 @@ print("hello")
           rootName,localAssets:assets,completeOrgScan:source?.kind==="folder"?incoming.length<2500&&chosen.length<500:source?.completeOrgScan===true,
           webdavUrl:item.webdavUrl||"",webdavEtag:item.webdavEtag||"",webdavConfig:item.webdavConfig||null,
           webdavBaseText:item.webdavUrl?item.text:null,persistedText:item.text,dirty:false}));
-        rebuildFromSources();
+        const cookieUpdates=rebuildFromSources();
         state.file="all";state.selected=null;state.hierParent=null;state.lastAddParent=null;
         state.navHistory=[];state.batchMode=false;state.batchSelected=[];state.batchSources=[];
         setSearchQuery("");state.visible=100;applyStartupPage();
-        setNotice(`已读取 ${state.files.length} 个文件，共识别 ${state.tasks.length} 个标题条目。`);
+        const writableCount=state.sources.filter(sourceCanWrite).length;
+        setNotice(`已读取 ${state.files.length} 个文件，共识别 ${state.tasks.length} 个标题条目。${cookieUpdates?`已校正 ${cookieUpdates} 个统计进度 Cookie，写回文件后可同步到 Emacs。`:""}${writableCount===state.sources.length?
+          "当前来源可直接写回原文件。":"当前打开方式只能读取；要直接写回，请用最新版 Edge/Chrome 重新点击“打开 Org 文件夹”并允许读写。"}`);
         render();await rememberSource(source||{id:`files:${state.files.map(file=>file.path).join("|")}`,kind:"files",
           label:state.files.length===1?state.files[0].name:`${state.files[0].name} 等 ${state.files.length} 个文件`},
           decoded.map(item=>({name:item.file.name,path:item.path||item.file.name,text:item.text})));
       } catch(e){setNotice("读取文件时出现问题，请确认文件未损坏。");render()}
     }
     function counts() {
-      const base=state.tasks.filter(t=>!t.isGroup), d=today();
+      const scoped=state.tasks.filter(taskInCurrentFileScope);
+      const base=scoped.filter(t=>!t.isGroup), d=today();
       return {open:base.filter(t=>!isDone(t)).length,today:base.filter(t=>!isDone(t)&&hasActionDate(t,d)).length,
         habits:base.filter(t=>t.isHabit).length,
         upcoming:base.filter(t=>!isDone(t)&&dateValues(t,"date").some(date=>date>d)).length,
         overdue:base.filter(taskOverdue).length,
         "no-date":base.filter(t=>!isDone(t)&&!dateValues(t,"date").length).length,
-        completed:base.filter(isDone).length,countdown:state.tasks.filter(countdownVisible).length,statistics:base.filter(t=>t.closed).length,quadrant:base.filter(t=>!isDone(t)).length,
+        completed:base.filter(isDone).length,countdown:scoped.filter(countdownVisible).length,statistics:base.filter(t=>t.closed).length,quadrant:base.filter(t=>!isDone(t)).length,
         calendar:base.filter(t=>calendarDateValues(t).length).length,all:base.length};
     }
     function matchesFilters(task,search) {
-      if(state.file!=="all"&&task.fileId!==state.file)return false;
+      if(!taskInCurrentFileScope(task))return false;
       const done=isDone(task);
       if(state.status==="OPEN"&&done)return false;
       if(!["ALL","OPEN"].includes(state.status)&&task.status!==state.status)return false;
@@ -4100,7 +4218,6 @@ print("hello")
       const d=today(),search=compileSearch(state.query);state.searchError=search.error;
       return state.tasks.filter(t=>{
         if(t.isGroup&&!["all","countdown"].includes(state.view))return false;
-        if(state.file!=="all"&&t.fileId!==state.file)return false;
         const done=isDone(t);
         if(state.view==="open"&&done)return false;
         if(state.view==="today"&&(done||!hasActionDate(t,d)))return false;
@@ -4111,7 +4228,8 @@ print("hello")
         if(state.view==="completed"&&!done)return false;
         if(state.view==="countdown"&&!countdownVisible(t))return false;
         return matchesFilters(t,search);
-      }).sort(state.view==="countdown"?(a,b)=>Number(b.countdownPinned)-Number(a.countdownPinned)||a.countdownDate.localeCompare(b.countdownDate)||taskCompare(a,b):taskCompare);
+      }).sort(state.file==="recent"?(a,b)=>taskModifiedAt(b)-taskModifiedAt(a)||taskCompare(a,b):
+        state.view==="countdown"?(a,b)=>Number(b.countdownPinned)-Number(a.countdownPinned)||a.countdownDate.localeCompare(b.countdownDate)||taskCompare(a,b):taskCompare);
     }
     function dateLabel(date){if(!date)return"";const d=new Date(date+"T00:00:00"),now=today();
       if(date===now)return"今天";const tm=new Date();tm.setDate(tm.getDate()+1);
@@ -4157,14 +4275,17 @@ print("hello")
     }
     function renderFiles(){
       $("fileTotal").textContent=state.files.length;
-      const entries=[{id:"all",path:"all",name:"全部文件",count:state.tasks.filter(task=>!task.isGroup).length,dirty:false},
-        ...state.files],keys=entries.map(entry=>entry.path);
+      const allEntry={id:"all",path:"all",name:"全部文件",count:state.tasks.filter(task=>!task.isGroup).length,dirty:false},
+        entries=[allEntry,...state.files],keys=entries.map(entry=>entry.path);
       state.fileOrder=[...state.fileOrder.filter(key=>keys.includes(key)),...keys.filter(key=>!state.fileOrder.includes(key))];
-      const ordered=state.fileOrder.map(key=>entries.find(entry=>entry.path===key)).filter(Boolean);
-      const html=ordered.map((file,index)=>`<button class="fileItem ${state.file===file.id?"active":""}" data-file="${file.id}" data-sort-key="${esc(file.path)}" title="${esc(file.path)}">
+      const manual=state.fileOrder.map(key=>entries.find(entry=>entry.path===key)).filter(Boolean),recentEntry={id:"recent",path:"recent",name:"最近修改",
+        count:recentModifiedTasks().filter(task=>!task.isGroup).length,dirty:false,virtual:true};
+      const ordered=manual.flatMap(file=>file.id==="all"?[file,recentEntry]:[file]);
+      const html=ordered.map((file,index)=>`<button class="fileItem ${state.file===file.id?"active":""}" data-file="${file.id}"${file.virtual?"":` data-sort-key="${esc(file.path)}"`} title="${file.virtual?"查看带有 Org MODIFIED 属性的条目":esc(file.path)}${!file.virtual&&file.id!=="all"&&file.dirty?" · 当前有未写回修改":""}">
         <span class="dot dot${index%5}"></span>
         <span class="fileName">${esc(file.name)}${file.dirty?' <span class="dirtyMark" title="有尚未写回的修改">●</span>':""}</span><em class="count">${file.count}</em></button>`).join("");
       $("files").innerHTML=html;$("files").querySelectorAll("[data-file]").forEach(b=>b.onclick=()=>{state.file=b.dataset.file;
+        if(state.file==="recent"){state.mode="global";state.view="all"}
         state.customActive=null;state.hierParent=null;state.selected=null;state.detailOpen=false;state.visible=100;closeSidebar();render()});
     }
     function buildTags(){
@@ -4176,7 +4297,7 @@ print("hello")
     function taskCard(task){
       const done=isDone(task),batchSelected=state.batchSelected.includes(task.uid);
       return `<div class="taskSwipe ${batchSelected?"batchSelected":""}" data-swipe-row="${task.uid}">
-        <button class="batchSelect" data-batch-select="${task.uid}" aria-label="${batchSelected?"取消选择":"选择"} ${esc(task.title)}">✓</button>
+        <button class="batchSelect" data-batch-select="${task.uid}" aria-label="${batchSelected?"取消选择":"选择"} ${esc(displayTaskTitle(task))}">✓</button>
         <button class="batchDragHandle" data-batch-drag="${task.uid}" aria-label="拖动所选条目，让它成为另一个条目的子项" title="拖到另一个条目上，松开后成为它的子项">⋮⋮</button>
         <div class="swipeActions"><button class="swipeEdit" data-swipe-edit="${task.uid}">编辑</button>
           <button class="swipeMove" data-swipe-move="${task.uid}">移动</button>
@@ -4184,9 +4305,9 @@ print("hello")
           <button class="swipeDelete" data-swipe-delete="${task.uid}">删除</button></div>
         <button class="task ${statusToneClass(task.status)} ${done?"isDone":""} ${state.selected===task.uid?"selected":""}" data-task="${task.uid}">
         <span class="check ${done?"done":task.status.toLowerCase()}" data-toggle="${task.uid}" title="${task.isHabit&&!done?"完成本次习惯、记录历史并推进下一次计划":done?"取消完成并改为 TODO":"标记为 DONE 并写入 CLOSED 完成时间"}"></span>
-        <span class="taskBody"><span class="titleLine">${task.priority?`<span class="priority p${esc(task.priority)}">${esc(task.priority)}</span>`:""}<span class="taskTitle">${esc(task.title)}</span></span>
+        <span class="taskBody"><span class="titleLine">${task.priority?`<span class="priority p${esc(task.priority)}">${esc(task.priority)}</span>`:""}<span class="taskTitle">${esc(displayTaskTitle(task))}</span></span>
         <span class="meta"><span class="chip statusColor ${statusToneClass(task.status)}">${esc(STATUS_LABEL[task.status]||task.status)}</span>${task.tags.slice(0,3).map(tag=>`<span class="tag">#${esc(tag)}</span>`).join("")}${task.parentPath.length?`<span class="path">${esc(task.parentPath.slice(-2).join(" / "))}</span>`:""}</span></span>
-        <span class="tail">${renderDateBadges(task)}<span class="source">${esc(task.fileName)}</span><span class="taskDetailHint" data-task-detail="${task.uid}">详情</span></span>
+        <span class="tail">${state.file==="recent"?`<span class="date orgdate" title="最近修改时间">修改 ${esc(new Date(taskModifiedAt(task)).toLocaleString("zh-CN",{month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hour12:false}))}</span>`:""}${renderDateBadges(task)}<span class="source">${esc(task.fileName)}</span><span class="taskDetailHint" data-task-detail="${task.uid}">详情</span></span>
       </button></div>`
     }
     function toggleBatchSelection(uid){
@@ -4414,7 +4535,7 @@ print("hello")
       const complete=!isDone(task),lines=source.text.replace(/\r\n?/g,"\n").split("\n"),original=lines.slice(task.startIndex,task.endIndex).join("\n");
       let renewed=null,block;
       try{renewed=task.isHabit&&complete?completeHabitBlock(original,task):null;
-        block=(renewed?.block||setBlockCompletion(original,task,complete)).split("\n")
+        block=updateModifiedProperty(renewed?.block||setBlockCompletion(original,task,complete)).split("\n")
       }catch(error){setNotice(error?.message||"习惯续期失败。");return false}
       lines.splice(task.startIndex,task.endIndex-task.startIndex,...block);
       source.text=lines.join(source.eol||"\n");source.dirty=true;
@@ -4454,18 +4575,18 @@ print("hello")
           if(renewHabit){
             const habitTask={...task,scheduled:dateField==="SCHEDULED"?date:task.scheduled,
               scheduledTime:dateField==="SCHEDULED"?time:task.scheduledTime};
-            changed=completeHabitBlock(changed,habitTask).block;lines.splice(task.startIndex,task.endIndex-task.startIndex,...changed.split("\n"));return
+            changed=updateModifiedProperty(completeHabitBlock(changed,habitTask).block);lines.splice(task.startIndex,task.endIndex-task.startIndex,...changed.split("\n"));return
           }
           const effectiveStatus=nextStatus==="KEEP"?task.status:nextStatus;
           if(nextStatus!=="KEEP"&&!DONE.has(effectiveStatus)&&dateField!=="CLOSED")
             changed=updateBatchPlanning(changed,"CLOSED","","");
-          changed=ensureClosedForStatus(changed,effectiveStatus).split("\n");
+          changed=updateModifiedProperty(ensureClosedForStatus(changed,effectiveStatus)).split("\n");
           lines.splice(task.startIndex,task.endIndex-task.startIndex,...changed)
         });
         source.text=lines.join(source.eol||"\n");source.dirty=true;
         if(!state.batchSources.includes(fileId))state.batchSources.push(fileId)
       });
-      rebuildFromSources();setNotice(`已批量修改 ${selected.length} 个条目的状态、优先级、标签或日期，尚未写回原文件。`);render()
+      rebuildFromSources();setNotice(`已批量修改 ${selected.length} 个条目的状态、优先级、标签、日期及 MODIFIED，尚未写回原文件。`);render()
     }
     function deleteBatchTasks(){
       const selected=state.tasks.filter(task=>state.batchSelected.includes(task.uid));
@@ -4491,6 +4612,8 @@ print("hello")
     }
     async function writeBatchSources(){
       const sources=state.batchSources.map(id=>state.sources.find(source=>source.id===id)).filter(Boolean);
+      const requestable=sources.find(source=>!sourceCanWrite(source)&&sourceCanOfferWrite(source));
+      if(requestable)await ensureSourceWritable(requestable);
       const writable=sources.filter(sourceCanWrite),blocked=sources.length-writable.length;
       if(!writable.length){setNotice("批量修改涉及的文件都没有写入权限，请重新打开文件夹或下载修改后的文件。");return}
       if(!window.confirm(`确定写回 ${writable.length} 个已修改的 Org 文件吗？${blocked?`另有 ${blocked} 个文件没有写入权限。`:""}`))return;
@@ -4503,7 +4626,7 @@ print("hello")
       const all=filtered(), shown=all.slice(0,state.visible);
       const view=VIEWS.find(x=>x[0]===state.view);$("viewTitle").textContent=view?.[2]||"待办";
       $("summary").textContent=`${all.length} 个条目${state.query?` · 搜索“${state.query}”`:""}`;
-      $("scope").textContent=state.file==="all"?(state.files.length?"全部文件":"尚未选择文件"):(state.files.find(f=>f.id===state.file)?.name||"全部文件");
+      $("scope").textContent=currentFileScopeLabel();
       if(!state.tasks.length){$("listHost").innerHTML=`<div class="empty"><div class="emptyIcon">✓</div><h2>选择你的 Org 文件</h2><p>点击“打开 Org 文件夹”后选择 <b>D:\\gtd</b>。这个 HTML 完全在本地工作，不需要登录，也不会上传文件。</p><button class="btn primary" id="emptyOpen">打开 Org 文件夹</button></div>`;$("emptyOpen").onclick=()=>chooseFolder();return}
       if(!shown.length){$("listHost").innerHTML='<div class="empty"><div class="emptyIcon">○</div><h2>这里暂时没有条目</h2><p>可以调整筛选条件，或换一个文件查看。</p></div>';return}
       const rows=shown.map(taskCard).join("");
@@ -4548,7 +4671,7 @@ print("hello")
       habitDates=base.filter(task=>task.isHabit).flatMap(habitLogDates).filter(date=>inDateRange(date,bounds));
       if(!state.tasks.length){$("viewTitle").textContent="统计";$("summary").textContent="0 个条目";$("scope").textContent="尚未选择文件";
         $("listHost").innerHTML=`<div class="empty"><div class="emptyIcon">统</div><h2>选择你的 Org 文件</h2><p>统计中心会读取 CLOSED、计划日期、标签、优先级和 Habit LOGBOOK。</p><button class="btn primary" id="emptyOpen">打开 Org 文件夹</button></div>`;$("emptyOpen").onclick=()=>chooseFolder();return}
-      $("viewTitle").textContent="统计";$("scope").textContent=state.file==="all"?"全部文件":state.files.find(file=>file.id===state.file)?.name||"当前文件";
+      $("viewTitle").textContent="统计";$("scope").textContent=currentFileScopeLabel("尚未选择文件");
       $("summary").textContent=`${bounds.start} 至 ${bounds.end} · 点击图表可查看任务`;
       const cards=state.statistics.completion?`<div class="statsGrid">
         <button class="statCard" data-stat-query="closed:${bounds.start}..${bounds.end}"><h3>完成任务</h3><div class="statValue">${completed.length}</div><div class="statSub">较上周期 ${change>=0?"+":""}${change}</div></button>
@@ -4572,7 +4695,7 @@ print("hello")
       $("listHost").querySelectorAll("[data-stat-overdue]").forEach(button=>button.onclick=()=>{state.view="overdue";render()})
     }
     function hierarchyMatches(task,searchPredicate){
-      if(state.file!=="all"&&task.fileId!==state.file)return false;
+      if(!taskInCurrentFileScope(task))return false;
       const done=isDone(task);
       if(state.status==="OPEN"&&done)return false;
       if(!["ALL","OPEN"].includes(state.status)&&task.status!==state.status)return false;
@@ -4595,8 +4718,8 @@ print("hello")
       while(node){chain.unshift(node);node=node.parentUid?state.tasks.find(t=>t.uid===node.parentUid):null}
       chain.forEach((item,index)=>{
         html+='<span class="sep">›</span>';
-        html+=index===chain.length-1?`<span class="crumbCurrent">${esc(item.title)}</span>`:
-          `<button data-crumb="${item.uid}">${esc(item.title)}</button>`;
+        html+=index===chain.length-1?`<span class="crumbCurrent">${esc(displayTaskTitle(item))}</span>`:
+          `<button data-crumb="${item.uid}">${esc(displayTaskTitle(item))}</button>`;
       });
       if(state.query){html+='<span class="sep">›</span><span class="crumbCurrent">搜索结果</span>'}
       $("hierBar").innerHTML=html;
@@ -4609,7 +4732,7 @@ print("hello")
         [task.fileName,...task.parentPath].join(" / "):
         (task.body.split("\n").find(Boolean)||task.parentPath.slice(-1)[0]||task.fileName);
       return `<div class="taskSwipe hierarchySwipe ${batchSelected?"batchSelected":""}" data-swipe-row="${task.uid}">
-        <button class="batchSelect" data-batch-select="${task.uid}" aria-label="${batchSelected?"取消选择":"选择"} ${esc(task.title)}">✓</button>
+        <button class="batchSelect" data-batch-select="${task.uid}" aria-label="${batchSelected?"取消选择":"选择"} ${esc(displayTaskTitle(task))}">✓</button>
         <button class="batchDragHandle" data-batch-drag="${task.uid}" aria-label="拖动所选条目，让它成为另一个条目的子项" title="拖到另一个条目上，松开后成为它的子项">⋮⋮</button>
         <div class="swipeActions"><button class="swipeEdit" data-swipe-edit="${task.uid}">编辑</button>
           <button class="swipeMove" data-swipe-move="${task.uid}">移动</button>
@@ -4617,7 +4740,7 @@ print("hello")
           <button class="swipeDelete" data-swipe-delete="${task.uid}">删除</button></div>
         <article class="hierCard ${statusToneClass(task.status)} ${done?"isDone":""}" data-hier="${task.uid}">
         <span class="levelBadge">H${task.level}</span>
-        <div class="hierMain"><div class="hierTitle">${task.priority?`<span class="priority p${esc(task.priority)}">${esc(task.priority)}</span>`:""}<h2>${esc(task.title)}</h2></div>
+        <div class="hierMain"><div class="hierTitle">${task.priority?`<span class="priority p${esc(task.priority)}">${esc(task.priority)}</span>`:""}<h2>${esc(displayTaskTitle(task))}</h2></div>
         <div class="hierSubtitle"><span class="chip statusColor ${statusToneClass(task.status)}">${esc(STATUS_LABEL[task.status]||task.status)}</span>
         ${task.tags.slice(0,2).map(tag=>`<span class="tag">#${esc(tag)}</span>`).join("")}<span class="hierPreview">${esc(preview)}</span></div></div>
         <div class="hierTail"><button class="hierDetail" data-detail="${task.uid}">详情</button>${task.childCount?
@@ -4709,8 +4832,7 @@ print("hello")
     }
     function renderQuadrant(){
       $("viewTitle").textContent="四象限";
-      $("scope").textContent=state.file==="all"?(state.files.length?"全部文件":"尚未选择文件"):
-        (state.files.find(file=>file.id===state.file)?.name||"全部文件");
+      $("scope").textContent=currentFileScopeLabel();
       if(!state.tasks.length){
         $("summary").textContent="按重要性和紧急性整理未完成条目";
         $("listHost").innerHTML=`<div class="empty"><div class="emptyIcon">田</div><h2>选择你的 Org 文件</h2><p>读取文件后，未完成条目会自动进入四个象限。</p><button class="btn primary" id="emptyOpen">打开 Org 文件夹</button></div>`;
@@ -4770,7 +4892,7 @@ print("hello")
     }
     function calendarTaskButton(task,date){
       const time=calendarTaskTime(task,date);
-      return `<button class="calendarTaskButton ${statusToneClass(task.status)} ${isDone(task)?"isDone":""}" data-calendar-task="${task.uid}" title="${esc(task.title)}">${time?`${time} · `:""}${esc(task.title)}</button>`
+      return `<button class="calendarTaskButton ${statusToneClass(task.status)} ${isDone(task)?"isDone":""}" data-calendar-task="${task.uid}" title="${esc(displayTaskTitle(task))}">${time?`${time} · `:""}${esc(displayTaskTitle(task))}</button>`
     }
     function calendarCountParts(items){
       return {unfinished:items.filter(task=>!isDone(task)).length,total:items.length}
@@ -4821,7 +4943,7 @@ print("hello")
         return `<button class="calendarDay ${date.getMonth()===month?"":"outside"} ${iso===today()?"todayCell":""}" data-calendar-date="${iso}">
           <span class="dayTop"><span class="dayNumber">${date.getDate()}</span>${calendarCountMarkup(items)}</span>
           <span class="dayMeta"><span class="dayLunar">${esc(meta.shortLunar)}</span>${festival?`<span class="dayFestival" title="${esc(festival)}">${esc(festival)}</span>`:""}</span>
-          <span class="dayTasks">${items.slice(0,3).map(task=>`<span class="dayTask ${statusToneClass(task.status)}" style="color:var(--statusTone);background:var(--statusToneSoft)">${esc(task.title)}</span>`).join("")}${items.length>3?`<span class="dayTask">还有 ${items.length-3} 项…</span>`:""}</span></button>`
+          <span class="dayTasks">${items.slice(0,3).map(task=>`<span class="dayTask ${statusToneClass(task.status)}" style="color:var(--statusTone);background:var(--statusToneSoft)">${esc(displayTaskTitle(task))}</span>`).join("")}${items.length>3?`<span class="dayTask">还有 ${items.length-3} 项…</span>`:""}</span></button>`
       }).join("");
       return `<div class="calendarTitleRow"><h2>${year} 年 ${month+1} 月</h2><span>附农历与节日 · 日期角标＝未完成数／<b>总数</b></span></div>
         <div class="calendarMonthScroll"><div class="monthWeekdays">${weekdays}</div><div class="monthGrid">${cells}</div></div>`
@@ -4865,8 +4987,7 @@ print("hello")
     }
     function renderCalendar(){
       $("viewTitle").textContent="日历";
-      $("scope").textContent=state.file==="all"?(state.files.length?"全部文件":"尚未选择文件"):
-        (state.files.find(file=>file.id===state.file)?.name||"全部文件");
+      $("scope").textContent=currentFileScopeLabel();
       const cursor=localDate(state.calendarCursor||today()),{tasks,map}=calendarTasksAndMap();
       $("summary").textContent=`${tasks.length} 个筛选后条目 · ${[...map.values()].reduce((sum,items)=>sum+items.length,0)} 个日期归属`;
       if(state.calendarMode==="year")$("listHost").innerHTML=renderCalendarYear(map,cursor);
@@ -4887,8 +5008,10 @@ print("hello")
       const editableSource=state.sources.find(source=>source.id===state.file)||(state.sources.length===1?state.sources[0]:null);
       $("editCurrentFile").disabled=!editableSource;
       $("editCurrentFile").textContent=editableSource?"编辑整个文件":"选择文件后编辑";
-      $("writeCurrentFile").disabled=!editableSource||!sourceCanWrite(editableSource);
+      $("writeCurrentFile").disabled=!editableSource||!sourceCanOfferWrite(editableSource);
       $("writeCurrentFile").textContent=editableSource?.dirty?"写回整个文件 · 有修改":"写回整个文件";
+      $("writeCurrentFile").title=editableSource&&!sourceCanWrite(editableSource)&&sourceCanOfferWrite(editableSource)?
+        "点击后重新选择原文件夹并授权写回":"";
       updateFilterToggle();
       $("globalMode").classList.toggle("active",!hierarchy);$("hierMode").classList.toggle("active",hierarchy);
       $("hierBar").classList.toggle("show",hierarchy);
@@ -4939,9 +5062,9 @@ print("hello")
     function renderDetail(){
       const t=state.tasks.find(x=>x.uid===state.selected);
       if(!t){state.detailOpen=false;$("detail").classList.remove("open");$("detail").innerHTML='<div class="detailEmpty"><div class="circle"></div><h2>选择一个条目</h2><p>查看正文、Org 属性、标签和来源位置。</p></div>';return}
-      const done=isDone(t),props=Object.entries(t.properties);
-      $("detail").innerHTML=`<div class="detailHead"><div><strong>条目详情</strong></div><div class="detailActions"><button class="editButton" id="moveTask">移动条目</button><button class="deleteButton" id="deleteTask">删除条目</button><button class="editButton" id="visualEditTask">可视化编辑</button><button class="editButton" id="editTask">编辑原文</button><button class="iconBtn" id="closeDetail">×</button></div></div>
-        <div class="detailScroll"><div class="detailTitle"><button class="check ${done?"done":t.status.toLowerCase()}" id="detailCheck" title="${t.isHabit&&!done?"完成本次习惯、记录历史并推进下一次计划":done?"取消完成并改为 TODO":"标记为 DONE 并写入 CLOSED 完成时间"}"></button><h2>${esc(t.title)}</h2></div>
+      const done=isDone(t),props=Object.entries(t.properties),parent=parentTask(t);
+      $("detail").innerHTML=`<div class="detailHead"><div><strong>条目详情</strong></div><div class="detailActions"><button class="editButton" id="jumpParentTask" ${parent?"":'disabled title="当前条目没有上级"'}>跳转上级</button><button class="editButton" id="moveTask">移动条目</button><button class="deleteButton" id="deleteTask">删除条目</button><button class="editButton" id="visualEditTask">可视化编辑</button><button class="editButton" id="editTask">编辑原文</button><button class="iconBtn" id="closeDetail">×</button></div></div>
+        <div class="detailScroll"><div class="detailTitle"><button class="check ${done?"done":t.status.toLowerCase()}" id="detailCheck" title="${t.isHabit&&!done?"完成本次习惯、记录历史并推进下一次计划":done?"取消完成并改为 TODO":"标记为 DONE 并写入 CLOSED 完成时间"}"></button><h2>${esc(displayTaskTitle(t))}</h2></div>
         <div class="fields"><div><span>状态</span><b>${esc(STATUS_LABEL[t.status]||t.status)}</b></div>
         <div><span>优先级</span><b>${esc(t.priority||"无")}</b></div>
         <div><span>SCHEDULED</span><b>${esc(t.scheduled||"未设置")}</b></div>
@@ -4956,6 +5079,7 @@ print("hello")
         <section class="section sourceInfo"><h3>来源</h3><p>${esc(t.filePath)}</p><small>第 ${t.line} 行 · ${t.level} 级标题</small></section></div>
         <div class="detailNote">普通条目点击圆圈会改为 DONE 并写入 CLOSED；习惯条目会记录本次完成、更新 LAST_REPEAT 和 LOGBOOK，并自动推进下一次 SCHEDULED。</div>`;
       $("detail").classList.toggle("open",state.detailOpen);$("closeDetail").onclick=()=>{state.detailOpen=false;$("detail").classList.remove("open")};
+      $("jumpParentTask").onclick=()=>jumpToParentTask(t.uid);
       $("deleteTask").onclick=()=>openDeleteModal(t.uid);
       $("moveTask").onclick=()=>openMoveModal(t.uid);
       $("visualEditTask").onclick=()=>openVisualEditor("edit",t.uid);
@@ -5490,7 +5614,28 @@ print("hello")
     }
     function sourceCanWrite(source){
       return !!source?.webdavUrl&&!!source.webdavConfig||
-        !!source?.fileHandle&&typeof source.fileHandle.createWritable==="function"
+        !!source?.fileHandle&&typeof source.fileHandle.createWritable==="function"||
+        !!source?.rootHandle&&typeof source.rootHandle.getFileHandle==="function"
+    }
+    function sourceCanOfferWrite(source){
+      return sourceCanWrite(source)
+    }
+    async function ensureSourceWritable(source){
+      if(sourceCanWrite(source))return true;
+      setNotice("当前文件夹是只读来源，不能直接覆盖原文件。请使用最新版 Edge 或 Chrome，重新点击“打开 Org 文件夹”并授予读写权限。");
+      return false
+    }
+    async function localSourceFileHandle(source){
+      if(source?.fileHandle&&typeof source.fileHandle.createWritable==="function")return source.fileHandle;
+      if(!source?.rootHandle||typeof source.rootHandle.getFileHandle!=="function")
+        throw new Error("当前文件没有可写句柄，请重新点击“打开 Org 文件夹”。");
+      const parts=pathRelativeToRoot(source,source.path).split("/").filter(Boolean),name=parts.pop();
+      if(!name)throw new Error("无法确定要写回的 Org 文件。");
+      let directory=source.rootHandle;
+      for(const part of parts)directory=await directory.getDirectoryHandle(part);
+      const handle=await directory.getFileHandle(name);
+      if(typeof handle.createWritable!=="function")throw new Error("浏览器没有提供本地文件写入能力。");
+      source.fileHandle=handle;return handle
     }
     function openEditor(uid){
       const task=state.tasks.find(item=>item.uid===uid),source=task&&state.sources.find(item=>item.id===task.fileId);
@@ -5504,9 +5649,10 @@ print("hello")
       $("editorCode").classList.remove("hideLineNumbers");closeVimCommandLine(false);
       setEditorMode(state.editMode,false);
       setVimState(state.vimMode?"normal":"insert");
-      const canWrite=sourceCanWrite(source);
-      $("writeEdit").disabled=!canWrite;$("writeEdit").title=canWrite?
-        (source.webdavUrl?"写回 WebDAV 远程文件":"覆盖写回当前 Org 文件"):"当前打开方式没有写权限，请使用“下载修改后的文件”";
+      const canWrite=sourceCanOfferWrite(source),authorized=sourceCanWrite(source);
+      $("writeEdit").disabled=!canWrite;$("writeEdit").title=authorized?
+        (source.webdavUrl?"写回 WebDAV 远程文件":"覆盖写回当前 Org 文件"):canWrite?
+          "点击后重新选择原文件夹并授权写回":"当前打开方式没有写权限，请使用“下载修改后的文件”";
       configureExternalEditorButton();$("editModal").classList.add("show");prepareEditorSurface()
     }
     function openFileEditor(sourceId=""){
@@ -5522,31 +5668,32 @@ print("hello")
       $("editorCode").classList.remove("hideLineNumbers");closeVimCommandLine(false);
       setEditorMode(state.editMode,false);
       setVimState(state.vimMode?"normal":"insert");
-      const canWrite=sourceCanWrite(source);$("writeEdit").disabled=!canWrite;
-      $("writeEdit").title=canWrite?(source.webdavUrl?"写回 WebDAV 远程文件":"覆盖写回当前 Org 文件"):
-        "当前打开方式没有写权限，请使用“下载修改后的文件”";
+      const canWrite=sourceCanOfferWrite(source),authorized=sourceCanWrite(source);$("writeEdit").disabled=!canWrite;
+      $("writeEdit").title=authorized?(source.webdavUrl?"写回 WebDAV 远程文件":"覆盖写回当前 Org 文件"):canWrite?
+        "点击后重新选择原文件夹并授权写回":"当前打开方式没有写权限，请使用“下载修改后的文件”";
       configureExternalEditorButton();$("editModal").classList.add("show");prepareEditorSurface()
     }
     function replaceTaskBlock(task,replacement){
       const source=task&&state.sources.find(item=>item.id===task.fileId);
       if(!task||!source){setNotice("无法找到待编辑的条目。");return null}
-      const normalized=String(replacement||"").replace(/\r\n?/g,"\n");
+      let normalized=String(replacement||"").replace(/\r\n?/g,"\n");
       if(!/^\*+\s+\S/.test(normalized.split("\n")[0]||"")){
         setNotice("首行必须是 Org 标题，例如：* TODO 标题");return null
       }
+      normalized=updateModifiedProperty(normalized);
       const lines=source.text.replace(/\r\n?/g,"\n").split("\n");
       lines.splice(task.startIndex,task.endIndex-task.startIndex,...normalized.split("\n"));
       source.text=lines.join(source.eol||"\n");source.dirty=true;
-      rebuildFromSources({fileId:task.fileId,startIndex:task.startIndex,line:task.line});
-      render();return source
+      rebuildFromSources({fileId:task.fileId,startIndex:task.startIndex,line:task.line});render();return source
     }
     async function readLatestSourceText(source){
       if(source.webdavUrl){
         const response=await webdavRequest(source.webdavUrl,{method:"GET"},source.webdavConfig);
         return {text:await response.text(),etag:response.headers.get("etag")||""}
       }
-      if(source.fileHandle&&typeof source.fileHandle.getFile==="function"){
-        const file=await source.fileHandle.getFile();return {text:await decode(file),etag:""}
+      if(sourceCanWrite(source)){
+        const handle=await localSourceFileHandle(source),file=await handle.getFile();
+        return {text:await decode(file),etag:""}
       }
       throw new Error("当前文件没有可重新读取的写入句柄")
     }
@@ -5566,7 +5713,7 @@ print("hello")
         source.webdavEtag=response.headers.get("etag")||"";
         source.webdavBaseText=text
       }else{
-        const handle=source.fileHandle;
+        const handle=await localSourceFileHandle(source);
         let permission=typeof handle.queryPermission==="function"?await handle.queryPermission({mode:"readwrite"}):"granted";
         if(permission!=="granted"&&typeof handle.requestPermission==="function")permission=await handle.requestPermission({mode:"readwrite"});
         if(permission!=="granted")throw new DOMException("没有获得写入权限","NotAllowedError");
@@ -5582,12 +5729,12 @@ print("hello")
     }
     async function writeSingleTaskReplacement(originalTask,replacement,hadPendingChanges=false){
       const source=originalTask&&state.sources.find(item=>item.id===originalTask.fileId);
-      if(!sourceCanWrite(source)){setNotice("当前打开方式没有写权限；请从“打开 Org 文件夹”授予权限，或下载修改后的文件。");return false}
+      if(!await ensureSourceWritable(source))return false;
       if(!window.confirm(`只把当前条目“${originalTask.title}”写回 ${source.name}？页面中其他未写回修改不会一并提交。`))return false;
       try{
         const latest=await readLatestSourceText(source),match=findLatestTask(latest.text,source,originalTask);
         if(!match)throw new Error("最新文件中找不到原条目。可能已被其他程序改名或移动，请重新打开文件。");
-        const lines=latest.text.replace(/\r\n?/g,"\n").split("\n"),normalized=String(replacement||"").replace(/\r\n?/g,"\n");
+        const lines=latest.text.replace(/\r\n?/g,"\n").split("\n"),normalized=updateModifiedProperty(String(replacement||"").replace(/\r\n?/g,"\n"));
         lines.splice(match.startIndex,match.endIndex-match.startIndex,...normalized.split("\n"));
         const eol=latest.text.includes("\r\n")?"\r\n":"\n",merged=lines.join(eol);
         await writeTextToOriginal(source,merged,latest.etag);
@@ -5603,9 +5750,7 @@ print("hello")
       }catch(error){writeFailureNotice(error);return false}
     }
     async function writeSourceToOriginal(source,confirmed=false){
-      if(!sourceCanWrite(source)){
-        setNotice("当前文件是通过只读选择器打开的，浏览器不允许覆盖原文件。请重新点“打开 Org 文件夹”并授予读写权限，或下载修改后的文件。");return false
-      }
+      if(!await ensureSourceWritable(source))return false;
       if(!confirmed&&!window.confirm(`确定覆盖写回“${source.name}”${source.webdavUrl?"的 WebDAV 远程文件":"吗"}？`))return false;
       try{
         const selected=state.tasks.find(task=>task.uid===state.selected);let previousText=source.persistedText??source.text;
@@ -5616,7 +5761,7 @@ print("hello")
           previousText=latest.text;
           await writeTextToOriginal(source,source.text,latest.etag||source.webdavEtag)
         }else{
-          const handle=source.fileHandle;
+          const handle=await localSourceFileHandle(source);
           let permission=typeof handle.queryPermission==="function"?await handle.queryPermission({mode:"readwrite"}):"granted";
           if(permission!=="granted"&&typeof handle.requestPermission==="function")permission=await handle.requestPermission({mode:"readwrite"});
           if(permission!=="granted"){setNotice("没有获得写入权限，原文件未修改。");return false}
@@ -5642,9 +5787,10 @@ print("hello")
       if(edited!==editorText())setEditorText(edited);
       if(state.editingScope==="file"){
         const source=state.sources.find(item=>item.id===state.editingFileId);if(!source){setNotice("无法找到要编辑的文件。");return null}
+        const before=state.tasks.filter(task=>task.fileId===source.id);
         source.text=edited.replace(/\r\n?/g,"\n").split("\n").join(source.eol||"\n");
-        source.dirty=true;rebuildFromSources();state.selected=null;render();
-        setNotice(`整个文件“${source.name}”已应用到当前页面，尚未写回磁盘。`);return source
+        source.dirty=true;const modifiedCount=updateChangedFileTaskProperties(source,before);rebuildFromSources();state.selected=null;render();
+        setNotice(`整个文件“${source.name}”已应用到当前页面；${modifiedCount} 个变化条目已更新 MODIFIED，尚未写回磁盘。`);return source
       }
       const task=state.tasks.find(item=>item.uid===state.editing);
       const source=replaceTaskBlock(task,edited);if(!source)return null;
@@ -5653,7 +5799,7 @@ print("hello")
     async function writeEditedSource(closeAfter=true){
       if(state.editingScope==="file"){
         const source=applyEditorText();if(!source)return false;
-        const written=await writeSourceToOriginal(source);if(written&&closeAfter)closeEditor();return written
+        const written=await writeSourceToOriginal(source,true);if(written&&closeAfter)closeEditor();return written
       }
       const task=state.tasks.find(item=>item.uid===state.editing),replacement=formattedEditorText();
       if(replacement===null)return false;
@@ -5818,10 +5964,10 @@ print("hello")
       }
       $("visualSource").textContent=state.visualMode==="edit"&&task?
         `${task.filePath} · 第 ${task.line} 行 · H${task.level}`:(addDescription||"尚未选择目标文件");
-      const canWrite=sourceCanWrite(source);
+      const canWrite=sourceCanOfferWrite(source),authorized=sourceCanWrite(source);
       $("writeVisual").textContent=state.visualMode==="edit"?"只写回当前条目":"写回整个文件";
-      $("writeVisual").disabled=!canWrite;$("writeVisual").title=canWrite?(source.webdavUrl?"写回 WebDAV 远程文件":"覆盖写回当前 Org 文件"):
-        "当前打开方式没有写权限，请使用“下载修改后的文件”"
+      $("writeVisual").disabled=!canWrite;$("writeVisual").title=authorized?(source.webdavUrl?"写回 WebDAV 远程文件":"覆盖写回当前 Org 文件"):canWrite?
+        "点击后重新选择原文件夹并授权写回":"当前打开方式没有写权限，请使用“下载修改后的文件”"
     }
     function closeVisualEditor(){
       state.visualEditing=null;$("visualModal").classList.remove("show")
@@ -5832,7 +5978,17 @@ print("hello")
       return state.tasks.some(task=>task.uid===state.lastAddParent.parentUid&&task.fileId===preferredFile)?
         state.lastAddParent.parentUid:""
     }
+    function openedDetailTask(){
+      if(!state.detailOpen)return null;
+      return state.tasks.find(task=>task.uid===state.selected)||null
+    }
     function defaultAddParentUid(preferredFile){
+      const detailTask=openedDetailTask();
+      if(detailTask?.fileId===preferredFile)return detailTask.uid;
+      if(state.mode==="hierarchy"){
+        return state.hierParent&&state.tasks.some(task=>task.uid===state.hierParent&&task.fileId===preferredFile)?
+          state.hierParent:""
+      }
       const mode=state.addDefaults?.position||"auto";
       if(mode==="top")return "";
       if(mode==="selected"){
@@ -5840,11 +5996,6 @@ print("hello")
         return current?current.uid:""
       }
       if(mode==="last-parent")return lastAddParentUid(preferredFile);
-      if(state.mode==="hierarchy"){
-        if(state.hierParent&&state.tasks.some(task=>task.uid===state.hierParent&&task.fileId===preferredFile))return state.hierParent;
-        const current=state.tasks.find(task=>task.uid===state.selected&&task.fileId===preferredFile);
-        return current?.parentUid||""
-      }
       return lastAddParentUid(preferredFile)
     }
     function openVisualEditor(mode="add",uid=null){
@@ -5859,8 +6010,9 @@ print("hello")
       document.querySelectorAll(".visualAddOnly").forEach(element=>element.classList.toggle("formHidden",!!editTask));
       $("visualFile").innerHTML=state.sources.map(source=>`<option value="${esc(source.id)}">${esc(source.path)}</option>`).join("");
       const current=state.tasks.find(task=>task.uid===state.selected);
+      const detailTask=!editTask?openedDetailTask():null;
       const hierParentTask=state.mode==="hierarchy"?state.tasks.find(task=>task.uid===state.hierParent):null;
-      const preferredFile=editTask?.fileId||hierParentTask?.fileId||
+      const preferredFile=editTask?.fileId||detailTask?.fileId||hierParentTask?.fileId||
         (state.file!=="all"&&state.sources.some(source=>source.id===state.file)?state.file:
           current?.fileId||state.sources[0].id);
       $("visualFile").value=preferredFile;
@@ -5919,7 +6071,7 @@ print("hello")
         const written=await writeSingleTaskReplacement(task,replacement,pending);if(written)closeVisualEditor();return written
       }
       const source=commitVisualChanges();if(!source)return;
-      const written=await writeSourceToOriginal(source);if(written)closeVisualEditor();return written
+      const written=await writeSourceToOriginal(source,true);if(written)closeVisualEditor();return written
     }
     function downloadVisualSource(){
       const source=commitVisualChanges();if(!source)return;
@@ -5992,8 +6144,9 @@ print("hello")
       if(target.id===range.source.id&&context.insertAt>=range.startIndex&&context.insertAt<=range.endIndex){
         setNotice("不能把条目移动到它自身或自己的子标题中。");return false
       }
-      const sourceLines=range.source.text.replace(/\r\n?/g,"\n").split("\n");
-      const moved=adjustedSubtreeLines(sourceLines.slice(range.startIndex,range.endIndex),context.level-task.level);
+      const sourceLines=range.source.text.replace(/\r\n?/g,"\n").split("\n"),rootEnd=range.descendants[0]?.startIndex??range.endIndex,
+        touchedRoot=updateModifiedProperty(sourceLines.slice(range.startIndex,rootEnd).join("\n")).split("\n"),
+        moved=adjustedSubtreeLines([...touchedRoot,...sourceLines.slice(rootEnd,range.endIndex)],context.level-task.level);
       sourceLines.splice(range.startIndex,range.endIndex-range.startIndex);
       let targetLines=target.id===range.source.id?sourceLines:target.text.replace(/\r\n?/g,"\n").split("\n");
       let insertAt=context.insertAt;
@@ -6068,8 +6221,9 @@ print("hello")
         throw new Error("目标父项不能是所选条目自身或它的子标题。");
       const parentRange=taskSubtreeRange(parent);if(!parentRange)throw new Error("无法读取目标父项位置。");
       const lineMaps=new Map(state.sources.map(source=>[source.id,source.text.replace(/\r\n?/g,"\n").split("\n")]));
-      const moved=ranges.map(range=>adjustedSubtreeLines(
-        lineMaps.get(range.source.id).slice(range.startIndex,range.endIndex),parent.level+1-range.task.level));
+      const moved=ranges.map(range=>{const lines=lineMaps.get(range.source.id),rootEnd=range.descendants[0]?.startIndex??range.endIndex,
+        touchedRoot=updateModifiedProperty(lines.slice(range.startIndex,rootEnd).join("\n")).split("\n");
+        return adjustedSubtreeLines([...touchedRoot,...lines.slice(rootEnd,range.endIndex)],parent.level+1-range.task.level)});
       let insertAt=parentRange.endIndex;
       ranges.filter(range=>range.source.id===parent.fileId&&range.startIndex<insertAt).forEach(range=>insertAt-=range.endIndex-range.startIndex);
       const grouped=new Map();ranges.forEach(range=>{if(!grouped.has(range.source.id))grouped.set(range.source.id,[]);grouped.get(range.source.id).push(range)});
@@ -6099,9 +6253,9 @@ print("hello")
         将删除 ${esc(task.filePath)} 第 ${task.line} 行的 H${task.level} 标题${
           range.descendants.length?`，以及其下 ${range.descendants.length} 个子标题`:""}。<br>
         删除范围：<code>第 ${range.startIndex+1}—${range.endIndex} 行</code>`;
-      const canWrite=sourceCanWrite(range.source);$("writeDelete").disabled=!canWrite;
-      $("writeDelete").title=canWrite?(range.source.webdavUrl?"删除并写回 WebDAV":"删除并覆盖原 Org 文件"):
-        "当前打开方式没有写权限，可选择下载修改后的文件";
+      const canWrite=sourceCanOfferWrite(range.source),authorized=sourceCanWrite(range.source);$("writeDelete").disabled=!canWrite;
+      $("writeDelete").title=authorized?(range.source.webdavUrl?"删除并写回 WebDAV":"删除并覆盖原 Org 文件"):canWrite?
+        "点击后重新选择原文件夹并授权写回":"当前打开方式没有写权限，可选择下载修改后的文件";
       $("deleteModal").classList.add("show")
     }
     function deleteTaskFromPage(){
@@ -6165,7 +6319,7 @@ print("hello")
     $("editCurrentFile").onclick=()=>openFileEditor();
     $("writeCurrentFile").onclick=()=>{
       const source=state.sources.find(item=>item.id===state.file)||(state.sources.length===1?state.sources[0]:null);
-      if(source)writeSourceToOriginal(source);else setNotice("请先在左侧选择一个具体文件。")
+      if(source)writeSourceToOriginal(source,true);else setNotice("请先在左侧选择一个具体文件。")
     };
     $("refreshReminderTop").onclick=()=>syncReminderNow(true);
     $("batchToggle").onclick=()=>setBatchMode(!state.batchMode);
@@ -6208,10 +6362,6 @@ print("hello")
     $("openPluginDocs").onclick=()=>window.open("README-Plugins.md","_blank","noopener");
     $("openWebdav").onclick=()=>openWebdavFolder();
     $("settingsModal").onclick=event=>{if(event.target===$("settingsModal"))closeSettings()};
-    $("folderInput").onchange=e=>{
-      const files=Array.from(e.target.files),root=files[0]?.webkitRelativePath?.split("/")[0]||"Org 文件夹";
-      load(files,{id:`fallback-folder:${root}`,kind:"folder",label:root});e.target.value=""
-    };
     $("fileInput").onchange=e=>{
       const files=Array.from(e.target.files),label=files.length===1?files[0].name:`${files[0]?.name||"Org 文件"} 等 ${files.length} 个文件`;
       load(files,{id:`fallback-files:${files.map(file=>file.name).join("|")}`,kind:"files",label});e.target.value=""
