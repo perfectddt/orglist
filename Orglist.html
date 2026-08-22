@@ -1676,7 +1676,7 @@ print("hello")
           <h3>关于</h3>
           <div class="aboutCard"><strong>Orglist</strong>
             <p>面向 Org 文件的本地任务清单与浏览工具。数据默认保存在本地，只有在你主动使用写回或 WebDAV 时才会与文件交互。</p>
-            <dl><div><dt>当前版本</dt><dd>2.1.0</dd></div>
+            <dl><div><dt>当前版本</dt><dd>2.2.1</dd></div>
               <div><dt>项目地址</dt><dd><a href="https://github.com/perfectddt/orglist" target="_blank" rel="noopener noreferrer">github.com/perfectddt/orglist</a></dd></div>
               <div><dt>使用方式</dt><dd>支持本地 HTML、Android APK 与 WebDAV。</dd></div>
             </dl>
@@ -2116,11 +2116,19 @@ print("hello")
       $("pluginList").innerHTML=state.installedPlugins.length?state.installedPlugins.map(item=>
         `<div class="pluginItem"><div class="pluginInfo"><strong><span class="pluginType">${esc(pluginTypeLabel(item.type))}</span>${esc(item.name)} ${esc(item.version)}</strong>
           <small>${esc(item.fileName)} · ${esc(item.id)} · ${Math.max(1,Math.round(Number(item.size||0)/1024))} KB${item.error?`<br>错误：${esc(item.error)}`:""}</small></div>
-          <div class="pluginButtons"><button data-plugin-toggle="${esc(item.id)}">${item.enabled?"停用":"启用"}</button>
+          <div class="pluginButtons">${item.enabled&&typeof pluginRuntime.get(item.id)?.instance?.openLayout==="function"?`<button data-plugin-layout="${esc(item.id)}">布局</button>`:""}<button data-plugin-toggle="${esc(item.id)}">${item.enabled?"停用":"启用"}</button>
             <button class="pluginDelete" data-plugin-delete="${esc(item.id)}">删除</button></div></div>`).join(""):
         '<div class="settingsHint" style="margin:0">尚未安装插件。可导入 .js 功能插件或 .css 页面样式。</div>';
+      $("pluginList").querySelectorAll("[data-plugin-layout]").forEach(button=>button.onclick=()=>openInstalledLayoutPlugin(button.dataset.pluginLayout));
       $("pluginList").querySelectorAll("[data-plugin-toggle]").forEach(button=>button.onclick=()=>toggleInstalledPlugin(button.dataset.pluginToggle));
       $("pluginList").querySelectorAll("[data-plugin-delete]").forEach(button=>button.onclick=()=>deleteInstalledPlugin(button.dataset.pluginDelete))
+    }
+    function openInstalledLayoutPlugin(id){
+      const runtime=pluginRuntime.get(id);
+      try{
+        if(typeof runtime?.instance?.openLayout!=="function")throw new Error("该插件没有提供布局入口");
+        runtime.instance.openLayout();closeSettings()
+      }catch(error){if($("pluginStatus"))$("pluginStatus").textContent=`无法打开布局：${error?.message||error}`}
     }
     async function toggleInstalledPlugin(id){
       const record=state.installedPlugins.find(item=>item.id===id);if(!record)return;
@@ -3863,7 +3871,8 @@ Use mode=search for questions about finding/listing tasks. Put an executable exp
     async function webdavRequest(url,options={},config){
       const headers=new Headers(options.headers||{}),authorization=basicAuthorization(config?.username||"",config?.password||"");
       if(authorization)headers.set("Authorization",authorization);
-      const bridge=webdavBridgeActive(),token=webdavBridgeToken(),requestUrl=bridge?
+      const bridge=webdavBridgeActive(),token=webdavBridgeToken(),lanFolder=config?.lanFolder===true,
+        requestUrl=lanFolder?url:bridge?
         `/webdav-proxy?url=${encodeURIComponent(url)}${token?`&token=${encodeURIComponent(token)}`:""}`:url;
       const android=androidWebdavActive();
       let response;try{response=android?await androidWebdavFetch(url,options,headers):
@@ -3962,9 +3971,74 @@ Use mode=search for questions about finding/listing tasks. Put an executable exp
             webdavConfig:{...config}})
         }
         await load(entries,{id:`webdav:${config.profileId}`,kind:"webdav",label:webdavProfileLabel(config),completeOrgScan:scan.complete});
-        closeSettings();setNotice(`已从 WebDAV 的 ${scan.scannedDirectories} 个目录读取 ${entries.length} 个 Org 文件。`)
-      }catch(error){setWebdavStatus(error.message,true)}
+        closeSettings();setNotice(`已从 WebDAV 的 ${scan.scannedDirectories} 个目录读取 ${entries.length} 个 Org 文件。`);return true
+      }catch(error){setWebdavStatus(error.message,true);return false}
       finally{setWebdavBusy(false)}
+    }
+    function lanMobileBridgeActive(){
+      const params=new URLSearchParams(window.location?.search||"");
+      return webdavBridgeActive()&&!androidWebdavActive()&&params.get("bridge")==="1"&&!!params.get("token")
+    }
+    function computerLanFolderBridgeActive(){
+      return lanMobileBridgeActive()&&["127.0.0.1","localhost","::1"].includes(window.location?.hostname||"")
+    }
+    function lanFolderEndpoint(path,parameters={}){
+      const url=new URL(path,window.location.origin);Object.entries(parameters).forEach(([name,value])=>url.searchParams.set(name,String(value)));
+      const token=webdavBridgeToken();if(token)url.searchParams.set("token",token);return url.href
+    }
+    let lanFolderPollTimer=null,lanFolderAutoTimer=null;
+    async function pollLanFolderChanges(){
+      const share=state.lanFolderShare;if(!share||!computerLanFolderBridgeActive())return;
+      try{
+        const response=await fetch(lanFolderEndpoint("/lan-folder/changes",{since:share.generation}),{cache:"no-store",credentials:"omit"});
+        const result=await response.json();if(!response.ok)throw new Error(result.error||`电脑桥接返回 ${response.status}`);
+        let updated=0;
+        for(const change of result.changes||[]){
+          const source=state.sources.find(item=>item.path===change.path),handle=source?.fileHandle;
+          if(!source||!handle)throw new Error(`找不到电脑原文件：${change.path}`);
+          if(source.dirty)throw new Error(`电脑页面中的 ${source.name} 有尚未写回的修改，已暂停手机写回以避免覆盖。`);
+          const writable=await handle.createWritable();await writable.write(change.text);await writable.close();
+          source.text=change.text;source.persistedText=change.text;source.webdavEtag=change.etag||"";source.dirty=false;updated++
+        }
+        share.generation=Number(result.generation)||share.generation;
+        if(updated){rebuildFromSources();render();setNotice(`已将手机修改写回电脑原文件（${updated} 个）。`)}
+      }catch(error){setNotice(`手机写回电脑文件失败：${error?.message||error}`)}
+    }
+    async function publishLanFolderShare(){
+      if(!computerLanFolderBridgeActive()||!state.sources.length)return false;
+      const files=state.sources.filter(source=>isOrgFileName(source.name)&&source.fileHandle).map(source=>
+        ({path:String(source.path||source.name).replace(/\\/g,"/"),text:source.text}));
+      if(!files.length)return false;
+      try{
+        const response=await fetch(lanFolderEndpoint("/lan-folder/publish"),{method:"POST",cache:"no-store",credentials:"omit",
+          headers:{"Content-Type":"application/json"},body:JSON.stringify({label:state.sources[0]?.rootName||"电脑 Org 文件夹",files})});
+        const result=await response.json();if(!response.ok||!result.ok)throw new Error(result.error||`电脑桥接返回 ${response.status}`);
+        state.lanFolderShare={generation:Number(result.generation)||0};
+        clearInterval(lanFolderPollTimer);lanFolderPollTimer=setInterval(pollLanFolderChanges,2000);
+        setNotice(`已通过局域网共享 ${result.count} 个 Org 文件；电脑页面和 CMD 窗口需保持打开。`);return true
+      }catch(error){setNotice(`无法向手机共享当前文件夹：${error?.message||error}`);return false}
+    }
+    function scheduleLanFolderAutoLoad(){
+      clearTimeout(lanFolderAutoTimer);lanFolderAutoTimer=setTimeout(()=>{
+        if(!state.sources.length&&lanMobileBridgeActive())autoLoadLanFolderShare()
+      },2000)
+    }
+    async function autoLoadLanFolderShare(){
+      if(!lanMobileBridgeActive()||state.sources.length)return !!state.sources.length;
+      try{
+        const response=await fetch(lanFolderEndpoint("/lan-folder/snapshot"),{cache:"no-store",credentials:"omit"});
+        const snapshot=await response.json();if(!response.ok)throw new Error(snapshot.error||`电脑桥接返回 ${response.status}`);
+        if(!snapshot.available){
+          setNotice(computerLanFolderBridgeActive()?"局域网桥接已启动。请在这个电脑页面点击“打开 Org 文件夹”并完成授权。":
+            "手机局域网桥接已连接，正在等待电脑页面选择并共享 Org 文件夹…");
+          scheduleLanFolderAutoLoad();return false
+        }
+        const entries=(snapshot.files||[]).map(item=>({file:new File([item.text],item.name,{type:"text/plain"}),path:item.path,
+          handle:null,webdavUrl:lanFolderEndpoint("/lan-folder/file",{path:item.path}),webdavEtag:item.etag||"",
+          webdavConfig:{lanFolder:true}}));
+        await load(entries,{id:`lan-folder:${snapshot.label}`,kind:"lan-folder",label:`电脑：${snapshot.label}`,completeOrgScan:true});
+        setNotice(`已从电脑局域网读取 ${entries.length} 个 Org 文件，不经过坚果云。`);return true
+      }catch(error){setNotice(`电脑本地文件夹读取失败：${error?.message||error}`);scheduleLanFolderAutoLoad();return false}
     }
     function saveCustomLists(){
       try{localStorage.setItem(CUSTOM_KEY,JSON.stringify(state.custom))}catch(_){}
@@ -4281,7 +4355,23 @@ Use mode=search for questions about finding/listing tasks. Put an executable exp
       }
       return output
     }
+    window.__orgAndroidFolderOpened=async payload=>{
+      if(payload?.cancelled)return;
+      if(payload?.error){setNotice(`无法打开文件夹：${payload.error}`);return}
+      const items=Array.isArray(payload?.files)?payload.files.map(item=>({
+        file:new File([String(item.text||"")],item.name,{type:"text/plain"}),
+        path:item.path||item.name,androidUri:item.uri||""
+      })):[];
+      if(!items.length){setNotice("所选文件夹及其子文件夹中没有找到 .org 文件。");return}
+      await load(items,{id:`android-folder:${payload.treeUri||payload.rootName}`,kind:"folder",
+        label:payload.rootName||"Org 文件夹",handle:null,completeOrgScan:!payload.truncated});
+      if(payload.truncated)setNotice("文件夹已打开，但文件较多；本次最多扫描 2500 个条目和 500 个 Org 文件。")
+    };
     async function chooseFolder(){
+      if(window.AndroidOrgFolder&&typeof window.AndroidOrgFolder.openFolder==="function"){
+        setNotice("请在系统界面中选择 Org 文件夹，并点击“使用此文件夹”。");
+        window.AndroidOrgFolder.openFolder();return
+      }
       if(typeof window.showDirectoryPicker!=="function"){
         setNotice("当前浏览器或打开方式只能读取文件夹，不能覆盖原文件。请使用最新版 Edge 或 Chrome 直接打开本页面，再点击“打开 Org 文件夹”。");return
       }
@@ -4458,8 +4548,8 @@ Use mode=search for questions about finding/listing tasks. Put an executable exp
       if(assetFiles.some(item=>item.file.size>25*1024*1024)){setNotice("单张图片不能超过 25 MB。");return}
       $("listHost").innerHTML='<div class="empty"><div class="emptyIcon">…</div><h2>正在读取</h2><p>正在解析 Org 标题、状态、日期、标签和属性。</p></div>';
       try {
-        const decoded=await Promise.all(chosen.map(async({file,path,handle,webdavUrl,webdavEtag,webdavConfig},i)=>({file,path,handle,
-          webdavUrl,webdavEtag,webdavConfig,text:await decode(file),id:"f"+i,eol:"\r\n"})));
+        const decoded=await Promise.all(chosen.map(async({file,path,handle,androidUri,webdavUrl,webdavEtag,webdavConfig},i)=>({file,path,handle,
+          androidUri,webdavUrl,webdavEtag,webdavConfig,text:await decode(file),id:"f"+i,eol:"\r\n"})));
         clearImageAssetCache();const rootName=typeof source?.handle?.name==="string"?source.handle.name:
           (assetFiles[0]?.path||chosen[0]?.path||"").split("/")[0]||"";
         const assets=new Map();assetFiles.forEach(item=>{
@@ -4468,6 +4558,7 @@ Use mode=search for questions about finding/listing tasks. Put an executable exp
         });
         state.sources=decoded.map(item=>({id:item.id,name:item.file.name,path:item.path||item.file.name,
           text:item.text,eol:item.text.includes("\r\n")?"\r\n":"\n",fileHandle:item.handle||null,
+          androidUri:item.androidUri||"",
           rootHandle:source?.kind==="folder"&&!Array.isArray(source.handle)?source.handle:null,
           rootName,localAssets:assets,completeOrgScan:source?.kind==="folder"?incoming.length<2500&&chosen.length<500:source?.completeOrgScan===true,
           webdavUrl:item.webdavUrl||"",webdavEtag:item.webdavEtag||"",webdavConfig:item.webdavConfig||null,
@@ -4482,6 +4573,7 @@ Use mode=search for questions about finding/listing tasks. Put an executable exp
         render();await rememberSource(source||{id:`files:${state.files.map(file=>file.path).join("|")}`,kind:"files",
           label:state.files.length===1?state.files[0].name:`${state.files[0].name} 等 ${state.files.length} 个文件`},
           decoded.map(item=>({name:item.file.name,path:item.path||item.file.name,text:item.text})));
+        if(source?.kind==="folder")await publishLanFolderShare();
       } catch(e){setNotice("读取文件时出现问题，请确认文件未损坏。");render()}
     }
     function counts() {
@@ -5911,8 +6003,23 @@ Use mode=search for questions about finding/listing tasks. Put an executable exp
       clearInterval(editorImageWatchTimer);editorImageWatchTimer=null;editorImagePreviewGeneration++;
       $("editImagePreview").classList.remove("show");$("editImagePreview").innerHTML="";$("editModal").classList.remove("show")
     }
+    function androidFolderBridgeActive(){
+      return !!window.AndroidOrgFolder&&typeof window.AndroidOrgFolder.readText==="function"&&
+        typeof window.AndroidOrgFolder.writeText==="function"
+    }
+    function androidBridgeResult(raw,action){
+      let result;try{result=JSON.parse(String(raw||"{}"))}catch(_){throw new Error(`Android ${action}返回无效结果`)}
+      if(!result?.ok)throw new Error(result?.error||`Android ${action}失败`);return result
+    }
+    function readAndroidSourceText(source){
+      return androidBridgeResult(window.AndroidOrgFolder.readText(source.androidUri),"读取").text||""
+    }
+    function writeAndroidSourceText(source,text){
+      androidBridgeResult(window.AndroidOrgFolder.writeText(source.androidUri,text),"写回")
+    }
     function sourceCanWrite(source){
       return !!source?.webdavUrl&&!!source.webdavConfig||
+        !!source?.androidUri&&androidFolderBridgeActive()||
         !!source?.fileHandle&&typeof source.fileHandle.createWritable==="function"||
         !!source?.rootHandle&&typeof source.rootHandle.getFileHandle==="function"
     }
@@ -5990,6 +6097,7 @@ Use mode=search for questions about finding/listing tasks. Put an executable exp
         const response=await webdavRequest(source.webdavUrl,{method:"GET"},source.webdavConfig);
         return {text:await response.text(),etag:response.headers.get("etag")||""}
       }
+      if(source.androidUri&&androidFolderBridgeActive())return {text:readAndroidSourceText(source),etag:""};
       if(sourceCanWrite(source)){
         const handle=await localSourceFileHandle(source),file=await handle.getFile();
         return {text:await decode(file),etag:""}
@@ -6011,6 +6119,8 @@ Use mode=search for questions about finding/listing tasks. Put an executable exp
         const response=await webdavRequest(source.webdavUrl,{method:"PUT",headers,body:text},source.webdavConfig);
         source.webdavEtag=response.headers.get("etag")||"";
         source.webdavBaseText=text
+      }else if(source.androidUri&&androidFolderBridgeActive()){
+        writeAndroidSourceText(source,text)
       }else{
         const handle=await localSourceFileHandle(source);
         let permission=typeof handle.queryPermission==="function"?await handle.queryPermission({mode:"readwrite"}):"granted";
@@ -6059,6 +6169,8 @@ Use mode=search for questions about finding/listing tasks. Put an executable exp
             throw new Error("远程文件刚刚发生变化");
           previousText=latest.text;
           await writeTextToOriginal(source,source.text,latest.etag||source.webdavEtag)
+        }else if(source.androidUri&&androidFolderBridgeActive()){
+          writeAndroidSourceText(source,source.text)
         }else{
           const handle=await localSourceFileHandle(source);
           let permission=typeof handle.queryPermission==="function"?await handle.queryPermission({mode:"readwrite"}):"granted";
@@ -6822,7 +6934,8 @@ Use mode=search for questions about finding/listing tasks. Put an executable exp
     setInterval(()=>{if(state.view==="countdown")renderContent()},60000);
     document.body.ondragover=e=>e.preventDefault();
     document.body.ondrop=e=>{e.preventDefault();if(e.dataTransfer.files.length)load(e.dataTransfer.files)};
-    loadRecent();loadPreferences();render();initializeInstalledPlugins();autoOpenDefaultRecent();
+    loadRecent();loadPreferences();render();initializeInstalledPlugins();
+    autoLoadLanFolderShare().then(loaded=>{if(!loaded&&!lanMobileBridgeActive())autoOpenDefaultRecent()});
   })();
   </script>
 </body>

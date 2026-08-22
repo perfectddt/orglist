@@ -1,5 +1,4 @@
 @echo off
-chcp 65001 >nul
 title Org Checklist Mobile WebDAV Bridge
 set "BRIDGE_SCRIPT=%~dp0org-webdav-bridge.py"
 set "BRIDGE_LOG=%~dp0org-webdav-mobile-startup.log"
@@ -9,9 +8,11 @@ set "ORG_WEBDAV_LAN=1"
 echo [%date% %time%] Starting mobile WebDAV bridge.> "%BRIDGE_LOG%"
 echo Script: %BRIDGE_SCRIPT%>> "%BRIDGE_LOG%"
 echo.
-echo Starting the mobile WebDAV bridge...
-echo Keep this window open and use the phone URL printed below.
-echo Your phone and computer must use the same Wi-Fi.
+echo Starting the Orglist LAN folder bridge...
+echo Keep this window and the computer browser page open.
+echo Step 1: On the computer page, click Open Org Folder and grant access.
+echo Step 2: On the phone, open the Phone URL printed below.
+echo A wired computer and a Wi-Fi phone can use the same router.
 echo.
 
 where py >nul 2>nul

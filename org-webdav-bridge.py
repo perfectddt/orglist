@@ -30,6 +30,12 @@ MAX_BODY = 25 * 1024 * 1024
 EXTERNAL_EDITOR_DIR = Path(tempfile.gettempdir()) / "OrglistExternalEditor"
 EXTERNAL_EDITOR_SESSIONS: Dict[str, Path] = {}
 EXTERNAL_EDITOR_LOCK = threading.Lock()
+LAN_FOLDER_LOCK = threading.Lock()
+LAN_FOLDER_FILES: Dict[str, dict] = {}
+LAN_FOLDER_LABEL = ""
+LAN_FOLDER_GENERATION = 0
+LAN_FOLDER_CHANGES = []
+LAN_FOLDER_LAST_HEARTBEAT = 0.0
 REMINDER_CONFIG_PATH = BASE_DIR / "orglist-reminder-config.json"
 REMINDER_STATE_PATH = BASE_DIR / "orglist-reminder-state.json"
 REMINDER_SCRIPT_PATH = BASE_DIR / "orglist-reminder.py"
@@ -63,6 +69,88 @@ REMINDER_DEFAULTS = {
 
 def external_editor_revision(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
+
+
+def normalize_lan_folder_path(value: object) -> str:
+    raw = str(value or "").replace("\\", "/").strip("/")
+    parts = [part for part in raw.split("/") if part]
+    if not parts or any(part in {".", ".."} or "\x00" in part for part in parts):
+        raise ValueError("局域网共享文件路径无效。")
+    path = "/".join(parts)
+    if not path.lower().endswith(".org"):
+        raise ValueError("局域网桥接只共享 .org 文件。")
+    return path
+
+
+def lan_folder_etag(text: str) -> str:
+    return f'"{hashlib.sha256(text.encode("utf-8")).hexdigest()}"'
+
+
+def publish_lan_folder(value: object) -> dict:
+    if not isinstance(value, dict) or not isinstance(value.get("files"), list):
+        raise ValueError("局域网共享数据格式无效。")
+    files: Dict[str, dict] = {}
+    total = 0
+    for item in value["files"][:501]:
+        if not isinstance(item, dict):
+            raise ValueError("局域网共享文件格式无效。")
+        path = normalize_lan_folder_path(item.get("path"))
+        text = str(item.get("text", ""))
+        total += len(text.encode("utf-8"))
+        if total > 20 * 1024 * 1024:
+            raise ValueError("共享的 Org 文件总大小超过 20 MB。")
+        files[path] = {"path": path, "name": Path(path).name, "text": text, "etag": lan_folder_etag(text)}
+    if not files:
+        raise ValueError("所选文件夹中没有可共享的 .org 文件。")
+    if len(value["files"]) > 500:
+        raise ValueError("一次最多共享 500 个 Org 文件。")
+    global LAN_FOLDER_FILES, LAN_FOLDER_LABEL, LAN_FOLDER_GENERATION, LAN_FOLDER_CHANGES, LAN_FOLDER_LAST_HEARTBEAT
+    with LAN_FOLDER_LOCK:
+        LAN_FOLDER_GENERATION += 1
+        LAN_FOLDER_FILES = files
+        LAN_FOLDER_LABEL = str(value.get("label") or "电脑 Org 文件夹")[:200]
+        LAN_FOLDER_CHANGES = []
+        LAN_FOLDER_LAST_HEARTBEAT = time.monotonic()
+        generation = LAN_FOLDER_GENERATION
+    return {"ok": True, "count": len(files), "label": LAN_FOLDER_LABEL, "generation": generation}
+
+
+def lan_folder_snapshot() -> dict:
+    with LAN_FOLDER_LOCK:
+        if not LAN_FOLDER_FILES or time.monotonic() - LAN_FOLDER_LAST_HEARTBEAT > 12:
+            return {"available": False, "label": "", "generation": LAN_FOLDER_GENERATION, "files": []}
+        files = [{**item} for item in LAN_FOLDER_FILES.values()]
+        return {"available": bool(files), "label": LAN_FOLDER_LABEL, "generation": LAN_FOLDER_GENERATION,
+                "files": files}
+
+
+def write_lan_folder_file(path_value: object, text: str, expected_etag: str = "") -> dict:
+    path = normalize_lan_folder_path(path_value)
+    global LAN_FOLDER_GENERATION
+    with LAN_FOLDER_LOCK:
+        if not LAN_FOLDER_FILES or time.monotonic() - LAN_FOLDER_LAST_HEARTBEAT > 12:
+            raise RuntimeError("电脑页面已关闭或本地文件夹共享已停止。")
+        current = LAN_FOLDER_FILES.get(path)
+        if current is None:
+            raise FileNotFoundError(path)
+        if expected_etag and expected_etag != current["etag"]:
+            raise RuntimeError("电脑共享文件已经发生变化，请刷新后重试。")
+        LAN_FOLDER_GENERATION += 1
+        etag = lan_folder_etag(text)
+        current.update({"text": text, "etag": etag})
+        LAN_FOLDER_CHANGES.append({"path": path, "text": text, "etag": etag,
+                                   "generation": LAN_FOLDER_GENERATION})
+        del LAN_FOLDER_CHANGES[:-500]
+        return {"ok": True, "path": path, "etag": etag, "generation": LAN_FOLDER_GENERATION}
+
+
+def lan_folder_changes(since: int) -> dict:
+    global LAN_FOLDER_LAST_HEARTBEAT
+    with LAN_FOLDER_LOCK:
+        if LAN_FOLDER_FILES:
+            LAN_FOLDER_LAST_HEARTBEAT = time.monotonic()
+        return {"generation": LAN_FOLDER_GENERATION,
+                "changes": [{**item} for item in LAN_FOLDER_CHANGES if item["generation"] > since]}
 
 
 def safe_external_editor_name(value: object) -> str:
@@ -345,6 +433,43 @@ class OrgWebDavHandler(BaseHTTPRequestHandler):
 
     def do_GET(self) -> None:
         parsed = urllib.parse.urlparse(self.path)
+        if parsed.path == "/lan-folder/snapshot":
+            if self._authorized():
+                self._send_json(200, lan_folder_snapshot())
+            return
+        if parsed.path == "/lan-folder/changes":
+            if not self._authorized():
+                return
+            if not self._loopback_client():
+                self._send_text(403, "只有电脑页面可以接收本地文件写回变更。")
+                return
+            try:
+                since = int(urllib.parse.parse_qs(parsed.query).get("since", ["0"])[0] or "0")
+                self._send_json(200, lan_folder_changes(max(0, since)))
+            except ValueError:
+                self._send_text(400, "局域网共享版本号无效。")
+            return
+        if parsed.path == "/lan-folder/file":
+            if not self._authorized():
+                return
+            try:
+                path = normalize_lan_folder_path(urllib.parse.parse_qs(parsed.query).get("path", [""])[0])
+                with LAN_FOLDER_LOCK:
+                    item = LAN_FOLDER_FILES.get(path)
+                    if item is None:
+                        raise FileNotFoundError(path)
+                    body = item["text"].encode("utf-8")
+                    etag = item["etag"]
+                self.send_response(200)
+                self.send_header("Content-Type", "text/plain; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.send_header("ETag", etag)
+                self.send_header("Cache-Control", "no-store")
+                self.end_headers()
+                self.wfile.write(body)
+            except (FileNotFoundError, ValueError) as error:
+                self._send_text(404 if isinstance(error, FileNotFoundError) else 400, str(error))
+            return
         if parsed.path == "/external-editor":
             if not self._external_editor_allowed():
                 return
@@ -376,6 +501,17 @@ class OrgWebDavHandler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:
         parsed = urllib.parse.urlparse(self.path)
+        if parsed.path == "/lan-folder/publish":
+            if not self._authorized():
+                return
+            if not self._loopback_client():
+                self._send_text(403, "只有电脑页面可以发布本地文件夹。")
+                return
+            try:
+                self._send_json(200, publish_lan_folder(self._read_json_body(MAX_BODY)))
+            except (OSError, ValueError) as error:
+                self._send_json(400, {"ok": False, "error": str(error)})
+            return
         if parsed.path == "/webdav-proxy":
             self._proxy()
             return
@@ -495,6 +631,28 @@ class OrgWebDavHandler(BaseHTTPRequestHandler):
         self._proxy()
 
     def do_PUT(self) -> None:
+        parsed = urllib.parse.urlparse(self.path)
+        if parsed.path == "/lan-folder/file":
+            if not self._authorized():
+                return
+            try:
+                length = int(self.headers.get("Content-Length", "0") or "0")
+                if length < 0 or length > MAX_BODY:
+                    raise ValueError("写回内容超过 25 MB。")
+                text = self.rfile.read(length).decode("utf-8")
+                path = urllib.parse.parse_qs(parsed.query).get("path", [""])[0]
+                result = write_lan_folder_file(path, text, self.headers.get("If-Match", ""))
+                self.send_response(204)
+                self.send_header("ETag", result["etag"])
+                self.send_header("Cache-Control", "no-store")
+                self.end_headers()
+            except FileNotFoundError as error:
+                self._send_text(404, str(error))
+            except RuntimeError as error:
+                self._send_text(412, str(error))
+            except (UnicodeDecodeError, ValueError) as error:
+                self._send_text(400, str(error))
+            return
         self._proxy()
 
     def do_MKCOL(self) -> None:
@@ -684,6 +842,9 @@ class OrgWebDavHandler(BaseHTTPRequestHandler):
                 return False
         return True
 
+    def _loopback_client(self) -> bool:
+        return self.client_address[0] in {"127.0.0.1", "::1"}
+
     def _authorized(self) -> bool:
         expected = getattr(self.server, "access_token", "")
         if not expected:
@@ -739,7 +900,8 @@ def main() -> None:
     if lan_mode:
         phone_url = f"http://{find_lan_ip()}:{port}/{query}"
         print(f"手机页面地址：{phone_url}")
-        print("手机和电脑需连接同一 Wi-Fi；Windows 防火墙提示时请允许专用网络访问。")
+        print("请先在自动打开的电脑页面点击“打开 Org 文件夹”，再用手机打开上述地址。")
+        print("电脑可接网线、手机可接 Wi-Fi，只要连接同一路由器；Windows 防火墙提示时请允许专用网络访问。")
     print("请保留此窗口；关闭窗口或按 Ctrl+C 即可停止。")
     if os.environ.get("ORG_WEBDAV_NO_BROWSER") != "1":
         threading.Timer(0.5, lambda: webbrowser.open(local_url)).start()
